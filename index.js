@@ -513,7 +513,65 @@ app.get('/api/ticket/status/:id', requireLogin, async (req, res) => {
     if (ticket.length > 0) res.json({ status: ticket[0].status });
     else res.status(404).json({ error: 'Not found' });
 });
+// --- هذا المسار هو الحل الدائم لإنشاء الجداول في المكان الصحيح ---
+app.get('/fix-db', async (req, res) => {
+    try {
+        // 1. جدول المطورين
+        await db.execute(`
+            CREATE TABLE IF NOT EXISTS developers (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                email VARCHAR(255) UNIQUE NOT NULL,
+                password VARCHAR(255) NOT NULL,
+                wallet_balance DECIMAL(10,2) DEFAULT 0.00,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        
+        // 2. جدول الشركات
+        await db.execute(`
+            CREATE TABLE IF NOT EXISTS companies (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                developer_id INT,
+                name VARCHAR(255),
+                tax_id VARCHAR(50),
+                country_code VARCHAR(10),
+                api_secret VARCHAR(255),
+                api_credentials TEXT,
+                free_invoices_left INT DEFAULT 20,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        // 3. جدول المستخدمين (للدخول كمتجر)
+        await db.execute(`
+            CREATE TABLE IF NOT EXISTS end_users (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                company_id INT,
+                username VARCHAR(255),
+                password VARCHAR(255)
+            )
+        `);
+
+        // 4. باقي الجداول الضرورية...
+        await db.execute(`CREATE TABLE IF NOT EXISTS invoices (id INT AUTO_INCREMENT PRIMARY KEY, company_id INT, internal_id VARCHAR(50), total_amount DECIMAL(10,2), status VARCHAR(50), gov_uuid VARCHAR(255), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`);
+        await db.execute(`CREATE TABLE IF NOT EXISTS transactions (id INT AUTO_INCREMENT PRIMARY KEY, developer_id INT, amount DECIMAL(10,2), description TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`);
+        await db.execute(`CREATE TABLE IF NOT EXISTS support_tickets (id INT AUTO_INCREMENT PRIMARY KEY, developer_id INT, store_id INT, subject VARCHAR(255), company_name VARCHAR(255), tax_id VARCHAR(50), country_code VARCHAR(10), status VARCHAR(50) DEFAULT 'open', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`);
+        await db.execute(`CREATE TABLE IF NOT EXISTS ticket_messages (id INT AUTO_INCREMENT PRIMARY KEY, ticket_id INT, sender_type VARCHAR(50), message TEXT, attachment VARCHAR(255), is_read TINYINT(1) DEFAULT 0, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`);
+
+        // 5. إضافة مطور للتجربة (إذا لم يكن موجوداً)
+        await db.execute(`
+            INSERT IGNORE INTO developers (name, email, password, wallet_balance) 
+            VALUES ('Admin Dev', 'toxsfen.06@gmail.com', '123456', 100.00)
+        `);
+
+        res.send("✅ تم إصلاح قاعدة البيانات! الجداول الآن في المكان الصحيح. اذهب وسجل الدخول.");
+    } catch (e) {
+        res.send("❌ خطأ: " + e.message);
+    }
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
+
 
