@@ -104,20 +104,45 @@ app.post('/register-dev', async (req, res) => {
     } catch (e) { res.send('خطأ: البريد الإلكتروني مسجل مسبقاً'); }
 });
 
+// 1. مسار صفحة دخول الأدمن (جديد)
+app.get('/admin/login', (req, res) => {
+    // إذا كان مسجلاً بالفعل كأدمن، حوله للوحة التحكم
+    if (req.session.user && req.session.role === 'admin') {
+        return res.redirect('/admin-dashboard');
+    }
+    // اعرض ملف الـ HTML الجديد (admin-login.html)
+    // ملاحظة: تأكد من وضع ملف admin-login.html في مجلد views أو public
+    res.sendFile(path.join(process.cwd(), 'views', 'admin-login.html')); 
+});
+
+// 2. معالجة دخول الأدمن (POST)
+app.post('/admin/login', async (req, res) => {
+    const { username, password } = req.body;
+    
+    try {
+        // البحث في جدول admins الجديد
+        const [admins] = await db.execute('SELECT * FROM admins WHERE username = ? AND password = ?', [username, password]);
+
+        if (admins.length > 0) {
+            req.session.user = admins[0]; // تخزين بيانات الأدمن من الداتا بيز
+            req.session.role = 'admin';
+            return res.json({ success: true, redirect: '/admin-dashboard' });
+        } else {
+            return res.status(401).json({ success: false, message: 'بيانات الدخول غير صحيحة' });
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: 'خطأ في السيرفر' });
+    }
+});
+
+// 3. تعديل مسار login القديم (للمطورين والمتاجر فقط)
 app.post('/login', async (req, res) => {
     const { username, password, role } = req.body;
     
     try {
-        if (role === 'admin') {
-            if (username === 'admin' && password === 'admin123') {
-                req.session.user = { name: 'Super Admin', id: 0 };
-                req.session.role = 'admin';
-                return res.redirect('/admin-dashboard');
-            }
-        } else if (role === 'developer') {
-            // هنا قد تكون المشكلة: تأكد أن اسم العمود في القاعدة هو email
+        if (role === 'developer') {
             const [devs] = await db.execute('SELECT * FROM developers WHERE email = ? AND password = ?', [username, password]);
-            
             if (devs.length > 0) {
                 req.session.user = devs[0];
                 req.session.role = 'developer';
@@ -133,12 +158,18 @@ app.post('/login', async (req, res) => {
             }
         }
         
-        res.send('بيانات الدخول غير صحيحة أو نوع الحساب خاطئ');
+        // إذا لم ينجح
+        res.send(`
+            <div style="text-align:center; margin-top:50px; font-family:sans-serif;">
+                <h3 style="color:red">خطأ في تسجيل الدخول</h3>
+                <p>تأكد من البريد الإلكتروني وكلمة المرور ونوع الحساب.</p>
+                <a href="/login">العودة</a>
+            </div>
+        `);
 
     } catch (error) {
-        // هذا هو الجزء المهم: سنطبع الخطأ على الشاشة
         console.error("Login Error:", error);
-        res.status(500).send(`<h1>حدث خطأ في السيرفر</h1><p>${error.message}</p>`);
+        res.status(500).send("Server Error");
     }
 });
 
@@ -553,6 +584,24 @@ app.get('/fix-db', async (req, res) => {
             )
         `);
 
+        // داخل دالة app.get('/fix-db', ...) أضف هذا السطر مع باقي الجداول:
+
+await db.execute(`
+    CREATE TABLE IF NOT EXISTS admins (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        username VARCHAR(255) UNIQUE NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+`);
+
+// إضافة أدمن افتراضي (لأول مرة فقط)
+await db.execute(`
+    INSERT IGNORE INTO admins (username, password) 
+    VALUES ('super_admin', 'securePassword2025')
+`);
+
+
         // 4. باقي الجداول الضرورية...
         await db.execute(`CREATE TABLE IF NOT EXISTS invoices (id INT AUTO_INCREMENT PRIMARY KEY, company_id INT, internal_id VARCHAR(50), total_amount DECIMAL(10,2), status VARCHAR(50), gov_uuid VARCHAR(255), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`);
         await db.execute(`CREATE TABLE IF NOT EXISTS transactions (id INT AUTO_INCREMENT PRIMARY KEY, developer_id INT, amount DECIMAL(10,2), description TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`);
@@ -573,5 +622,6 @@ app.get('/fix-db', async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
+
 
 
