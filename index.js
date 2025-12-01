@@ -620,71 +620,59 @@ app.post('/api/admin/delete-company', requireLogin, async (req, res) => {
 
 // 1. جلب ملف الشركة الكامل (شامل المفاتيح والمطور والفواتير)
 app.get('/api/admin/company-file/:id', requireLogin, async (req, res) => {
-    // 1. التحقق من الصلاحية (يمكنك تفعيلها لاحقاً إذا أردت)
-    // if (req.session.role !== 'admin') return res.status(403).json({error: 'Unauthorized'});
-    
     const compId = req.params.id;
-    console.log(`>>> Fetching File for Company ID: ${compId}`); // سجل للتبع
-
     try {
-        // 2. جلب بيانات الشركة الأساسية فقط (لتجنب مشاكل الربط)
+        // 1. جلب بيانات الشركة
         const [companies] = await db.execute('SELECT * FROM companies WHERE id = ?', [compId]);
-        
-        if (companies.length === 0) {
-            return res.status(404).json({error: 'الشركة غير موجودة'});
-        }
-        
+        if (companies.length === 0) return res.status(404).json({error: 'الشركة غير موجودة'});
         const company = companies[0];
-        let devInfo = { name: 'غير مسند', email: '-', phone: '-' };
 
-        // 3. جلب بيانات المطور (بشكل منفصل وآمن)
+        // 2. جلب بيانات المطور
+        let devInfo = { name: 'غير مسند', email: '-' };
         if (company.developer_id) {
             try {
-                const [devs] = await db.execute('SELECT name, email, phone FROM developers WHERE id = ?', [company.developer_id]);
+                const [devs] = await db.execute('SELECT name, email FROM developers WHERE id = ?', [company.developer_id]);
                 if (devs.length > 0) devInfo = devs[0];
-            } catch (err) {
-                console.error("Error fetching developer:", err.message);
-            }
+            } catch (e) {}
         }
 
-        // 4. جلب الفواتير (مع تجاوز الأخطاء في حالة عدم وجود فواتير)
+        // 3. جلب الفواتير وعددها
         let invoices = [];
+        let invoiceCount = 0;
         try {
             const [invResult] = await db.execute('SELECT * FROM invoices WHERE company_id = ? ORDER BY created_at DESC LIMIT 20', [compId]);
             invoices = invResult;
-        } catch (err) {
-            console.error("Error fetching invoices:", err.message);
-            // لا نوقف التنفيذ، نرسل مصفوفة فارغة
-        }
+            
+            const [countResult] = await db.execute('SELECT COUNT(*) as count FROM invoices WHERE company_id = ?', [compId]);
+            invoiceCount = countResult[0].count;
+        } catch (e) {}
 
-        // 5. معالجة Credentials بأمان
-        let credentials = {};
+        // 4. جلب سجلات الشحن (جديد)
+        let shippingLogs = [];
         try {
-            if (company.api_credentials) {
-                credentials = JSON.parse(company.api_credentials);
-            }
-        } catch (e) { 
-            credentials = { error: "بيانات تالفة" }; 
-        }
+            const [shipResult] = await db.execute('SELECT * FROM shipping_logs WHERE company_id = ? ORDER BY created_at DESC LIMIT 10', [compId]);
+            shippingLogs = shipResult;
+        } catch (e) {}
 
-        // 6. إرسال الرد النهائي المجمع
+        // 5. تحديد نوع الاشتراك (منطق بسيط)
+        const subType = company.subscription_type === 'pro' ? 'مدفوع (Pro)' : 'مجاني (Free)';
+
         res.json({
             info: { 
                 ...company, 
                 dev_name: devInfo.name, 
-                dev_email: devInfo.email, 
-                dev_phone: devInfo.phone 
+                dev_email: devInfo.email,
+                invoice_count: invoiceCount,
+                subscription_label: subType
             },
-            credentials: credentials,
-            invoices: invoices
+            credentials: JSON.parse(company.api_credentials || '{}'),
+            invoices: invoices,
+            shipping: shippingLogs
         });
 
     } catch (e) {
-        console.error("CRITICAL SERVER ERROR:", e);
-        res.status(500).json({
-            error: "حدث خطأ داخلي في السيرفر",
-            details: e.message
-        });
+        console.error(e);
+        res.status(500).json({error: e.message});
     }
 });
 
@@ -710,6 +698,7 @@ app.get('/api/admin/developer-file/:id', requireLogin, async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
+
 
 
 
