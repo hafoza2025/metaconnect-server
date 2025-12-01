@@ -106,30 +106,42 @@ app.post('/register-dev', async (req, res) => {
 
 app.post('/login', async (req, res) => {
     const { username, password, role } = req.body;
-    if (role === 'admin') {
-        if (username === 'admin' && password === 'admin123') {
-            req.session.user = { name: 'Super Admin', id: 0 };
-            req.session.role = 'admin';
-            return res.redirect('/admin-dashboard');
+    
+    try {
+        if (role === 'admin') {
+            if (username === 'admin' && password === 'admin123') {
+                req.session.user = { name: 'Super Admin', id: 0 };
+                req.session.role = 'admin';
+                return res.redirect('/admin-dashboard');
+            }
+        } else if (role === 'developer') {
+            // هنا قد تكون المشكلة: تأكد أن اسم العمود في القاعدة هو email
+            const [devs] = await db.execute('SELECT * FROM developers WHERE email = ? AND password = ?', [username, password]);
+            
+            if (devs.length > 0) {
+                req.session.user = devs[0];
+                req.session.role = 'developer';
+                return res.redirect('/dev-dashboard');
+            }
+        } else if (role === 'store') {
+            const [users] = await db.execute('SELECT * FROM end_users WHERE username = ? AND password = ?', [username, password]);
+            if (users.length > 0) {
+                req.session.user = users[0];
+                req.session.role = 'store';
+                req.session.user.company_id = users[0].company_id;
+                return res.redirect('/store-portal');
+            }
         }
-    } else if (role === 'developer') {
-        const [devs] = await db.execute('SELECT * FROM developers WHERE email = ? AND password = ?', [username, password]);
-        if (devs.length > 0) {
-            req.session.user = devs[0];
-            req.session.role = 'developer';
-            return res.redirect('/dev-dashboard');
-        }
-    } else if (role === 'store') {
-        const [users] = await db.execute('SELECT * FROM end_users WHERE username = ? AND password = ?', [username, password]);
-        if (users.length > 0) {
-            req.session.user = users[0];
-            req.session.role = 'store';
-            req.session.user.company_id = users[0].company_id;
-            return res.redirect('/store-portal');
-        }
+        
+        res.send('بيانات الدخول غير صحيحة أو نوع الحساب خاطئ');
+
+    } catch (error) {
+        // هذا هو الجزء المهم: سنطبع الخطأ على الشاشة
+        console.error("Login Error:", error);
+        res.status(500).send(`<h1>حدث خطأ في السيرفر</h1><p>${error.message}</p>`);
     }
-    res.send('بيانات الدخول غير صحيحة أو نوع الحساب خاطئ');
 });
+
 
 app.get('/logout', (req, res) => {
     req.session.destroy();
@@ -504,3 +516,4 @@ app.get('/api/ticket/status/:id', requireLogin, async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
+
