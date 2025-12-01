@@ -35,22 +35,6 @@
             overflow-y: auto;
             border: 1px solid #333;
         }
-
-        .badge-env {
-            font-size: 0.8em;
-            padding: 5px 10px;
-            border-radius: 4px;
-        }
-
-        .badge-sandbox {
-            background: #ffc107;
-            color: #000;
-        }
-
-        .badge-live {
-            background: #198754;
-            color: #fff;
-        }
     </style>
 </head>
 
@@ -61,13 +45,12 @@
         <div class="text-center mb-4">
             <h2 class="fw-bold text-primary">⚡ المولد الآلي لكود الربط</h2>
             <p class="text-muted">كود واحد يعمل في بيئة التجربة (Sandbox) والإنتاج (Live).</p>
-            <% if(userType==='developer' && exampleConfig) { %>
+            
+            <% if(typeof userType !== 'undefined' && userType === 'developer' && typeof exampleConfig !== 'undefined') { %>
                 <div class="alert alert-light border d-inline-block py-1 px-3">
-                    المعرف الخاص بك: <strong>
-                        <%= exampleConfig.tax_id %>
-                    </strong>
+                    المعرف الخاص بك: <strong><%= exampleConfig.tax_id %></strong>
                 </div>
-                <% } %>
+            <% } %>
         </div>
 
         <!-- القائمة -->
@@ -90,26 +73,27 @@
                     <strong>طريقة التركيب:</strong>
                     <ol class="mb-0 ps-3">
                         <li>انسخ هذا الكود وضعه في <strong>نهاية الملف</strong> الخاص بالفواتير.</li>
-                        <li>عند حفظ الفاتورة، استدعِ الدالة: de>sendInvoiceToTax(...)</code></li>
+                        <li>عند حفظ الفاتورة، استدعِ الدالة: <code>sendInvoiceToTax(...)</code></li>
                     </ol>
                 </div>
             </div>
 
             <div class="position-relative">
                 <div class="code-box" id="codeDisplay"></div>
-                <button class="btn btn-primary position-absolute top-0 end-0 m-3" onclick="copyCode()">نسخ الكود
-                    📋</button>
+                <button class="btn btn-primary position-absolute top-0 end-0 m-3" onclick="copyCode()">نسخ الكود 📋</button>
             </div>
         </div>
 
     </div>
 
     <!-- البيانات المخفية -->
-    <input type="hidden" id="taxId" value="<%= exampleConfig ? exampleConfig.tax_id : 'YOUR_TAX_ID' %>">
+    <!-- تم إضافة فحص للتأكد من وجود exampleConfig لتجنب الأخطاء إذا لم يتم تمرير البيانات -->
+    <input type="hidden" id="taxId" value="<%= (typeof exampleConfig !== 'undefined' && exampleConfig.tax_id) ? exampleConfig.tax_id : '312345678900003' %>">
 
     <script>
+        // تم تصحيح الرابط الأساسي هنا
         const taxId = document.getElementById('taxId').value;
-        const baseUrl = "http://localhost:3000/api/v1"; // رابط السيرفر
+        const baseUrl = "https://metaconnect-server-three.vercel.app/api/v1"; // ✅ الرابط الصحيح
 
         const templates = {
             js: `/**
@@ -119,7 +103,7 @@
 async function sendInvoiceToTax(totalAmount, itemsList, isLive = false) {
     // 1. تحديد البيئة (Sandbox أو Live)
     const env = isLive ? 'connect' : 'sandbox';
-    const url = \`${baseUrl}/\${env}/${taxId}\`;
+    const url = \`${baseUrl}/\${env}/\${taxId}\`; // تم استخدام المتغيرات الصحيحة
 
     console.log(\`📡 جاري الإرسال إلى بيئة: \${isLive ? 'Live 🚀' : 'Sandbox 🧪'}\`);
 
@@ -150,6 +134,7 @@ async function sendInvoiceToTax(totalAmount, itemsList, isLive = false) {
         }
     } catch (err) {
         console.error("⚠️ خطأ اتصال:", err);
+        alert("فشل الاتصال بالسيرفر. تأكد من الإنترنت.");
     }
 }
 
@@ -166,7 +151,7 @@ async function sendInvoiceToTax(totalAmount, itemsList, isLive = false) {
 function sendInvoiceToTax($total, $items, $isLive = false) {
     $taxId = "${taxId}";
     $env = $isLive ? 'connect' : 'sandbox';
-    $url = "${baseUrl}/$env/$taxId";
+    $url = "${baseUrl}/$env/$taxId"; // ✅ الرابط الصحيح
 
     // تجهيز البيانات
     $data = [
@@ -193,15 +178,9 @@ function sendInvoiceToTax($total, $items, $isLive = false) {
         return ["success" => false, "error" => $response];
     }
 }
-
-// ==========================================
-// 🟢 مثال للاستخدام:
-// sendInvoiceToTax(500, $cartItems, false); // false للتجربة
-// ==========================================
 ?>`,
 
             csharp: `// 🔌 كود الربط C#
-// ضعه كـ Class منفصل أو داخل الـ Form
 using System.Net.Http;
 using System.Text;
 using Newtonsoft.Json;
@@ -210,7 +189,7 @@ public class MetaConnect
 {
     private static readonly HttpClient client = new HttpClient();
     private string taxId = "${taxId}";
-    private string baseUrl = "${baseUrl}";
+    private string baseUrl = "${baseUrl}"; // ✅ الرابط الصحيح
 
     public async void SendInvoice(decimal total, object items, bool isLive = false)
     {
@@ -239,12 +218,7 @@ public class MetaConnect
             System.Windows.Forms.MessageBox.Show("خطأ: " + ex.Message);
         }
     }
-}
-
-// ==========================================
-// 🟢 مثال للاستخدام:
-// new MetaConnect().SendInvoice(100.00, cart, false);
-// ==========================================`,
+}`,
 
             python: `# 🔌 دالة الربط Python
 import requests
@@ -253,7 +227,7 @@ from datetime import datetime
 
 def send_invoice_to_tax(total, items, is_live=False):
     tax_id = "${taxId}"
-    base_url = "${baseUrl}"
+    base_url = "${baseUrl}" # ✅ الرابط الصحيح
     env = "connect" if is_live else "sandbox"
     url = f"{base_url}/{env}/{tax_id}"
 
@@ -271,11 +245,7 @@ def send_invoice_to_tax(total, items, is_live=False):
             print("❌ Failed:", res.text)
     except Exception as e:
         print("⚠️ Error:", e)
-
-# ==========================================
-# 🟢 مثال للاستخدام:
-# send_invoice_to_tax(200, cart_items, False) # False for Sandbox
-# ==========================================`,
+`
         };
 
         function generateCode() {
@@ -294,5 +264,4 @@ def send_invoice_to_tax(total, items, is_live=False):
     </script>
 
 </body>
-
 </html>
