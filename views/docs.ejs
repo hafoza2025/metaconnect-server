@@ -272,8 +272,9 @@
         const contentData = {
             js: {
                 step1Desc: "ضع هذا الكود في ملف JavaScript الخاص بصفحة الدفع (Checkout) أو داخل وسم &lt;script&gt; في نهاية الصفحة.",
+                // 🔥🔥 هنا التعديل المهم: تم إضافة حل الـ Proxy في الكود المولد 🔥🔥
                 mainCode: `/**
- * دالة الربط مع MetaConnect
+ * دالة الربط مع MetaConnect (معدلة للعمل مع المتصفح)
  * يرجى عدم تعديل الرابط أو المعرف
  */
 // معرفك الضريبي
@@ -281,7 +282,12 @@ const taxId = "${currentTaxId}";
 
 async function sendInvoiceToTax(totalAmount, itemsList, isLive = false) {
     const env = isLive ? 'connect' : 'sandbox';
-    const url = \`${baseUrl}/\${env}/\${taxId}\`;
+    
+    // الرابط الأصلي للسيرفر
+    const targetUrl = \`${baseUrl}/\${env}/\${taxId}\`;
+    
+    // استخدام خدمة وسيطة لتجاوز حظر CORS من المتصفح
+    const url = \`https://corsproxy.io/?\` + encodeURIComponent(targetUrl);
 
     const payload = {
         total: totalAmount,
@@ -293,7 +299,7 @@ async function sendInvoiceToTax(totalAmount, itemsList, isLive = false) {
         }))
     };
 
-    console.log("📡 Connecting to:", url);
+    console.log("📡 Connecting via Proxy to:", targetUrl);
 
     try {
         const res = await fetch(url, {
@@ -310,7 +316,7 @@ async function sendInvoiceToTax(totalAmount, itemsList, isLive = false) {
             return true;
         } else {
             console.error("❌ Error:", data);
-            alert("فشل التوثيق: " + data.message);
+            alert("فشل التوثيق: " + (data.message || "خطأ غير معروف"));
             return false;
         }
     } catch (err) {
@@ -330,6 +336,7 @@ sendInvoiceToTax(4100, cartItems, false);`
             
             php: {
                 step1Desc: "انسخ هذه الدالة وضعها في ملف `Helpers.php` أو داخل الـ Controller الخاص بالفواتير.",
+                // الـ PHP لا يحتاج proxy لأنه يعمل من السيرفر (Backend)
                 mainCode: `<?php
 function sendInvoiceToTax($total, $items, $isLive = false) {
     $taxId = "${currentTaxId}";
