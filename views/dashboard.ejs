@@ -337,75 +337,120 @@
         }
 
         // OPEN COMPANY FILE (FULL DETAILS)
-        async function openCompanyFile(id) {
-            const modal = new bootstrap.Modal(document.getElementById('companyFileModal'));
-            modal.show();
-            const content = document.getElementById('compModalContent');
+     async function openCompanyFile(id) {
+    const modal = new bootstrap.Modal(document.getElementById('companyFileModal'));
+    modal.show();
+    const content = document.getElementById('compModalContent');
 
-            try {
-                const res = await fetch(`/api/admin/company-file/${id}`);
-                const data = await res.json();
-                const info = data.info;
-                const creds = data.credentials;
+    try {
+        const res = await fetch(`/api/admin/company-file/${id}`);
+        const data = await res.json();
+        const info = data.info;
+        const creds = data.credentials;
 
-                content.innerHTML = `
-                    <div class="profile-header">
-                        <div class="profile-avatar"><i class="fas fa-building"></i></div>
-                        <div class="profile-info ms-3">
-                            <h3>${info.name}</h3>
-                            <p>TAX ID: ${info.tax_id}</p>
-                            <span class="badge bg-dark mt-2">${info.country_code === 'EG' ? 'ETA Egypt' : 'ZATCA Saudi'}</span>
+        // تحديد لون حالة الاشتراك
+        const subBadge = info.subscription_label.includes('مدفوع') 
+            ? '<span class="badge bg-warning text-dark"><i class="fas fa-crown"></i> مدفوع</span>' 
+            : '<span class="badge bg-secondary">مجاني</span>';
+
+        content.innerHTML = `
+            <div class="profile-header">
+                <div class="profile-avatar"><i class="fas fa-building"></i></div>
+                <div class="profile-info ms-3">
+                    <h3 class="mb-1">${info.name} ${subBadge}</h3>
+                    <p class="mb-0 text-muted">TAX ID: ${info.tax_id}</p>
+                    <small class="text-muted"><i class="fas fa-map-marker-alt"></i> ${info.country_code === 'EG' ? 'مصر' : 'السعودية'}</small>
+                </div>
+                <div class="ms-auto text-end">
+                    <h2 class="fw-bold text-success mb-0">$${info.wallet_balance || '0.00'}</h2>
+                    <small class="text-muted">رصيد المحفظة</small>
+                </div>
+            </div>
+
+            <div class="profile-content bg-light">
+                
+                <!-- كروت الإحصائيات السريعة -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <div class="bg-white p-3 rounded border text-center">
+                            <h6 class="text-muted small">عدد الفواتير</h6>
+                            <h4 class="fw-bold mb-0">${info.invoice_count}</h4>
                         </div>
                     </div>
-                    <div class="profile-content bg-light">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="info-box">
-                                    <h6>بيانات الربط (Credentials)</h6>
-                                    <div class="bg-dark rounded p-3 font-monospace text-info mb-3" style="font-size:0.85rem; word-break:break-all;">
-                                        ${info.country_code === 'EG' ? 
-                                            `Client ID: <span class="text-white">${creds.id || '-'}</span><br>Secret: <span class="text-white">${creds.secret || '-'}</span>` : 
-                                            `OTP Code: <span class="text-white">${creds.otp || '-'}</span>`
-                                        }
-                                    </div>
-                                    <button class="btn btn-outline-danger btn-sm w-100"><i class="fas fa-key me-2"></i> إعادة تعيين المفاتيح</button>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="info-box">
-                                    <h6>المطور المسؤول</h6>
-                                    <div class="d-flex align-items-center mb-3">
-                                        <div class="bg-light rounded-circle p-2 text-primary"><i class="fas fa-user"></i></div>
-                                        <div class="ms-3">
-                                            <h6 class="mb-0 border-0 pb-0">${info.dev_name || 'النظام'}</h6>
-                                            <small class="text-muted">${info.dev_email || '-'}</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <div class="info-box">
-                                    <h6>سجل الفواتير والعمليات</h6>
-                                    <table class="table table-sm">
-                                        <thead><tr><th>ID</th><th>القيمة</th><th>الحالة</th><th>UUID</th></tr></thead>
-                                        <tbody>
-                                            ${data.invoices.length > 0 ? data.invoices.map(i => `
-                                                <tr>
-                                                    <td>${i.internal_id}</td>
-                                                    <td>${i.total_amount}</td>
-                                                    <td><span class="badge ${i.status==='submitted'?'bg-success':'bg-danger'}">${i.status}</span></td>
-                                                    <td class="small text-muted">${i.gov_uuid || '-'}</td>
-                                                </tr>
-                                            `).join('') : '<tr><td colspan="4" class="text-center">لا توجد فواتير</td></tr>'}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
+                    <div class="col-md-4">
+                        <div class="bg-white p-3 rounded border text-center">
+                            <h6 class="text-muted small">المطور</h6>
+                            <h5 class="fw-bold mb-0 text-primary">${info.dev_name}</h5>
                         </div>
                     </div>
-                `;
-            } catch (e) { content.innerHTML = '<div class="alert alert-danger m-3">Error loading file</div>'; }
-        }
+                    <div class="col-md-4">
+                        <div class="bg-white p-3 rounded border text-center">
+                            <h6 class="text-muted small">حالة النظام</h6>
+                            <span class="badge bg-success">نشط 100%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- العمود الأيمن: الفواتير والشحن -->
+                    <div class="col-md-8">
+                        
+                        <!-- جدول الشحن -->
+                        <div class="info-box mb-3">
+                            <div class="d-flex justify-content-between mb-3">
+                                <h6>🚚 سجل الشحن (Shipping Logs)</h6>
+                                <button class="btn btn-sm btn-outline-primary">+ شحنة</button>
+                            </div>
+                            <table class="table table-sm table-bordered">
+                                <thead class="table-light"><tr><th>رقم التتبع</th><th>الوجهة</th><th>الحالة</th></tr></thead>
+                                <tbody>
+                                    ${data.shipping.length > 0 ? data.shipping.map(s => `
+                                        <tr>
+                                            <td class="font-monospace">${s.tracking_number}</td>
+                                            <td>${s.destination}</td>
+                                            <td><span class="badge bg-info text-dark">${s.status}</span></td>
+                                        </tr>
+                                    `).join('') : '<tr><td colspan="3" class="text-center text-muted py-2">لا توجد شحنات مسجلة</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- جدول الفواتير -->
+                        <div class="info-box">
+                            <h6>🧾 آخر الفواتير</h6>
+                            <table class="table table-sm">
+                                <thead><tr><th>ID</th><th>القيمة</th><th>الحالة</th></tr></thead>
+                                <tbody>
+                                    ${data.invoices.length > 0 ? data.invoices.map(i => `
+                                        <tr>
+                                            <td>${i.internal_id}</td>
+                                            <td>${i.total_amount}</td>
+                                            <td><span class="badge ${i.status==='submitted'?'bg-success':'bg-danger'}">${i.status}</span></td>
+                                        </tr>
+                                    `).join('') : '<tr><td colspan="3" class="text-center py-2">لا توجد فواتير</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- العمود الأيسر: بيانات الاعتماد -->
+                    <div class="col-md-4">
+                        <div class="info-box h-100">
+                            <h6 class="mb-3">🔑 مفاتيح الربط</h6>
+                            <div class="bg-dark p-3 rounded text-white mb-3" style="word-break:break-all; font-size:0.8rem">
+                                ${info.country_code === 'EG' ? 
+                                    `<strong>Client ID:</strong><br>${creds.id || '-'}<br><br><strong>Secret:</strong><br>${creds.secret || '-'}` : 
+                                    `<strong>OTP:</strong><br>${creds.otp || '-'}`
+                                }
+                            </div>
+                            <button class="btn btn-danger w-100"><i class="fas fa-sync-alt"></i> إعادة التعيين</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    } catch (e) { content.innerHTML = '<div class="alert alert-danger m-3">Error loading file</div>'; }
+}
 
         // Init
         fetchDashboardData();
@@ -413,3 +458,4 @@
     </script>
 </body>
 </html>
+
