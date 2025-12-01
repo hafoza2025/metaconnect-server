@@ -1,25 +1,89 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
 <head>
-    <title>تسجيل مطور جديد</title>
+    <meta charset="UTF-8">
+    <title>انضم كشريك تطوير | MetaConnect</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <style>
+        body { background: #f8f9fa; display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .register-card { width: 100%; max-width: 600px; border: none; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); background: white; padding: 40px; margin: 20px; }
+        .form-label { font-weight: 600; color: #555; font-size: 0.9rem; }
+        .form-control { padding: 12px; border-radius: 8px; border: 1px solid #ddd; }
+        .form-control:focus { border-color: #198754; box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25); }
+        .btn-success { background-color: #198754; border: none; padding: 12px; font-size: 1.1rem; font-weight: bold; border-radius: 8px; width: 100%; transition: 0.3s; }
+        .btn-success:hover { background-color: #146c43; transform: translateY(-2px); }
+        .section-title { font-size: 1.1rem; color: #198754; margin-bottom: 15px; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; }
+    </style>
 </head>
+<body>
 
-<body class="d-flex align-items-center justify-content-center vh-100 bg-light">
-    <div class="card p-4" style="width: 400px;">
-        <h4 class="text-center mb-4">انضم كشريك تطوير</h4>
+    <div class="register-card">
+        <div class="text-center mb-4">
+            <h3 class="fw-bold text-dark">انضم كشريك تطوير 🚀</h3>
+            <p class="text-muted">ابدأ رحلتك مع MetaConnect للربط الضريبي</p>
+        </div>
+
         <form action="/register-dev" method="POST">
-            <input type="text" name="name" class="form-control mb-3" placeholder="اسم الشركة / المطور" required>
-            <input type="email" name="email" class="form-control mb-3" placeholder="البريد الإلكتروني" required>
-            <input type="password" name="password" class="form-control mb-3" placeholder="كلمة المرور" required>
-            <button type="submit" class="btn btn-success w-100">إنشاء حساب</button>
+            
+            <!-- بيانات الشركة -->
+            <div class="mb-4">
+                <h5 class="section-title">🏢 بيانات الشركة / الكيان</h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">اسم الشركة / المطور <span class="text-danger">*</span></label>
+                        <input type="text" name="name" class="form-control" placeholder="مثال: الحلول الذكية" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">الموقع الإلكتروني (اختياري)</label>
+                        <input type="url" name="website" class="form-control" placeholder="https://example.com">
+                    </div>
+                </div>
+            </div>
+
+            <!-- بيانات التواصل -->
+            <div class="mb-4">
+                <h5 class="section-title">📞 بيانات التواصل</h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">اسم المسؤول <span class="text-danger">*</span></label>
+                        <input type="text" name="contact_person" class="form-control" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">رقم الهاتف <span class="text-danger">*</span></label>
+                        <input type="tel" name="phone" class="form-control" placeholder="05xxxxxxxx" required>
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label">الدولة <span class="text-danger">*</span></label>
+                        <select name="country" class="form-select" required>
+                            <option value="" disabled selected>-- اختر الدولة --</option>
+                            <option value="KSA">السعودية 🇸🇦</option>
+                            <option value="EG">مصر 🇪🇬</option>
+                            <option value="OTHER">أخرى 🌍</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- بيانات الحساب -->
+            <div class="mb-4">
+                <h5 class="section-title">🔐 بيانات الدخول</h5>
+                <div class="mb-3">
+                    <label class="form-label">البريد الإلكتروني (سيكون اسم المستخدم) <span class="text-danger">*</span></label>
+                    <input type="email" name="email" class="form-control" placeholder="name@company.com" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">كلمة المرور <span class="text-danger">*</span></label>
+                    <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-success">إنشاء حساب شريك</button>
+            
+            <div class="text-center mt-3">
+                <a href="/login" class="text-decoration-none text-muted small">لديك حساب بالفعل؟ تسجيل الدخول</a>
+            </div>
         </form>
-        <a href="/login" class="d-block text-center mt-3">لديك حساب بالفعل؟</a>
     </div>
 
-    
-
 </body>
-
 </html>
