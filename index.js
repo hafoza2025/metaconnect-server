@@ -111,16 +111,21 @@ app.post('/register-dev', async (req, res) => {
         
         // بعد النجاح، نحوله لصفحة الدخول
         res.redirect('/login?success=registered');
-    } catch (e) { 
-        console.error(e);
-        res.send(`
-            <div style="text-align:center; margin-top:50px; font-family:sans-serif;">
-                <h3 style="color:red">فشل التسجيل</h3>
-                <p>يبدو أن البريد الإلكتروني مسجل مسبقاً، أو حدث خطأ في البيانات.</p>
-                <a href="/register-dev">حاول مرة أخرى</a>
-            </div>
-        `); 
-    }
+// الكود الجديد لكشف الخطأ
+} catch (e) { 
+    console.error("Registration Error:", e); // طباعة في الكونسول للمطور
+    res.send(`
+        <div style="text-align:center; margin-top:50px; font-family:sans-serif; direction:rtl;">
+            <h3 style="color:red">❌ حدث خطأ تقني بالتفصيل:</h3>
+            <p style="background:#f8d7da; color:#721c24; padding:15px; display:inline-block; border-radius:5px;">
+                ${e.message}
+            </p>
+            <br><br>
+            <a href="/register-dev" style="padding:10px 20px; background:#0d6efd; color:white; text-decoration:none; border-radius:5px;">حاول مرة أخرى</a>
+        </div>
+    `); 
+}
+
 });
 
 
@@ -567,6 +572,7 @@ app.get('/api/ticket/status/:id', requireLogin, async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
+
 
 
 
