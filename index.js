@@ -97,12 +97,32 @@ app.get('/login', (req, res) => res.render('login'));
 app.get('/register-dev', (req, res) => res.render('register-dev'));
 
 app.post('/register-dev', async (req, res) => {
-    const { name, email, password } = req.body;
+    // نستقبل جميع البيانات الجديدة من الفورم
+    const { name, email, password, phone, country, website, contact_person } = req.body;
+    
     try {
-        await db.execute('INSERT INTO developers (name, email, password, wallet_balance) VALUES (?, ?, ?, 5.00)', [name, email, password]);
-        res.redirect('/login');
-    } catch (e) { res.send('خطأ: البريد الإلكتروني مسجل مسبقاً'); }
+        // نقوم بحفظ البيانات في الجدول المحدث
+        await db.execute(
+            `INSERT INTO developers 
+            (name, email, password, wallet_balance, phone, country, website, contact_person) 
+            VALUES (?, ?, ?, 5.00, ?, ?, ?, ?)`, 
+            [name, email, password, phone, country, website || null, contact_person]
+        );
+        
+        // بعد النجاح، نحوله لصفحة الدخول
+        res.redirect('/login?success=registered');
+    } catch (e) { 
+        console.error(e);
+        res.send(`
+            <div style="text-align:center; margin-top:50px; font-family:sans-serif;">
+                <h3 style="color:red">فشل التسجيل</h3>
+                <p>يبدو أن البريد الإلكتروني مسجل مسبقاً، أو حدث خطأ في البيانات.</p>
+                <a href="/register-dev">حاول مرة أخرى</a>
+            </div>
+        `); 
+    }
 });
+
 
 // 1. مسار صفحة دخول الأدمن (جديد)
 app.get('/admin/login', (req, res) => {
@@ -547,6 +567,7 @@ app.get('/api/ticket/status/:id', requireLogin, async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
+
 
 
 
