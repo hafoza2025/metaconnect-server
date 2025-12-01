@@ -570,8 +570,56 @@ app.get('/api/ticket/status/:id', requireLogin, async (req, res) => {
     else res.status(404).json({ error: 'Not found' });
 });
 
+// API لجلب إحصائيات لوحة التحكم بشكل لحظي
+app.get('/api/admin/dashboard-stats', requireLogin, async (req, res) => {
+    if (req.session.role !== 'admin') return res.status(403).json({error: 'Unauthorized'});
+
+    try {
+        const [companies] = await db.execute('SELECT * FROM companies ORDER BY created_at DESC');
+        const [developers] = await db.execute('SELECT * FROM developers ORDER BY created_at DESC');
+        
+        // إحصائيات الفواتير
+        const [invoiceStats] = await db.execute(`
+            SELECT 
+                COUNT(*) as total,
+                SUM(CASE WHEN status = 'submitted' THEN 1 ELSE 0 END) as success,
+                SUM(CASE WHEN status != 'submitted' THEN 1 ELSE 0 END) as failed,
+                SUM(CASE WHEN DATE(created_at) = CURDATE() THEN 1 ELSE 0 END) as today
+            FROM invoices
+        `);
+
+        // إحصائيات حسب الدولة
+        const saudiCompanies = companies.filter(c => c.country_code === 'SA').length;
+        const egyptCompanies = companies.filter(c => c.country_code === 'EG').length;
+
+        res.json({
+            stats: {
+                totalCompanies: companies.length,
+                totalDevs: developers.length,
+                invoices: invoiceStats[0],
+                saudiCount: saudiCompanies,
+                egyptCount: egyptCompanies
+            },
+            recentCompanies: companies.slice(0, 5), // آخر 5 شركات
+            recentDevs: developers.slice(0, 5)     // آخر 5 مطورين
+        });
+    } catch (e) {
+        res.status(500).json({error: e.message});
+    }
+});
+
+// API لحذف شركة (مثال للتحكم الكامل)
+app.post('/api/admin/delete-company', requireLogin, async (req, res) => {
+    if (req.session.role !== 'admin') return res.status(403).json({error: 'Unauthorized'});
+    const { id } = req.body;
+    await db.execute('DELETE FROM companies WHERE id = ?', [id]);
+    res.json({success: true});
+});
+
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
+
 
 
 
