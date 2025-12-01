@@ -3,164 +3,342 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>MetaConnect - كود الربط الشامل</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MetaConnect - دليل الربط الشامل</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
     <style>
-        body {
-            background: #f4f6f9;
-            font-family: 'Segoe UI', Tahoma, sans-serif;
-            padding: 30px;
+        :root {
+            --primary-color: #0d6efd;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --code-bg: #1e1e1e;
         }
 
-        .main-card {
-            background: white;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            max-width: 900px;
+        body {
+            background: var(--bg-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding-top: 40px;
+            padding-bottom: 40px;
+            color: #333;
+        }
+
+        .main-container {
+            max-width: 1000px;
             margin: 0 auto;
         }
 
-        .code-box {
-            background: #1e1e1e;
-            color: #f8f8f2;
+        .header-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header-section h1 {
+            font-weight: 800;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .card-custom {
+            background: var(--card-bg);
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .card-header-custom {
+            background: #f8f9fa;
+            padding: 20px 30px;
+            border-bottom: 1px solid #eee;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .card-body-custom {
+            padding: 30px;
+        }
+
+        .step-badge {
+            background: var(--primary-color);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 10px;
+            font-weight: bold;
+        }
+
+        .step-item {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .code-preview {
+            background: var(--code-bg);
+            color: #d4d4d4;
             padding: 20px;
             border-radius: 8px;
-            font-family: 'Consolas', monospace;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
             direction: ltr;
             text-align: left;
-            white-space: pre-wrap;
-            font-size: 14px;
-            max-height: 600px;
-            overflow-y: auto;
+            overflow-x: auto;
+            position: relative;
+            margin-top: 15px;
             border: 1px solid #333;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .param-table th {
+            background-color: #f8f9fa;
+        }
+
+        .note-box {
+            background-color: #e7f1ff;
+            border-right: 4px solid #0d6efd;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
         }
     </style>
 </head>
 
 <body>
 
-    <div class="main-card">
-
-        <div class="text-center mb-4">
-            <h2 class="fw-bold text-primary">⚡ المولد الآلي لكود الربط</h2>
-            <p class="text-muted">كود واحد يعمل في بيئة التجربة (Sandbox) والإنتاج (Live).</p>
+    <div class="container main-container">
+        
+        <!-- رأس الصفحة -->
+        <div class="header-section">
+            <h1>⚡ MetaConnect API</h1>
+            <p class="lead text-muted">دليل المطور للربط مع منظومة الفاتورة الضريبية</p>
             
             <% if(typeof userType !== 'undefined' && userType === 'developer' && typeof exampleConfig !== 'undefined') { %>
-                <div class="alert alert-light border d-inline-block py-1 px-3">
-                    المعرف الخاص بك: <strong><%= exampleConfig.tax_id %></strong>
-                </div>
+            <div class="d-inline-block bg-white px-4 py-2 rounded-pill shadow-sm mt-2 border">
+                <span class="text-muted">المعرف الضريبي الخاص بك (Tax ID):</span>
+                <strong class="text-primary ms-2" id="displayTaxId"><%= exampleConfig.tax_id %></strong>
+            </div>
+            <% } else { %>
+            <!-- Fallback for static view -->
+            <div class="d-inline-block bg-white px-4 py-2 rounded-pill shadow-sm mt-2 border">
+                <span class="text-muted">المعرف الضريبي الخاص بك (Tax ID):</span>
+                <strong class="text-primary ms-2" id="displayTaxId">312345678900003</strong>
+            </div>
             <% } %>
         </div>
 
-        <!-- القائمة -->
-        <div class="mb-4">
-            <label class="fw-bold mb-2">اختر لغة النظام لديك:</label>
-            <select id="langSelect" class="form-select form-select-lg" onchange="generateCode()">
-                <option value="" selected disabled>-- اختر اللغة --</option>
-                <option value="js">JavaScript (HTML / Frontend)</option>
-                <option value="php">PHP (Backend / Laravel)</option>
-                <option value="csharp">C# (Desktop Apps)</option>
-                <option value="python">Python (Odoo / Django)</option>
-            </select>
+        <!-- اختيار اللغة -->
+        <div class="card-custom">
+            <div class="card-body-custom text-center">
+                <h5 class="mb-4">بأي لغة برمجة يعمل نظامك؟</h5>
+                <div class="row justify-content-center">
+                    <div class="col-md-6">
+                        <select id="langSelect" class="form-select form-select-lg shadow-none border-primary" onchange="updateContent()">
+                            <option value="" selected disabled>-- اختر بيئة العمل --</option>
+                            <option value="js">JavaScript (Frontend / Node.js)</option>
+                            <option value="php">PHP (Laravel / Native)</option>
+                            <option value="csharp">C# (.NET / Desktop)</option>
+                            <option value="python">Python (Django / Flask)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- منطقة الكود -->
-        <div id="resultArea" style="display:none;">
-            <div class="alert alert-info d-flex align-items-center">
-                <span class="fs-4 me-2">💡</span>
-                <div>
-                    <strong>طريقة التركيب:</strong>
-                    <ol class="mb-0 ps-3">
-                        <li>انسخ هذا الكود وضعه في <strong>نهاية الملف</strong> الخاص بالفواتير.</li>
-                        <li>عند حفظ الفاتورة، استدعِ الدالة: <code>sendInvoiceToTax(...)</code></li>
-                    </ol>
+        <!-- المحتوى الديناميكي -->
+        <div id="contentArea" style="display: none;">
+            
+            <!-- قسم التعليمات -->
+            <div class="card-custom">
+                <div class="card-header-custom">
+                    📚 خطوات الربط (Integration Steps)
+                </div>
+                <div class="card-body-custom">
+                    
+                    <!-- الخطوة 1 -->
+                    <div class="step-item">
+                        <div class="step-badge">1</div>
+                        <div class="w-100">
+                            <h5 class="fw-bold">تضمين الكود (Installation)</h5>
+                            <p class="text-muted" id="step1-desc">انسخ الكود أدناه وضعه في المكان المخصص.</p>
+                            
+                            <div class="code-preview">
+                                <button class="copy-btn" onclick="copyToClipboard('mainCode')">نسخ</button>
+                                <pre id="mainCode"></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- الخطوة 2 -->
+                    <div class="step-item">
+                        <div class="step-badge">2</div>
+                        <div class="w-100">
+                            <h5 class="fw-bold">استدعاء الدالة (Usage)</h5>
+                            <p class="text-muted">عند قيام العميل بإتمام الطلب (Checkout)، قم باستدعاء الدالة كالتالي:</p>
+                            
+                            <div class="code-preview">
+                                <button class="copy-btn" onclick="copyToClipboard('usageCode')">نسخ</button>
+                                <pre id="usageCode"></pre>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
-            <div class="position-relative">
-                <div class="code-box" id="codeDisplay"></div>
-                <button class="btn btn-primary position-absolute top-0 end-0 m-3" onclick="copyCode()">نسخ الكود 📋</button>
+            <!-- تفاصيل المتغيرات -->
+            <div class="card-custom">
+                <div class="card-header-custom">
+                    ⚙️ تفاصيل البيانات (Parameters)
+                </div>
+                <div class="card-body-custom">
+                    <table class="table table-hover param-table">
+                        <thead>
+                            <tr>
+                                <th>المتغير</th>
+                                <th>النوع</th>
+                                <th>إجباري؟</th>
+                                <th>الوصف</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>totalAmount</code></td>
+                                <td>رقم (Decimal)</td>
+                                <td><span class="badge bg-danger">نعم</span></td>
+                                <td>إجمالي قيمة الفاتورة شاملة الضريبة.</td>
+                            </tr>
+                            <tr>
+                                <td><code>itemsList</code></td>
+                                <td>مصفوفة (Array)</td>
+                                <td><span class="badge bg-danger">نعم</span></td>
+                                <td>قائمة المنتجات، كل منتج يجب أن يحتوي على (name, price).</td>
+                            </tr>
+                            <tr>
+                                <td><code>isLive</code></td>
+                                <td>Boolean</td>
+                                <td><span class="badge bg-secondary">اختياري</span></td>
+                                <td>
+                                    <code>false</code> للتجربة (Sandbox)<br>
+                                    <code>true</code> للإطلاق الفعلي (Live)
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="note-box">
+                        <strong>💡 ملاحظة هامة:</strong>
+                        تأكد من تغيير حالة <code>isLive</code> إلى <code>true</code> فقط عندما تنتهي من الاختبارات وتكون جاهزاً لإصدار فواتير حقيقية للضرائب.
+                    </div>
+                </div>
             </div>
+
         </div>
 
     </div>
 
-    <!-- البيانات المخفية -->
-    <!-- تم إضافة فحص للتأكد من وجود exampleConfig لتجنب الأخطاء إذا لم يتم تمرير البيانات -->
-    <input type="hidden" id="taxId" value="<%= (typeof exampleConfig !== 'undefined' && exampleConfig.tax_id) ? exampleConfig.tax_id : '312345678900003' %>">
+    <!-- القيم المخفية للتهيئة -->
+    <input type="hidden" id="taxIdValue" value="<%= (typeof exampleConfig !== 'undefined' && exampleConfig.tax_id) ? exampleConfig.tax_id : '312345678900003' %>">
 
     <script>
-        // تم تصحيح الرابط الأساسي هنا
-        const taxId = document.getElementById('taxId').value;
-        const baseUrl = "https://metaconnect-server-three.vercel.app/api/v1"; // ✅ الرابط الصحيح
+        const taxId = document.getElementById('taxIdValue').value;
+        const baseUrl = "https://metaconnect-server-three.vercel.app/api/v1";
 
-        const templates = {
-            js: `/**
- * 🔌 دالة الربط الضريبي الشاملة (MetaConnect)
- * ضع هذه الدالة في نهاية ملف Javascript أو داخل وسم <script>
+        // النصوص والتعليمات لكل لغة
+        const contentData = {
+            js: {
+                step1Desc: "ضع هذا الكود في ملف JavaScript الخاص بصفحة الدفع (Checkout) أو داخل وسم &lt;script&gt; في نهاية الصفحة.",
+                mainCode: `/**
+ * دالة الربط مع MetaConnect
+ * يرجى عدم تعديل الرابط أو المعرف
  */
 async function sendInvoiceToTax(totalAmount, itemsList, isLive = false) {
-    // 1. تحديد البيئة (Sandbox أو Live)
     const env = isLive ? 'connect' : 'sandbox';
-    const url = \`${baseUrl}/\${env}/\${taxId}\`; // تم استخدام المتغيرات الصحيحة
+    const taxId = "${taxId}";
+    const url = \`${baseUrl}/\${env}/\${taxId}\`;
 
-    console.log(\`📡 جاري الإرسال إلى بيئة: \${isLive ? 'Live 🚀' : 'Sandbox 🧪'}\`);
-
-    // 2. تجهيز البيانات
     const payload = {
         total: totalAmount,
         date: new Date().toISOString().split('T')[0],
-        items: itemsList.map(item => ({ name: item.name, price: item.price, qty: item.quantity || 1 }))
+        items: itemsList.map(item => ({ 
+            name: item.name, 
+            price: item.price, 
+            qty: item.quantity || 1 
+        }))
     };
 
+    console.log("📡 Connecting to:", url);
+
     try {
-        // 3. الإرسال
         const res = await fetch(url, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
         });
-
+        
         const data = await res.json();
-
-        // 4. النتيجة
+        
         if (res.ok) {
-            console.log("✅ تم الربط بنجاح:", data);
-            alert("تم توثيق الفاتورة ضريبياً بنجاح! ✅");
+            console.log("✅ Success:", data);
+            alert("تم التوثيق الضريبي بنجاح!");
+            return true;
         } else {
-            console.error("❌ خطأ:", data);
-            alert("فشل التوثيق: " + (data.message || "خطأ غير معروف"));
+            console.error("❌ Error:", data);
+            alert("فشل التوثيق: " + data.message);
+            return false;
         }
     } catch (err) {
-        console.error("⚠️ خطأ اتصال:", err);
-        alert("فشل الاتصال بالسيرفر. تأكد من الإنترنت.");
+        console.error("⚠️ Connection Error:", err);
+        return false;
     }
-}
+}`,
+                usageCode: `// مثال: عند الضغط على زر "إتمام الطلب"
+const cartItems = [
+    { name: "iPhone 15", price: 4000, quantity: 1 },
+    { name: "Cover", price: 50, quantity: 2 }
+];
 
-// ==========================================
-// 🟢 مثال للاستخدام (ضعه داخل زر الحفظ):
-// sendInvoiceToTax(150.00, cartItems, false); // false للتجربة
-// ==========================================`,
-
-            php: `<?php
-/**
- * 🔌 دالة الربط الضريبي الشاملة (MetaConnect)
- * انسخ هذه الدالة وضعها في ملف الـ Helper أو الـ Controller
- */
+// false = بيئة تجريبية
+sendInvoiceToTax(4100, cartItems, false);`
+            },
+            
+            php: {
+                step1Desc: "انسخ هذه الدالة وضعها في ملف `Helpers.php` أو داخل الـ Controller الخاص بالفواتير.",
+                mainCode: `<?php
 function sendInvoiceToTax($total, $items, $isLive = false) {
     $taxId = "${taxId}";
     $env = $isLive ? 'connect' : 'sandbox';
-    $url = "${baseUrl}/$env/$taxId"; // ✅ الرابط الصحيح
+    $url = "${baseUrl}/$env/$taxId";
 
-    // تجهيز البيانات
     $data = [
         "total" => $total,
         "date" => date("Y-m-d"),
-        "items" => $items
+        "items" => $items // Array of ['name', 'price', 'qty']
     ];
 
-    // الإرسال
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POST, true);
@@ -171,27 +349,40 @@ function sendInvoiceToTax($total, $items, $isLive = false) {
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
-    // النتيجة
-    if ($httpCode == 200) {
-        return ["success" => true, "data" => json_decode($response, true)];
-    } else {
-        return ["success" => false, "error" => $response];
-    }
+    return [
+        "success" => $httpCode == 200,
+        "response" => json_decode($response, true)
+    ];
 }
 ?>`,
+                usageCode: `// داخل دالة حفظ الطلب (Store Order)
+$items = [
+    ["name" => "Laptop", "price" => 1500, "qty" => 1],
+    ["name" => "Mouse", "price" => 50, "qty" => 1]
+];
 
-            csharp: `// 🔌 كود الربط C#
-using System.Net.Http;
+$result = sendInvoiceToTax(1550, $items, false);
+
+if ($result['success']) {
+    echo "تم التوثيق بنجاح!";
+} else {
+    echo "فشل التوثيق: " . $result['response']['message'];
+}`
+            },
+
+            csharp: {
+                step1Desc: "أضف هذا الكلاس في مشروعك (Service Layer) أو داخل الـ Form.",
+                mainCode: `using System.Net.Http;
 using System.Text;
-using Newtonsoft.Json;
+using Newtonsoft.Json; // تأكد من تثبيت هذه المكتبة
 
-public class MetaConnect
+public class TaxService
 {
     private static readonly HttpClient client = new HttpClient();
     private string taxId = "${taxId}";
-    private string baseUrl = "${baseUrl}"; // ✅ الرابط الصحيح
+    private string baseUrl = "${baseUrl}";
 
-    public async void SendInvoice(decimal total, object items, bool isLive = false)
+    public async Task<bool> SendInvoice(decimal total, object items, bool isLive = false)
     {
         string env = isLive ? "connect" : "sandbox";
         string url = $"{baseUrl}/{env}/{taxId}";
@@ -207,27 +398,31 @@ public class MetaConnect
 
         try {
             var response = await client.PostAsync(url, content);
-            string result = await response.Content.ReadAsStringAsync();
-
-            if (response.IsSuccessStatusCode) {
-                System.Windows.Forms.MessageBox.Show("✅ تم التوثيق بنجاح!");
-            } else {
-                System.Windows.Forms.MessageBox.Show("❌ فشل: " + result);
-            }
-        } catch (Exception ex) {
-            System.Windows.Forms.MessageBox.Show("خطأ: " + ex.Message);
+            return response.IsSuccessStatusCode;
+        } catch {
+            return false;
         }
     }
 }`,
+                usageCode: `// مثال للاستخدام داخل زر الحفظ
+var items = new[] {
+    new { name = "Service A", price = 100, qty = 1 }
+};
 
-            python: `# 🔌 دالة الربط Python
-import requests
-import json
+var taxService = new TaxService();
+bool success = await taxService.SendInvoice(100, items, false); // false = Sandbox
+
+if(success) MessageBox.Show("تم الربط بنجاح");`
+            },
+
+            python: {
+                step1Desc: "ضع هذه الدالة في ملف `utils.py` أو `services.py`.",
+                mainCode: `import requests
 from datetime import datetime
 
 def send_invoice_to_tax(total, items, is_live=False):
     tax_id = "${taxId}"
-    base_url = "${baseUrl}" # ✅ الرابط الصحيح
+    base_url = "${baseUrl}"
     env = "connect" if is_live else "sandbox"
     url = f"{base_url}/{env}/{tax_id}"
 
@@ -239,27 +434,42 @@ def send_invoice_to_tax(total, items, is_live=False):
 
     try:
         res = requests.post(url, json=payload)
-        if res.status_code == 200:
-            print("✅ Success:", res.json())
-        else:
-            print("❌ Failed:", res.text)
+        return res.status_code == 200, res.json()
     except Exception as e:
-        print("⚠️ Error:", e)
-`
+        return False, str(e)`,
+                usageCode: `# استخدام الدالة
+cart = [
+    {"name": "Book", "price": 20, "qty": 3}
+]
+
+success, response = send_invoice_to_tax(60, cart, is_live=False)
+
+if success:
+    print("✅ تم التوثيق")
+else:
+    print("❌ فشل:", response)`
+            }
         };
 
-        function generateCode() {
+        function updateContent() {
             const lang = document.getElementById('langSelect').value;
-            if (templates[lang]) {
-                document.getElementById('resultArea').style.display = 'block';
-                document.getElementById('codeDisplay').innerText = templates[lang];
+            const contentArea = document.getElementById('contentArea');
+            
+            if (contentData[lang]) {
+                contentArea.style.display = 'block';
+                
+                // تحديث النصوص
+                document.getElementById('step1-desc').innerHTML = contentData[lang].step1Desc;
+                document.getElementById('mainCode').innerText = contentData[lang].mainCode;
+                document.getElementById('usageCode').innerText = contentData[lang].usageCode;
             }
         }
 
-        function copyCode() {
-            const text = document.getElementById('codeDisplay').innerText;
-            navigator.clipboard.writeText(text);
-            alert("تم نسخ الكود! ضعه في ملفك الآن.");
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                alert("تم النسخ للحافظة! 📋");
+            });
         }
     </script>
 
