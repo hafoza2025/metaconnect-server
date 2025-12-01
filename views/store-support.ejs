@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <title>الدعم الفني للمتجر</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+</head>
+
+<body class="bg-light">
+    <!-- Navbar -->
+    <nav class="navbar navbar-light bg-white shadow-sm mb-4">
+        <div class="container">
+            <span class="navbar-brand mb-0 h1">مركز دعم المتجر</span>
+            <a href="/store-portal" class="btn btn-outline-secondary btn-sm">عودة للمتجر</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3>💬 تذاكر الدعم</h3>
+            <button class="btn btn-warning text-dark fw-bold" data-bs-toggle="modal" data-bs-target="#newTicketModal">+
+                تذكرة جديدة</button>
+        </div>
+
+        <div class="list-group shadow-sm">
+            <% if(tickets.length==0) { %>
+                <div class="text-center p-5 text-muted">لا توجد تذاكر حالياً</div>
+                <% } %>
+                    <% tickets.forEach(function(ticket) { %>
+                        <a href="/store/support/view/<%= ticket.id %>"
+                            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-1">
+                                    <%= ticket.subject %>
+                                </h5>
+                                <small class="text-muted">
+                                    <%= ticket.created_at.toLocaleString() %>
+                                </small>
+                            </div>
+                            <span class="badge bg-<%= ticket.status == 'open' ? 'success' : 'secondary' %>">
+                                <%= ticket.status=='open' ? 'مفتوحة' : 'مغلقة' %>
+                            </span>
+                        </a>
+                        <% }); %>
+        </div>
+    </div>
+
+    <!-- Modal تذكرة جديدة (بدون اختيار شركة) -->
+    <div class="modal fade" id="newTicketModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="/store/support/new" method="POST">
+                    <div class="modal-header bg-warning">
+                        <h5 class="modal-title">فتح تذكرة جديدة</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">نوع الطلب</label>
+                            <select name="subject" class="form-select">
+                                <option value="طلب شحن رصيد فواتير">💳 طلب شحن رصيد فواتير</option>
+                                <option value="مشكلة تقنية">🔧 مشكلة تقنية</option>
+                                <option value="استفسار">❓ استفسار عام</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">الرسالة</label>
+                            <textarea name="message" class="form-control" rows="4" required
+                                placeholder="اكتب تفاصيل طلبك هنا..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                        <button type="submit" class="btn btn-primary">إرسال الطلب</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

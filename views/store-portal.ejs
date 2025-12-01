@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <title>بوابة المتجر</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+</head>
+
+<body class="bg-light">
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark bg-dark mb-4">
+        <div class="container">
+            <span class="navbar-brand mb-0 h1">🛒 بوابة المتجر</span>
+            <div class="d-flex align-items-center">
+                <!-- (تم حذف الجرس لأنه يسبب المشاكل ولا يوجد تذاكر للمتجر) -->
+                <a href="/store/support" class="btn btn-warning btn-sm me-2">💬 الدعم الفني</a>
+
+                <span class="text-white me-3">مرحباً، <%= user.username %></span>
+                <a href="/logout" class="btn btn-danger btn-sm">خروج</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- كارت بيانات الشركة -->
+        <div class="card shadow-sm mb-4 border-primary">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">بيانات الشركة المسجلة</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <small class="text-muted">اسم الشركة</small>
+                        <h4 class="fw-bold text-primary">
+                            <%= company.name %>
+                        </h4>
+                    </div>
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <small class="text-muted">الرقم الضريبي</small>
+                        <h4 class="fw-bold">
+                            <%= company.tax_id %>
+                        </h4>
+                    </div>
+                    <div class="col-md-4">
+                        <small class="text-muted">الدولة</small>
+                        <h4 class="fw-bold">
+                            <%= company.country_code=='EG' ? 'مصر 🇪🇬' : 'السعودية 🇸🇦' %>
+                        </h4>
+                    </div>
+                </div>
+                <hr>
+                <div class="alert alert-info mb-0 text-center">
+                    <strong>API Secret:</strong> de><%= company.api_secret %></code>
+                        <br>
+                        <small>(استخدم هذا المفتاح لربط نظام الكاشير الخاص بك)</small>
+                </div>
+
+                <!-- الكود الجديد للرصيد يوضع هنا -->
+                <div class="alert alert-success mt-2 text-center">
+                    <strong>رصيد الفواتير المتبقي:</strong>
+                    <span class="fs-5 fw-bold">
+                        <%= company.free_invoices_left %>
+                    </span> فاتورة
+                </div>
+            </div>
+        </div>
+
+
+        <!-- جدول الفواتير -->
+        <h3 class="mb-3">أحدث الفواتير المرسلة</h3>
+        <div class="card shadow-sm">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>رقم الفاتورة</th>
+                            <th>المبلغ الإجمالي</th>
+                            <th>تاريخ الإرسال</th>
+                            <th>الحالة</th>
+                            <th>UUID الحكومي</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if(invoices.length===0) { %>
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-muted">لا توجد فواتير مرسلة بعد</td>
+                            </tr>
+                            <% } %>
+
+                                <% invoices.forEach(function(inv) { %>
+                                    <tr>
+                                        <td>#<%= inv.internal_id %>
+                                        </td>
+                                        <td class="fw-bold text-success">
+                                            <%= inv.total_amount %>
+                                        </td>
+                                        <td>
+                                            <%= inv.created_at.toLocaleString() %>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-success">مقبولة ✅</span>
+                                        </td>
+                                        <td>de class="text-muted"><%= inv.gov_uuid.substring(0, 15) %>...</code></td>
+                                    </tr>
+                                    <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

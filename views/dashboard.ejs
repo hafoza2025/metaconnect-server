@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <title>لوحة التحكم | MetaConnect</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+</head>
+
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">MetaConnect</a>
+            <div class="d-flex">
+                <a href="/docs" class="btn btn-outline-info btn-sm me-2">📖 دليل المطورين</a>
+                <a href="/admin/support" class="btn btn-outline-warning btn-sm me-2">💬 تذاكر الدعم</a>
+
+                <span class="text-white me-3">مرحباً، <%= user %></span>
+                <a href="/logout" class="btn btn-outline-light btn-sm">خروج</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <!-- كروت الإحصائيات -->
+        <div class="row mb-4 g-3"> <!-- g-3 لعمل مسافات متساوية بين الكروت -->
+
+            <!-- 1. إجمالي الشركات -->
+            <div class="col-md-3">
+                <div class="card text-white bg-primary h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <h6 class="card-title opacity-75">🏢 إجمالي الشركات</h6>
+                        <p class="card-text display-6 fw-bold mb-0">
+                            <%= stats.companiesCount %>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. فواتير اليوم -->
+            <div class="col-md-3">
+                <div class="card text-white bg-success h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <h6 class="card-title opacity-75">📅 فواتير اليوم</h6>
+                        <p class="card-text display-6 fw-bold mb-0">
+                            <%= stats.todayInvoices %>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. إجمالي الفواتير الناجحة -->
+            <div class="col-md-3">
+                <div class="card text-white bg-info h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <h6 class="card-title opacity-75">✅ إجمالي الفواتير الناجحة</h6>
+                        <p class="card-text display-6 fw-bold mb-0">
+                            <%= stats.totalInvoices %>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. الفواتير الفاشلة -->
+            <div class="col-md-3">
+                <div class="card text-white bg-danger h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <h6 class="card-title opacity-75">❌ الفواتير الفاشلة</h6>
+                        <p class="card-text display-6 fw-bold mb-0">
+                            <%= stats.failedInvoices %>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4>الشركات المسجلة</h4>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCompanyModal">+ إضافة
+                شركة</button>
+        </div>
+
+        <div class="card">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>اسم الشركة</th>
+                        <th>الرقم الضريبي</th>
+                        <th>الدولة</th>
+                        <th>API Secret</th>
+                        <th>الحالة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% companies.forEach(function(company) { %>
+                        <tr>
+                            <td><a href="/company/<%= company.id %>" class="text-decoration-none fw-bold">
+                                    <%= company.name %>
+                                </a></td>
+                            <td>
+                                <%= company.tax_id %>
+                            </td>
+                            <td>
+                                <% if(company.country_code=='EG' ) { %> 🇪🇬 مصر <% } else { %> 🇸🇦 السعودية <% } %>
+                            </td>
+                            <td>de><%= company.api_secret %></code></td>
+                            <td><span class="badge bg-success">نشط</span></td>
+                        </tr>
+                        <% }); %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal إضافة شركة -->
+    <div class="modal fade" id="addCompanyModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="/add-company" method="POST">
+                    <div class="modal-header">
+                        <h5 class="modal-title">إضافة شركة جديدة</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label>اسم الشركة</label>
+                            <input type="text" name="name" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label>الرقم الضريبي</label>
+                            <input type="text" name="tax_id" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label>الدولة</label>
+                            <select name="country_code" class="form-select">
+                                <option value="EG">مصر (ETA)</option>
+                                <option value="SA">السعودية (ZATCA)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">حفظ</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+
+    <!-- في النافبار Navbar بالأعلى، أضف أيقونة الجرس -->
+    <li class="nav-item position-relative me-3">
+        <a href="<%= userType === 'admin' ? '/admin/support' : '/dev/support' %>" class="nav-link text-white">
+            🔔
+            <span id="notifBadge"
+                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                style="display:none;">
+                0
+            </span>
+        </a>
+    </li>
+
+    <script>
+        // فحص الإشعارات كل 10 ثواني
+        function checkNotifications() {
+            fetch('/api/notifications/count')
+                .then(res => res.json())
+                .then(data => {
+                    const badge = document.getElementById('notifBadge');
+                    if (data.count > 0) {
+                        badge.innerText = data.count;
+                        badge.style.display = 'inline-block';
+                        // تشغيل صوت (اختياري)
+                        // new Audio('/notification.mp3').play(); 
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                });
+        }
+        setInterval(checkNotifications, 10000); // كل 10 ثواني
+        checkNotifications(); // تشغيل فوراً عند التحميل
+    </script>
+
+</body>
+
+</html>

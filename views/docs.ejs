@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <title>MetaConnect - كود الربط الشامل</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <style>
+        body {
+            background: #f4f6f9;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            padding: 30px;
+        }
+
+        .main-card {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .code-box {
+            background: #1e1e1e;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Consolas', monospace;
+            direction: ltr;
+            text-align: left;
+            white-space: pre-wrap;
+            font-size: 14px;
+            max-height: 600px;
+            overflow-y: auto;
+            border: 1px solid #333;
+        }
+
+        .badge-env {
+            font-size: 0.8em;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        .badge-sandbox {
+            background: #ffc107;
+            color: #000;
+        }
+
+        .badge-live {
+            background: #198754;
+            color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="main-card">
+
+        <div class="text-center mb-4">
+            <h2 class="fw-bold text-primary">⚡ المولد الآلي لكود الربط</h2>
+            <p class="text-muted">كود واحد يعمل في بيئة التجربة (Sandbox) والإنتاج (Live).</p>
+            <% if(userType==='developer' && exampleConfig) { %>
+                <div class="alert alert-light border d-inline-block py-1 px-3">
+                    المعرف الخاص بك: <strong>
+                        <%= exampleConfig.tax_id %>
+                    </strong>
+                </div>
+                <% } %>
+        </div>
+
+        <!-- القائمة -->
+        <div class="mb-4">
+            <label class="fw-bold mb-2">اختر لغة النظام لديك:</label>
+            <select id="langSelect" class="form-select form-select-lg" onchange="generateCode()">
+                <option value="" selected disabled>-- اختر اللغة --</option>
+                <option value="js">JavaScript (HTML / Frontend)</option>
+                <option value="php">PHP (Backend / Laravel)</option>
+                <option value="csharp">C# (Desktop Apps)</option>
+                <option value="python">Python (Odoo / Django)</option>
+            </select>
+        </div>
+
+        <!-- منطقة الكود -->
+        <div id="resultArea" style="display:none;">
+            <div class="alert alert-info d-flex align-items-center">
+                <span class="fs-4 me-2">💡</span>
+                <div>
+                    <strong>طريقة التركيب:</strong>
+                    <ol class="mb-0 ps-3">
+                        <li>انسخ هذا الكود وضعه في <strong>نهاية الملف</strong> الخاص بالفواتير.</li>
+                        <li>عند حفظ الفاتورة، استدعِ الدالة: de>sendInvoiceToTax(...)</code></li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="position-relative">
+                <div class="code-box" id="codeDisplay"></div>
+                <button class="btn btn-primary position-absolute top-0 end-0 m-3" onclick="copyCode()">نسخ الكود
+                    📋</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- البيانات المخفية -->
+    <input type="hidden" id="taxId" value="<%= exampleConfig ? exampleConfig.tax_id : 'YOUR_TAX_ID' %>">
+
+    <script>
+        const taxId = document.getElementById('taxId').value;
+        const baseUrl = "http://localhost:3000/api/v1"; // رابط السيرفر
+
+        const templates = {
+            js: `/**
+ * 🔌 دالة الربط الضريبي الشاملة (MetaConnect)
+ * ضع هذه الدالة في نهاية ملف Javascript أو داخل وسم <script>
+ */
+async function sendInvoiceToTax(totalAmount, itemsList, isLive = false) {
+    // 1. تحديد البيئة (Sandbox أو Live)
+    const env = isLive ? 'connect' : 'sandbox';
+    const url = \`${baseUrl}/\${env}/${taxId}\`;
+
+    console.log(\`📡 جاري الإرسال إلى بيئة: \${isLive ? 'Live 🚀' : 'Sandbox 🧪'}\`);
+
+    // 2. تجهيز البيانات
+    const payload = {
+        total: totalAmount,
+        date: new Date().toISOString().split('T')[0],
+        items: itemsList.map(item => ({ name: item.name, price: item.price, qty: item.quantity || 1 }))
+    };
+
+    try {
+        // 3. الإرسال
+        const res = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        // 4. النتيجة
+        if (res.ok) {
+            console.log("✅ تم الربط بنجاح:", data);
+            alert("تم توثيق الفاتورة ضريبياً بنجاح! ✅");
+        } else {
+            console.error("❌ خطأ:", data);
+            alert("فشل التوثيق: " + (data.message || "خطأ غير معروف"));
+        }
+    } catch (err) {
+        console.error("⚠️ خطأ اتصال:", err);
+    }
+}
+
+// ==========================================
+// 🟢 مثال للاستخدام (ضعه داخل زر الحفظ):
+// sendInvoiceToTax(150.00, cartItems, false); // false للتجربة
+// ==========================================`,
+
+            php: `<?php
+/**
+ * 🔌 دالة الربط الضريبي الشاملة (MetaConnect)
+ * انسخ هذه الدالة وضعها في ملف الـ Helper أو الـ Controller
+ */
+function sendInvoiceToTax($total, $items, $isLive = false) {
+    $taxId = "${taxId}";
+    $env = $isLive ? 'connect' : 'sandbox';
+    $url = "${baseUrl}/$env/$taxId";
+
+    // تجهيز البيانات
+    $data = [
+        "total" => $total,
+        "date" => date("Y-m-d"),
+        "items" => $items
+    ];
+
+    // الإرسال
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+    
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    // النتيجة
+    if ($httpCode == 200) {
+        return ["success" => true, "data" => json_decode($response, true)];
+    } else {
+        return ["success" => false, "error" => $response];
+    }
+}
+
+// ==========================================
+// 🟢 مثال للاستخدام:
+// sendInvoiceToTax(500, $cartItems, false); // false للتجربة
+// ==========================================
+?>`,
+
+            csharp: `// 🔌 كود الربط C#
+// ضعه كـ Class منفصل أو داخل الـ Form
+using System.Net.Http;
+using System.Text;
+using Newtonsoft.Json;
+
+public class MetaConnect
+{
+    private static readonly HttpClient client = new HttpClient();
+    private string taxId = "${taxId}";
+    private string baseUrl = "${baseUrl}";
+
+    public async void SendInvoice(decimal total, object items, bool isLive = false)
+    {
+        string env = isLive ? "connect" : "sandbox";
+        string url = $"{baseUrl}/{env}/{taxId}";
+
+        var payload = new {
+            total = total,
+            date = DateTime.Now.ToString("yyyy-MM-dd"),
+            items = items
+        };
+
+        var json = JsonConvert.SerializeObject(payload);
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        try {
+            var response = await client.PostAsync(url, content);
+            string result = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode) {
+                System.Windows.Forms.MessageBox.Show("✅ تم التوثيق بنجاح!");
+            } else {
+                System.Windows.Forms.MessageBox.Show("❌ فشل: " + result);
+            }
+        } catch (Exception ex) {
+            System.Windows.Forms.MessageBox.Show("خطأ: " + ex.Message);
+        }
+    }
+}
+
+// ==========================================
+// 🟢 مثال للاستخدام:
+// new MetaConnect().SendInvoice(100.00, cart, false);
+// ==========================================`,
+
+            python: `# 🔌 دالة الربط Python
+import requests
+import json
+from datetime import datetime
+
+def send_invoice_to_tax(total, items, is_live=False):
+    tax_id = "${taxId}"
+    base_url = "${baseUrl}"
+    env = "connect" if is_live else "sandbox"
+    url = f"{base_url}/{env}/{tax_id}"
+
+    payload = {
+        "total": total,
+        "date": datetime.now().strftime("%Y-%m-%d"),
+        "items": items
+    }
+
+    try:
+        res = requests.post(url, json=payload)
+        if res.status_code == 200:
+            print("✅ Success:", res.json())
+        else:
+            print("❌ Failed:", res.text)
+    except Exception as e:
+        print("⚠️ Error:", e)
+
+# ==========================================
+# 🟢 مثال للاستخدام:
+# send_invoice_to_tax(200, cart_items, False) # False for Sandbox
+# ==========================================`,
+        };
+
+        function generateCode() {
+            const lang = document.getElementById('langSelect').value;
+            if (templates[lang]) {
+                document.getElementById('resultArea').style.display = 'block';
+                document.getElementById('codeDisplay').innerText = templates[lang];
+            }
+        }
+
+        function copyCode() {
+            const text = document.getElementById('codeDisplay').innerText;
+            navigator.clipboard.writeText(text);
+            alert("تم نسخ الكود! ضعه في ملفك الآن.");
+        }
+    </script>
+
+</body>
+
+</html>

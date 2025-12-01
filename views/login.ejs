@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <title>تسجيل الدخول | MetaConnect</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <style>
+        body {
+            background: #f4f6f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .card {
+            width: 400px;
+            border: none;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card p-4">
+        <h3 class="text-center mb-4 text-primary">MetaConnect</h3>
+
+        <form action="/login" method="POST">
+            <div class="mb-3">
+                <label class="form-label">نوع الحساب</label>
+                <select name="role" class="form-select">
+                    <option value="admin">مدير النظام (Admin)</option>
+                    <option value="developer">مطور / شركة (Developer)</option>
+                    <option value="store">صاحب متجر (End User)</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">البريد الإلكتروني / المستخدم</label>
+                <input type="text" name="username" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">كلمة المرور</label>
+                <input type="password" name="password" class="form-control" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 py-2">تسجيل الدخول</button>
+        </form>
+
+        <div class="text-center mt-3 border-top pt-3">
+            <a href="/register-dev" class="text-decoration-none small">مطور جديد؟ سجل شركتك الآن</a>
+        </div>
+    </div>
+
+
+
+
+</body>
+
+</html>

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <title>تفاصيل الشركة | <%= company.name %>
+    </title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+</head>
+
+<body class="bg-light">
+    <div class="container mt-5">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">الرئيسية</a></li>
+                <li class="breadcrumb-item active">
+                    <%= company.name %>
+                </li>
+            </ol>
+        </nav>
+
+        <div class="row">
+            <!-- بيانات الشركة -->
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-header">بيانات الربط</div>
+                    <div class="card-body">
+                        <h5>
+                            <%= company.name %>
+                        </h5>
+                        <p class="text-muted">
+                            <%= company.tax_id %>
+                        </p>
+                        <hr>
+                        <label class="small text-muted">كود الدولة</label>
+                        <div>
+                            <%= company.country_code %>
+                        </div>
+                        <label class="small text-muted mt-2">API Secret الخاص بك</label>
+                        <div class="input-group">
+                            <input type="text" value="<%= company.api_secret %>" class="form-control form-control-sm"
+                                readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">إعدادات الضرائب (حساس)</div>
+                    <div class="card-body">
+                        <form action="/company/<%= company.id %>/update-creds" method="POST">
+                            <div class="mb-2">
+                                <label class="small">Client ID (من الضرائب)</label>
+                                <input type="text" name="gov_client_id" class="form-control form-control-sm"
+                                    placeholder="مفاتيح البوابة الحكومية">
+                            </div>
+                            <div class="mb-2">
+                                <label class="small">Client Secret</label>
+                                <input type="password" name="gov_client_secret" class="form-control form-control-sm">
+                            </div>
+                            <button type="submit" class="btn btn-dark btn-sm w-100">حفظ المفاتيح</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- جدول الفواتير -->
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>سجل الفواتير المرسلة</span>
+                        <span class="badge bg-primary">
+                            <%= invoices.length %> فاتورة
+                        </span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-striped mb-0">
+                            <thead>
+                                <tr>
+                                    <th>رقم داخلي</th>
+                                    <th>المبلغ</th>
+                                    <th>الحالة</th>
+                                    <th>UUID الحكومي</th>
+                                    <th>التوقيت</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% if(invoices.length==0) { %>
+                                    <tr>
+                                        <td colspan="5" class="text-center p-3">لا توجد فواتير مرسلة بعد</td>
+                                    </tr>
+                                    <% } %>
+                                        <% invoices.forEach(function(inv) { %>
+                                            <tr>
+                                                <td>
+                                                    <%= inv.internal_id %>
+                                                </td>
+                                                <td>
+                                                    <%= inv.total_amount %>
+                                                </td>
+                                                <td>
+                                                    <% if(inv.status=='submitted' ) { %>
+                                                        <span class="badge bg-success">مقبولة</span>
+                                                        <% } else { %>
+                                                            <span class="badge bg-danger">مرفوضة</span>
+                                                            <% } %>
+                                                </td>
+                                                <td><small>
+                                                        <%= inv.gov_uuid ? inv.gov_uuid.substring(0, 15)+'...' : '-' %>
+                                                    </small></td>
+                                                <td><small>
+                                                        <%= inv.created_at.toLocaleString() %>
+                                                    </small></td>
+                                            </tr>
+                                            <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- في النافبار Navbar بالأعلى، أضف أيقونة الجرس -->
+    <li class="nav-item position-relative me-3">
+        <a href="<%= userType === 'admin' ? '/admin/support' : '/dev/support' %>" class="nav-link text-white">
+            🔔
+            <span id="notifBadge"
+                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                style="display:none;">
+                0
+            </span>
+        </a>
+    </li>
+
+    <script>
+        // فحص الإشعارات كل 10 ثواني
+        function checkNotifications() {
+            fetch('/api/notifications/count')
+                .then(res => res.json())
+                .then(data => {
+                    const badge = document.getElementById('notifBadge');
+                    if (data.count > 0) {
+                        badge.innerText = data.count;
+                        badge.style.display = 'inline-block';
+                        // تشغيل صوت (اختياري)
+                        // new Audio('/notification.mp3').play(); 
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                });
+        }
+        setInterval(checkNotifications, 10000); // كل 10 ثواني
+        checkNotifications(); // تشغيل فوراً عند التحميل
+    </script>
+
+</body>
+
+</html>
