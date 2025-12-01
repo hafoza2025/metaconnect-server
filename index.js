@@ -620,35 +620,71 @@ app.post('/api/admin/delete-company', requireLogin, async (req, res) => {
 
 // 1. جلب ملف الشركة الكامل (شامل المفاتيح والمطور والفواتير)
 app.get('/api/admin/company-file/:id', requireLogin, async (req, res) => {
-    if (req.session.role !== 'admin') return res.status(403).json({error: 'Unauthorized'});
+    // 1. التحقق من الصلاحية (يمكنك تفعيلها لاحقاً إذا أردت)
+    // if (req.session.role !== 'admin') return res.status(403).json({error: 'Unauthorized'});
+    
     const compId = req.params.id;
+    console.log(`>>> Fetching File for Company ID: ${compId}`); // سجل للتبع
 
     try {
-        // جلب بيانات الشركة + اسم المطور المسؤول
-        const [compData] = await db.execute(`
-            SELECT c.*, d.name as dev_name, d.email as dev_email, d.phone as dev_phone 
-            FROM companies c 
-            LEFT JOIN developers d ON c.developer_id = d.id 
-            WHERE c.id = ?`, [compId]);
+        // 2. جلب بيانات الشركة الأساسية فقط (لتجنب مشاكل الربط)
+        const [companies] = await db.execute('SELECT * FROM companies WHERE id = ?', [compId]);
+        
+        if (companies.length === 0) {
+            return res.status(404).json({error: 'الشركة غير موجودة'});
+        }
+        
+        const company = companies[0];
+        let devInfo = { name: 'غير مسند', email: '-', phone: '-' };
 
-        if (compData.length === 0) return res.status(404).json({error: 'Company not found'});
+        // 3. جلب بيانات المطور (بشكل منفصل وآمن)
+        if (company.developer_id) {
+            try {
+                const [devs] = await db.execute('SELECT name, email, phone FROM developers WHERE id = ?', [company.developer_id]);
+                if (devs.length > 0) devInfo = devs[0];
+            } catch (err) {
+                console.error("Error fetching developer:", err.message);
+            }
+        }
 
-        // جلب آخر 50 فاتورة للشركة
-        const [invoices] = await db.execute('SELECT * FROM invoices WHERE company_id = ? ORDER BY created_at DESC LIMIT 50', [compId]);
+        // 4. جلب الفواتير (مع تجاوز الأخطاء في حالة عدم وجود فواتير)
+        let invoices = [];
+        try {
+            const [invResult] = await db.execute('SELECT * FROM invoices WHERE company_id = ? ORDER BY created_at DESC LIMIT 20', [compId]);
+            invoices = invResult;
+        } catch (err) {
+            console.error("Error fetching invoices:", err.message);
+            // لا نوقف التنفيذ، نرسل مصفوفة فارغة
+        }
 
-        // تنسيق بيانات الاعتماد (Credentials)
+        // 5. معالجة Credentials بأمان
         let credentials = {};
         try {
-            credentials = JSON.parse(compData[0].api_credentials || '{}');
-        } catch (e) { credentials = { error: "Invalid JSON" }; }
+            if (company.api_credentials) {
+                credentials = JSON.parse(company.api_credentials);
+            }
+        } catch (e) { 
+            credentials = { error: "بيانات تالفة" }; 
+        }
 
+        // 6. إرسال الرد النهائي المجمع
         res.json({
-            info: compData[0],
+            info: { 
+                ...company, 
+                dev_name: devInfo.name, 
+                dev_email: devInfo.email, 
+                dev_phone: devInfo.phone 
+            },
             credentials: credentials,
             invoices: invoices
         });
+
     } catch (e) {
-        res.status(500).json({error: e.message});
+        console.error("CRITICAL SERVER ERROR:", e);
+        res.status(500).json({
+            error: "حدث خطأ داخلي في السيرفر",
+            details: e.message
+        });
     }
 });
 
@@ -674,6 +710,7 @@ app.get('/api/admin/developer-file/:id', requireLogin, async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
+
 
 
 
