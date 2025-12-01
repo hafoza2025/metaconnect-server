@@ -28,7 +28,9 @@ const app = express();
 
 // --- إعدادات رفع الصور (Multer) ---
 const storage = multer.diskStorage({
-    destination: './public/uploads/',
+  //  destination: './public/uploads/',
+        destination: '/tmp', // ✅ المجلد المؤقت المسموح به
+
     filename: function (req, file, cb) {
         cb(null, 'img-' + Date.now() + path.extname(file.originalname));
     }
@@ -616,4 +618,5 @@ app.get('/api/ticket/status/:id', requireLogin, async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Multi-Tier System running at http://localhost:${PORT}`));
+
 
