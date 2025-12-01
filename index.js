@@ -4,7 +4,23 @@ const session = require('express-session');
 const bodyParser = require('body-parser');
 const multer = require('multer');
 const path = require('path');
-const db = require('./utils/db');
+const mysql = require('mysql2');
+
+// إنشاء الاتصال بقاعدة البيانات السحابية
+const pool = mysql.createPool({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: 4000,
+    ssl: { rejectUnauthorized: true }, // ضروري جداً للسحابة
+    waitForConnections: true,
+    connectionLimit: 5
+});
+
+// تعريف المتغير db لكي يعمل باقي الكود
+const db = pool.promise();
+
 const egyptHandler = require('./services/egyptHandler');
 const saudiHandler = require('./services/saudiHandler');
 
@@ -600,3 +616,4 @@ app.get('/api/ticket/status/:id', requireLogin, async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Multi-Tier System running at http://localhost:${PORT}`));
+
