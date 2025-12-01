@@ -616,9 +616,65 @@ app.post('/api/admin/delete-company', requireLogin, async (req, res) => {
     res.json({success: true});
 });
 
+// --- APIs لوحة التحكم المتقدمة ---
+
+// 1. جلب ملف الشركة الكامل (شامل المفاتيح والمطور والفواتير)
+app.get('/api/admin/company-file/:id', requireLogin, async (req, res) => {
+    if (req.session.role !== 'admin') return res.status(403).json({error: 'Unauthorized'});
+    const compId = req.params.id;
+
+    try {
+        // جلب بيانات الشركة + اسم المطور المسؤول
+        const [compData] = await db.execute(`
+            SELECT c.*, d.name as dev_name, d.email as dev_email, d.phone as dev_phone 
+            FROM companies c 
+            LEFT JOIN developers d ON c.developer_id = d.id 
+            WHERE c.id = ?`, [compId]);
+
+        if (compData.length === 0) return res.status(404).json({error: 'Company not found'});
+
+        // جلب آخر 50 فاتورة للشركة
+        const [invoices] = await db.execute('SELECT * FROM invoices WHERE company_id = ? ORDER BY created_at DESC LIMIT 50', [compId]);
+
+        // تنسيق بيانات الاعتماد (Credentials)
+        let credentials = {};
+        try {
+            credentials = JSON.parse(compData[0].api_credentials || '{}');
+        } catch (e) { credentials = { error: "Invalid JSON" }; }
+
+        res.json({
+            info: compData[0],
+            credentials: credentials,
+            invoices: invoices
+        });
+    } catch (e) {
+        res.status(500).json({error: e.message});
+    }
+});
+
+// 2. جلب ملف المطور الكامل
+app.get('/api/admin/developer-file/:id', requireLogin, async (req, res) => {
+    if (req.session.role !== 'admin') return res.status(403).json({error: 'Unauthorized'});
+    
+    try {
+        const [devData] = await db.execute('SELECT * FROM developers WHERE id = ?', [req.params.id]);
+        const [companies] = await db.execute('SELECT * FROM companies WHERE developer_id = ?', [req.params.id]);
+        const [transactions] = await db.execute('SELECT * FROM transactions WHERE developer_id = ? ORDER BY created_at DESC LIMIT 20', [req.params.id]);
+
+        res.json({
+            profile: devData[0],
+            companies: companies,
+            transactions: transactions
+        });
+    } catch (e) {
+        res.status(500).json({error: e.message});
+    }
+});
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
+
 
 
 
