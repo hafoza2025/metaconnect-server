@@ -226,24 +226,24 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td><code>totalAmount</code></td>
+                                <td>de>totalAmount</code></td>
                                 <td>رقم (Decimal)</td>
                                 <td><span class="badge bg-danger">نعم</span></td>
                                 <td>إجمالي قيمة الفاتورة شاملة الضريبة.</td>
                             </tr>
                             <tr>
-                                <td><code>itemsList</code></td>
+                                <td>de>itemsList</code></td>
                                 <td>مصفوفة (Array)</td>
                                 <td><span class="badge bg-danger">نعم</span></td>
                                 <td>قائمة المنتجات، كل منتج يجب أن يحتوي على (name, price).</td>
                             </tr>
                             <tr>
-                                <td><code>isLive</code></td>
+                                <td>de>isLive</code></td>
                                 <td>Boolean</td>
                                 <td><span class="badge bg-secondary">اختياري</span></td>
                                 <td>
-                                    <code>false</code> للتجربة (Sandbox)<br>
-                                    <code>true</code> للإطلاق الفعلي (Live)
+                                    de>false</code> للتجربة (Sandbox)<br>
+                                    de>true</code> للإطلاق الفعلي (Live)
                                 </td>
                             </tr>
                         </tbody>
@@ -251,7 +251,7 @@
 
                     <div class="note-box">
                         <strong>💡 ملاحظة هامة:</strong>
-                        تأكد من تغيير حالة <code>isLive</code> إلى <code>true</code> فقط عندما تنتهي من الاختبارات وتكون جاهزاً لإصدار فواتير حقيقية للضرائب.
+                        تأكد من تغيير حالة de>isLive</code> إلى de>true</code> فقط عندما تنتهي من الاختبارات وتكون جاهزاً لإصدار فواتير حقيقية للضرائب.
                     </div>
                 </div>
             </div>
@@ -264,7 +264,8 @@
     <input type="hidden" id="taxIdValue" value="<%= (typeof exampleConfig !== 'undefined' && exampleConfig.tax_id) ? exampleConfig.tax_id : '312345678900003' %>">
 
     <script>
-        const taxId = document.getElementById('taxIdValue').value;
+        // استخدام currentTaxId لتمييزه عن المتغير داخل النصوص المولدة
+        const currentTaxId = document.getElementById('taxIdValue').value;
         const baseUrl = "https://metaconnect-server-three.vercel.app/api/v1";
 
         // النصوص والتعليمات لكل لغة
@@ -275,9 +276,11 @@
  * دالة الربط مع MetaConnect
  * يرجى عدم تعديل الرابط أو المعرف
  */
+// معرفك الضريبي
+const taxId = "${currentTaxId}";
+
 async function sendInvoiceToTax(totalAmount, itemsList, isLive = false) {
     const env = isLive ? 'connect' : 'sandbox';
-    const taxId = "${taxId}";
     const url = \`${baseUrl}/\${env}/\${taxId}\`;
 
     const payload = {
@@ -329,7 +332,7 @@ sendInvoiceToTax(4100, cartItems, false);`
                 step1Desc: "انسخ هذه الدالة وضعها في ملف `Helpers.php` أو داخل الـ Controller الخاص بالفواتير.",
                 mainCode: `<?php
 function sendInvoiceToTax($total, $items, $isLive = false) {
-    $taxId = "${taxId}";
+    $taxId = "${currentTaxId}";
     $env = $isLive ? 'connect' : 'sandbox';
     $url = "${baseUrl}/$env/$taxId";
 
@@ -379,7 +382,7 @@ using Newtonsoft.Json; // تأكد من تثبيت هذه المكتبة
 public class TaxService
 {
     private static readonly HttpClient client = new HttpClient();
-    private string taxId = "${taxId}";
+    private string taxId = "${currentTaxId}";
     private string baseUrl = "${baseUrl}";
 
     public async Task<bool> SendInvoice(decimal total, object items, bool isLive = false)
@@ -421,7 +424,7 @@ if(success) MessageBox.Show("تم الربط بنجاح");`
 from datetime import datetime
 
 def send_invoice_to_tax(total, items, is_live=False):
-    tax_id = "${taxId}"
+    tax_id = "${currentTaxId}"
     base_url = "${baseUrl}"
     env = "connect" if is_live else "sandbox"
     url = f"{base_url}/{env}/{tax_id}"
