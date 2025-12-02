@@ -173,8 +173,8 @@
                                 isConnected = comp.country_code === 'EG' ? !!c.client_id : !!c.binarySecurityToken;
                             } catch(e) {}
                             
-                            // Auth User
-                            let authUser = 'store_' + String(comp.id).substring(0,8);
+                            // Auth User (إذا كان هناك اسم مستخدم مخصص نعرضه، وإلا نعرض الافتراضي)
+                            let authUser = comp.store_username ? comp.store_username : ('store_' + String(comp.id).substring(0,8));
                         %>
                         <tr>
                             <td class="ps-4">
@@ -412,32 +412,43 @@
         </div>
     </div>
 
-    <!-- 4. Auth Info Modal -->
+    <!-- 4. Auth Info Modal (Updated for Username & Password) -->
     <div class="modal fade" id="authModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header bg-light">
-                    <h6 class="modal-title fw-bold"><i class="bi bi-shield-lock me-2"></i>بيانات دخول المتجر</h6>
+                    <h6 class="modal-title fw-bold"><i class="bi bi-shield-lock me-2"></i>إدارة بيانات دخول المتجر</h6>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4">
                     <div class="mb-4">
-                        <label class="form-label small text-muted fw-bold">اسم المستخدم (تلقائي)</label>
+                        <label class="form-label small text-muted fw-bold">اسم المستخدم الحالي</label>
                         <div class="input-group">
-                            <input type="text" id="auth_user" class="form-control bg-light text-dark fw-bold font-monospace" readonly>
-                            <button class="btn btn-outline-secondary" onclick="navigator.clipboard.writeText(document.getElementById('auth_user').value)"><i class="bi bi-clipboard"></i></button>
+                            <input type="text" id="auth_user_display" class="form-control bg-light text-dark fw-bold font-monospace" readonly>
+                            <button class="btn btn-outline-secondary" onclick="navigator.clipboard.writeText(document.getElementById('auth_user_display').value)">
+                                <i class="bi bi-clipboard"></i>
+                            </button>
                         </div>
                         <small class="text-muted fst-italic ms-1">يستخدمه العميل للدخول للنظام.</small>
                     </div>
                     
-                    <div class="border-top pt-3">
-                        <label class="form-label small text-muted fw-bold mb-2">تعيين كلمة مرور جديدة</label>
-                        <form action="/dev/update-store-auth" method="POST" class="d-flex gap-2">
-                            <input type="hidden" name="company_id" id="auth_company_id">
-                            <input type="text" name="new_password" class="form-control" placeholder="كلمة السر الجديدة" required minlength="6">
-                            <button type="submit" class="btn btn-dark px-4">حفظ</button>
-                        </form>
-                    </div>
+                    <hr>
+
+                    <form action="/dev/update-store-auth" method="POST" class="mt-3">
+                        <input type="hidden" name="company_id" id="auth_company_id">
+                        
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-secondary">اسم مستخدم جديد (اختياري)</label>
+                            <input type="text" name="new_username" class="form-control" placeholder="اترك فارغاً إذا لا تريد التغيير">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-secondary">كلمة مرور جديدة (اختياري)</label>
+                            <input type="text" name="new_password" class="form-control" placeholder="اترك فارغاً إذا لا تريد التغيير" minlength="6">
+                        </div>
+
+                        <button type="submit" class="btn btn-dark w-100 fw-bold py-2 rounded-pill">حفظ التعديلات</button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -519,10 +530,10 @@
             new bootstrap.Modal(document.getElementById('allocateModal')).show();
         }
 
-        // 4. Auth
+        // 4. Auth Modal (Updated Logic)
         function openAuthModal(id, name, username) {
             document.getElementById('auth_company_id').value = id;
-            document.getElementById('auth_user').value = username;
+            document.getElementById('auth_user_display').value = username;
             new bootstrap.Modal(document.getElementById('authModal')).show();
         }
     </script>
