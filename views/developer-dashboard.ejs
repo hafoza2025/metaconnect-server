@@ -12,12 +12,9 @@
         .card { border: none; border-radius: 12px; box-shadow: 0 2px 15px rgba(0,0,0,0.05); transition: .3s; }
         .card:hover { transform: translateY(-3px); }
         .wallet-card { background: linear-gradient(135deg, #2c3e50, #34495e); color: white; }
-        .stats-icon { width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 10px; background: rgba(13, 110, 253, 0.1); color: #0d6efd; font-size: 1.4rem; }
         .table thead th { background-color: #f8f9fa; font-weight: 600; color: #6c757d; border-bottom: 2px solid #dee2e6; }
         .status-badge { padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
-        .copy-btn { cursor: pointer; font-size: 0.9rem; color: #6c757d; }
-        .copy-btn:hover { color: #0d6efd; }
-        .auth-box { background: #f8f9fa; padding: 4px 8px; border-radius: 4px; font-family: monospace; border: 1px solid #e9ecef; display: inline-block; font-size: 0.85rem; }
+        .auth-box { background: #f8f9fa; padding: 4px 8px; border-radius: 4px; font-family: monospace; border: 1px solid #e9ecef; display: inline-block; font-size: 0.85rem; color: #d63384; }
     </style>
 </head>
 <body>
@@ -77,7 +74,7 @@
         </div>
 
         <!-- Companies List -->
-        <div class="card">
+        <div class="card shadow-sm">
             <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
                 <h5 class="mb-0 fw-bold"><i class="bi bi-building me-2"></i> الشركات المسجلة</h5>
                 <span class="badge bg-secondary"><%= companies.length %> شركة</span>
@@ -122,14 +119,16 @@
                                     <% } %>
                                 </td>
                                 
-                                <!-- عمود بيانات الدخول (جديد) -->
+                                <!-- بيانات الدخول -->
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
                                         <div class="auth-info">
                                             <div class="mb-1">
                                                 <i class="bi bi-person text-muted"></i> 
-                                                <span class="auth-box" id="user-<%= comp.id %>"><%= `store_${comp.id}` %></span>
-                                                <!-- ملاحظة: في الواقع نحتاج لجلب الاسم الحقيقي من جدول end_users، سأضيف كود JS لذلك أو نعتمد الافتراضي -->
+                                                <!-- عرضنا هنا اسم الشركة كـ User مؤقتاً، لكن عند التعديل سنعرض الاسم الجديد -->
+                                                <span class="auth-box" id="username-display-<%= comp.id %>">
+                                                    store_<%= comp.id %>
+                                                </span>
                                             </div>
                                             <div>
                                                 <i class="bi bi-key text-muted"></i> 
@@ -137,7 +136,7 @@
                                             </div>
                                         </div>
                                         <button class="btn btn-sm btn-outline-secondary border-0" 
-                                                onclick="openAuthModal('<%= comp.id %>', '<%= comp.name %>')"
+                                                onclick="openAuthModal('<%= comp.id %>', '<%= comp.name %>', 'store_<%= comp.id %>')"
                                                 title="تعديل بيانات الدخول">
                                             <i class="bi bi-pencil-square"></i>
                                         </button>
@@ -146,11 +145,12 @@
 
                                 <td class="text-center">
                                     <div class="d-flex justify-content-center gap-2">
-                                        <button class="btn btn-success btn-sm fw-bold px-3" data-bs-toggle="modal" data-bs-target="#allocateModal<%= comp.id %>">
+                                        <!-- الأزرار تستدعي المودال عبر الـ ID فقط -->
+                                        <button class="btn btn-success btn-sm fw-bold px-3" onclick="openAllocateModal('<%= comp.id %>', '<%= comp.name %>')">
                                             <i class="bi bi-cash-coin me-1"></i> تحويل رصيد
                                         </button>
                                         
-                                        <button class="btn btn-light btn-sm border" data-bs-toggle="modal" data-bs-target="#credsModal<%= comp.id %>">
+                                        <button class="btn btn-light btn-sm border" onclick="openCredsModal('<%= comp.id %>', '<%= comp.name %>', '<%= comp.country_code %>')">
                                             <i class="bi bi-gear-fill"></i>
                                         </button>
                                         
@@ -158,65 +158,6 @@
                                             <i class="bi bi-code-slash"></i>
                                         </a>
                                     </div>
-
-                                    <!-- Modal تحويل الرصيد -->
-                                    <div class="modal fade" id="allocateModal<%= comp.id %>" tabindex="-1">
-                                        <div class="modal-dialog">
-                                            <form action="/dev/allocate-balance" method="POST" class="modal-content">
-                                                <div class="modal-header bg-success text-white">
-                                                    <h5 class="modal-title">تحويل رصيد لـ <%= comp.name %></h5>
-                                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                                                </div>
-                                                <div class="modal-body text-start">
-                                                    <input type="hidden" name="company_id" value="<%= comp.id %>">
-                                                    <div class="alert alert-info py-2 small">
-                                                        رصيدك الحالي: <strong><%= parseFloat(developer.wallet_balance).toFixed(2) %></strong>
-                                                    </div>
-                                                    <label class="form-label">المبلغ المراد تخصيصه (ج.م)</label>
-                                                    <input type="number" name="amount" class="form-control" min="1" step="0.01" required>
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="submit" class="btn btn-success w-100">تأكيد التحويل</button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Modal إعدادات الربط -->
-                                    <div class="modal fade" id="credsModal<%= comp.id %>" tabindex="-1">
-                                        <div class="modal-dialog">
-                                            <form action="/dev/company/update-creds" method="POST" class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title">إعدادات الربط: <%= comp.name %></h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                                </div>
-                                                <div class="modal-body text-start">
-                                                    <input type="hidden" name="company_id" value="<%= comp.id %>">
-                                                    <input type="hidden" name="country_code" value="<%= comp.country_code %>">
-                                                    
-                                                    <% if(comp.country_code == 'EG') { %>
-                                                        <div class="mb-2">
-                                                            <label>Client ID (ETA)</label>
-                                                            <input type="text" name="client_id" class="form-control form-control-sm">
-                                                        </div>
-                                                        <div class="mb-2">
-                                                            <label>Client Secret (ETA)</label>
-                                                            <input type="text" name="client_secret" class="form-control form-control-sm">
-                                                        </div>
-                                                    <% } else { %>
-                                                        <div class="mb-2">
-                                                            <label>OTP (ZATCA)</label>
-                                                            <input type="text" name="otp" class="form-control form-control-sm">
-                                                        </div>
-                                                    <% } %>
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="submit" class="btn btn-primary btn-sm w-100">حفظ الإعدادات</button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
-
                                 </td>
                             </tr>
                         <% }); %>
@@ -226,7 +167,9 @@
         </div>
     </div>
 
-    <!-- Modal تعديل بيانات دخول المتجر (واحد للكل) -->
+    <!-- =================== MODALS (خارج الجدول) =================== -->
+
+    <!-- 1. Modal تعديل بيانات دخول المتجر -->
     <div class="modal fade" id="authUpdateModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -243,7 +186,7 @@
                             <label class="form-label">اسم المستخدم الجديد</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-person"></i></span>
-                                <input type="text" name="new_username" class="form-control" required minlength="4">
+                                <input type="text" name="new_username" id="auth_new_username" class="form-control" required minlength="4">
                             </div>
                             <small class="text-muted">يستخدمه العميل للدخول إلى بوابة المتجر</small>
                         </div>
@@ -265,23 +208,106 @@
         </div>
     </div>
 
+    <!-- 2. Modal تحويل الرصيد -->
+    <div class="modal fade" id="allocateModal" tabindex="-1">
+        <div class="modal-dialog">
+            <form action="/dev/allocate-balance" method="POST" class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">تحويل رصيد لـ <span id="alloc_company_name"></span></h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-start">
+                    <input type="hidden" name="company_id" id="alloc_company_id">
+                    
+                    <!-- هنا نعرض رصيد المطور بشكل صحيح -->
+                    <div class="alert alert-info py-2 small">
+                        رصيد محفظتك الحالي: <strong><%= parseFloat(developer.wallet_balance).toFixed(2) %> ج.م</strong>
+                    </div>
+                    
+                    <label class="form-label">المبلغ المراد تخصيصه (ج.م)</label>
+                    <input type="number" name="amount" class="form-control" min="1" step="0.01" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success w-100">تأكيد التحويل</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 3. Modal إعدادات الربط -->
+    <div class="modal fade" id="credsModal" tabindex="-1">
+        <div class="modal-dialog">
+            <form action="/dev/company/update-creds" method="POST" class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">إعدادات الربط: <span id="creds_company_name"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-start">
+                    <input type="hidden" name="company_id" id="creds_company_id">
+                    <input type="hidden" name="country_code" id="creds_country_code">
+                    
+                    <div id="egypt_fields" style="display:none;">
+                        <div class="mb-2">
+                            <label>Client ID (ETA)</label>
+                            <input type="text" name="client_id" class="form-control form-control-sm">
+                        </div>
+                        <div class="mb-2">
+                            <label>Client Secret (ETA)</label>
+                            <input type="text" name="client_secret" class="form-control form-control-sm">
+                        </div>
+                    </div>
+
+                    <div id="saudi_fields" style="display:none;">
+                        <div class="mb-2">
+                            <label>OTP (ZATCA)</label>
+                            <input type="text" name="otp" class="form-control form-control-sm">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary btn-sm w-100">حفظ الإعدادات</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        function openAuthModal(id, name) {
+        // دوال لفتح المودال (لتجنب مشاكل التداخل)
+        
+        function openAuthModal(id, name, currentUsername) {
             document.getElementById('auth_company_id').value = id;
             document.getElementById('auth_company_name').innerText = name;
+            // حاول وضع الاسم الحالي إن وجد
+            const displayEl = document.getElementById('username-display-' + id);
+            if(displayEl) document.getElementById('auth_new_username').value = displayEl.innerText.trim();
             
-            // محاولة تعيين قيم افتراضية (اختياري)
-            const userEl = document.getElementById('user-' + id);
-            if(userEl) {
-                document.querySelector('input[name="new_username"]').value = userEl.innerText;
+            new bootstrap.Modal(document.getElementById('authUpdateModal')).show();
+        }
+
+        function openAllocateModal(id, name) {
+            document.getElementById('alloc_company_id').value = id;
+            document.getElementById('alloc_company_name').innerText = name;
+            new bootstrap.Modal(document.getElementById('allocateModal')).show();
+        }
+
+        function openCredsModal(id, name, countryCode) {
+            document.getElementById('creds_company_id').value = id;
+            document.getElementById('creds_company_name').innerText = name;
+            document.getElementById('creds_country_code').value = countryCode;
+            
+            if(countryCode === 'EG') {
+                document.getElementById('egypt_fields').style.display = 'block';
+                document.getElementById('saudi_fields').style.display = 'none';
+            } else {
+                document.getElementById('egypt_fields').style.display = 'none';
+                document.getElementById('saudi_fields').style.display = 'block';
             }
             
-            var myModal = new bootstrap.Modal(document.getElementById('authUpdateModal'));
-            myModal.show();
+            new bootstrap.Modal(document.getElementById('credsModal')).show();
         }
-        
-        // التحقق من رسائل النجاح في الرابط
+
+        // التحقق من رسائل النجاح وتحديث الواجهة
         const urlParams = new URLSearchParams(window.location.search);
         if(urlParams.get('msg') === 'auth_updated') {
             alert('✅ تم تحديث بيانات دخول المتجر بنجاح!');
