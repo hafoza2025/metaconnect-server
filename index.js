@@ -6,6 +6,9 @@ const bodyParser = require('body-parser');
 const multer = require('multer');
 const axios = require('axios'); // تأكد من وجود هذا السطر
 const path = require('path');
+// إضافة مكتبات التشفير الضرورية (مدمجة في Node.js)
+const crypto = require('crypto');
+const https = require('https');
 const mysql = require('mysql2');
 
 // إنشاء الاتصال بقاعدة البيانات السحابية (TiDB)
@@ -1065,6 +1068,7 @@ app.post('/dev/login', async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
+
 
 
 
