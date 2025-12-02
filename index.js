@@ -27,14 +27,12 @@ const saudiHandler = require('./services/saudiHandler');
 const app = express();
 
 // --- إعدادات رفع الصور (تم التعطيل مؤقتاً لتوافق Vercel) ---
-// لأن Vercel لا يسمح بالكتابة على القرص، عطلنا الرفع ليعمل الموقع
 const upload = (req, res, next) => {
-    // نتجاهل رفع الملف ونمرر الطلب
     req.file = null;
     next();
 };
 
-// دالة التحقق من نوع الملف (لن تستخدم حالياً، لكن أبقيناها)
+// دالة التحقق من نوع الملف
 function checkFileType(file, cb) {
     const filetypes = /jpeg|jpg|png|gif/;
     const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
@@ -45,7 +43,6 @@ function checkFileType(file, cb) {
 
 // --- إعدادات Express ---
 app.set('view engine', 'ejs');
-// نستخدم process.cwd() لضمان المسار الصحيح في Vercel
 app.set('views', path.join(process.cwd(), 'views')); 
 app.use(express.static(path.join(process.cwd(), 'public')));
 
@@ -97,59 +94,41 @@ app.get('/login', (req, res) => res.render('login'));
 app.get('/register-dev', (req, res) => res.render('register-dev'));
 
 app.post('/register-dev', async (req, res) => {
-    // نستقبل جميع البيانات الجديدة من الفورم
     const { name, email, password, phone, country, website, contact_person } = req.body;
-    
     try {
-        // نقوم بحفظ البيانات في الجدول المحدث
         await db.execute(
             `INSERT INTO developers 
             (name, email, password, wallet_balance, phone, country, website, contact_person) 
             VALUES (?, ?, ?, 5.00, ?, ?, ?, ?)`, 
             [name, email, password, phone, country, website || null, contact_person]
         );
-        
-        // بعد النجاح، نحوله لصفحة الدخول
         res.redirect('/login?success=registered');
-// الكود الجديد لكشف الخطأ
-} catch (e) { 
-    console.error("Registration Error:", e); // طباعة في الكونسول للمطور
-    res.send(`
-        <div style="text-align:center; margin-top:50px; font-family:sans-serif; direction:rtl;">
-            <h3 style="color:red">❌ حدث خطأ تقني بالتفصيل:</h3>
-            <p style="background:#f8d7da; color:#721c24; padding:15px; display:inline-block; border-radius:5px;">
-                ${e.message}
-            </p>
-            <br><br>
-            <a href="/register-dev" style="padding:10px 20px; background:#0d6efd; color:white; text-decoration:none; border-radius:5px;">حاول مرة أخرى</a>
-        </div>
-    `); 
-}
-
+    } catch (e) { 
+        console.error("Registration Error:", e);
+        res.send(`
+            <div style="text-align:center; margin-top:50px; font-family:sans-serif; direction:rtl;">
+                <h3 style="color:red">❌ حدث خطأ تقني بالتفصيل:</h3>
+                <p style="background:#f8d7da; color:#721c24; padding:15px; display:inline-block; border-radius:5px;">${e.message}</p>
+                <br><br>
+                <a href="/register-dev" style="padding:10px 20px; background:#0d6efd; color:white; text-decoration:none; border-radius:5px;">حاول مرة أخرى</a>
+            </div>
+        `); 
+    }
 });
 
-
-// 1. مسار صفحة دخول الأدمن (جديد)
 app.get('/admin/login', (req, res) => {
-    // إذا كان مسجلاً بالفعل كأدمن، حوله للوحة التحكم
     if (req.session.user && req.session.role === 'admin') {
         return res.redirect('/admin-dashboard');
     }
-    // اعرض ملف الـ HTML الجديد (admin-login.html)
-    // ملاحظة: تأكد من وضع ملف admin-login.html في مجلد views أو public
     res.sendFile(path.join(process.cwd(), 'views', 'admin-login.html')); 
 });
 
-// 2. معالجة دخول الأدمن (POST)
 app.post('/admin/login', async (req, res) => {
     const { username, password } = req.body;
-    
     try {
-        // البحث في جدول admins الجديد
         const [admins] = await db.execute('SELECT * FROM admins WHERE username = ? AND password = ?', [username, password]);
-
         if (admins.length > 0) {
-            req.session.user = admins[0]; // تخزين بيانات الأدمن من الداتا بيز
+            req.session.user = admins[0];
             req.session.role = 'admin';
             return res.json({ success: true, redirect: '/admin-dashboard' });
         } else {
@@ -161,10 +140,8 @@ app.post('/admin/login', async (req, res) => {
     }
 });
 
-// 3. تعديل مسار login القديم (للمطورين والمتاجر فقط)
 app.post('/login', async (req, res) => {
     const { username, password, role } = req.body;
-    
     try {
         if (role === 'developer') {
             const [devs] = await db.execute('SELECT * FROM developers WHERE email = ? AND password = ?', [username, password]);
@@ -182,8 +159,6 @@ app.post('/login', async (req, res) => {
                 return res.redirect('/store-portal');
             }
         }
-        
-        // إذا لم ينجح
         res.send(`
             <div style="text-align:center; margin-top:50px; font-family:sans-serif;">
                 <h3 style="color:red">خطأ في تسجيل الدخول</h3>
@@ -191,13 +166,11 @@ app.post('/login', async (req, res) => {
                 <a href="/login">العودة</a>
             </div>
         `);
-
     } catch (error) {
         console.error("Login Error:", error);
         res.status(500).send("Server Error");
     }
 });
-
 
 app.get('/logout', (req, res) => {
     req.session.destroy();
@@ -208,7 +181,6 @@ app.get('/logout', (req, res) => {
 
 app.get('/admin-dashboard', requireLogin, async (req, res) => {
     if (req.session.role !== 'admin') return res.redirect('/login');
-
     const [companies] = await db.execute('SELECT * FROM companies');
     const [developers] = await db.execute('SELECT * FROM developers');
     const [totalInvoices] = await db.execute("SELECT COUNT(*) as count FROM invoices WHERE status = 'submitted'");
@@ -381,6 +353,8 @@ app.post('/api/v1/submit', async (req, res) => {
 
         if (company.free_invoices_left > 0) {
             isFree = true;
+        } else if (company.invoice_limit > 0) { // تم التعديل ليدعم الشحن المباشر
+            // الشركة لديها رصيد مشحون
         } else if (company.developer_id) {
             const [devs] = await db.execute('SELECT * FROM developers WHERE id = ?', [company.developer_id]);
             if (devs.length === 0 || devs[0].wallet_balance < INVOICE_COST) {
@@ -396,6 +370,8 @@ app.post('/api/v1/submit', async (req, res) => {
         if (result.success) {
             if (isFree) {
                 await db.execute('UPDATE companies SET free_invoices_left = free_invoices_left - 1 WHERE id = ?', [company.id]);
+            } else if (company.invoice_limit > 0) { // الخصم من رصيد الشركة المباشر
+                 await db.execute('UPDATE companies SET invoice_limit = invoice_limit - 1, invoices_used = invoices_used + 1 WHERE id = ?', [company.id]);
             } else if (developer) {
                 await db.execute('UPDATE developers SET wallet_balance = wallet_balance - ? WHERE id = ?', [INVOICE_COST, developer.id]);
                 await db.execute('INSERT INTO transactions (developer_id, amount, description) VALUES (?, ?, ?)', [developer.id, -INVOICE_COST, `Invoice for ${company.name}`]);
@@ -410,7 +386,8 @@ app.post('/api/v1/submit', async (req, res) => {
 
 app.get('/dev/support', requireDev, async (req, res) => {
     const devId = req.session.user.id;
-    const [tickets] = await db.execute('SELECT * FROM support_tickets WHERE developer_id = ? ORDER BY created_at DESC', [devId]);
+    // تم التعديل لإخفاء تذاكر الإدارة
+    const [tickets] = await db.execute('SELECT * FROM support_tickets WHERE developer_id = ? AND (is_direct_to_admin = 0 OR is_direct_to_admin IS NULL) ORDER BY created_at DESC', [devId]);
     const [companies] = await db.execute('SELECT * FROM companies WHERE developer_id = ?', [devId]);
     res.render('dev-support', { tickets, companies, userType: 'developer' });
 });
@@ -440,7 +417,6 @@ app.get('/store/support', requireLogin, async (req, res) => {
 app.post('/store/support/new', requireLogin, async (req, res) => {
     if (req.session.role !== 'store') return res.status(403).send('Unauthorized');
     
-    // نستقبل الحقل الجديد target
     const { subject, message, target } = req.body;
     const storeId = req.session.user.id;
     const companyId = req.session.user.company_id;
@@ -449,11 +425,8 @@ app.post('/store/support/new', requireLogin, async (req, res) => {
         const [companies] = await db.execute('SELECT * FROM companies WHERE id = ?', [companyId]);
         const company = companies[0];
 
-        // إذا كان الهدف admin نضع العلامة 1، وإلا 0
-        // تنبيه: تأكد أنك أضفت العمود is_direct_to_admin في قاعدة البيانات كما شرحنا سابقاً
         const isDirect = (target === 'admin') ? 1 : 0;
 
-        // نضيف developer_id أيضاً لنعرف من هو مطور هذه الشركة حتى لو كانت الرسالة للإدمن
         const [result] = await db.execute(
             'INSERT INTO support_tickets (store_id, subject, company_name, tax_id, country_code, status, is_direct_to_admin, developer_id) VALUES (?, ?, ?, ?, ?, "open", ?, ?)',
             [storeId, subject, company.name, company.tax_id, company.country_code, isDirect, company.developer_id]
@@ -487,30 +460,38 @@ app.post('/admin/ticket/status', requireLogin, async (req, res) => {
     res.redirect('/admin/support/view/' + ticket_id);
 });
 
-// هذا المسار غالباً موجود عندك باسم /dev/support
-app.get('/dev/support', requireDev, async (req, res) => {
+// --- هذا هو الجزء الذي تم تحديثه ---
+app.get('/dev/support/view/:id', requireDev, async (req, res) => {
+    const ticketId = req.params.id;
     const devId = req.session.user.id;
-    // التعديل المهم هنا: AND (is_direct_to_admin = 0 OR is_direct_to_admin IS NULL)
-    const [tickets] = await db.execute('SELECT * FROM support_tickets WHERE developer_id = ? AND (is_direct_to_admin = 0 OR is_direct_to_admin IS NULL) ORDER BY created_at DESC', [devId]);
-    const [companies] = await db.execute('SELECT * FROM companies WHERE developer_id = ?', [devId]);
-    res.render('dev-support', { tickets, companies, userType: 'developer' });
+
+    // التحقق من أن التذكرة تخص هذا المطور وليست موجهة للإدمن مباشرة
+    const [ticketCheck] = await db.execute('SELECT * FROM support_tickets WHERE id = ? AND developer_id = ? AND (is_direct_to_admin = 0 OR is_direct_to_admin IS NULL)', [ticketId, devId]);
+    
+    if (ticketCheck.length === 0) {
+        return res.status(403).send("Access Denied or Ticket sent directly to Admin.");
+    }
+
+    await db.execute('UPDATE ticket_messages SET is_read = 1 WHERE ticket_id = ? AND sender_type = "admin"', [ticketId]);
+    const [messages] = await db.execute('SELECT * FROM ticket_messages WHERE ticket_id = ? ORDER BY created_at ASC', [ticketId]);
+    
+    res.render('ticket-view', { ticket: ticketCheck[0], messages, userType: 'developer' });
 });
+// -----------------------------------
 
 
-// --- تعديل هام: تعطيل رفع الملفات في الردود ---
 app.post('/support/reply', requireLogin, async (req, res) => {
-    // هنا لا نستخدم middleware الرفع لنتجنب أخطاء Vercel
     const { ticket_id, message } = req.body;
     let senderType = 'developer';
     
-    if (!req.session.user) return res.redirect('/login'); // أمان إضافي
+    if (!req.session.user) return res.redirect('/login'); 
 
     if (req.session.role === 'admin') senderType = 'admin';
     else if (req.session.role === 'store') senderType = 'store';
 
-    const attachment = null; // لا صور حالياً
+    const attachment = null; 
     
-    if (!message) return res.redirect('back'); // رسالة فارغة
+    if (!message) return res.redirect('back');
 
     await db.execute('INSERT INTO ticket_messages (ticket_id, sender_type, message, attachment) VALUES (?, ?, ?, ?)',
         [ticket_id, senderType, message || '', attachment]);
@@ -588,15 +569,11 @@ app.get('/api/ticket/status/:id', requireLogin, async (req, res) => {
     else res.status(404).json({ error: 'Not found' });
 });
 
-// API لجلب إحصائيات لوحة التحكم بشكل لحظي
 app.get('/api/admin/dashboard-stats', requireLogin, async (req, res) => {
     if (req.session.role !== 'admin') return res.status(403).json({error: 'Unauthorized'});
-
     try {
         const [companies] = await db.execute('SELECT * FROM companies ORDER BY created_at DESC');
         const [developers] = await db.execute('SELECT * FROM developers ORDER BY created_at DESC');
-        
-        // إحصائيات الفواتير
         const [invoiceStats] = await db.execute(`
             SELECT 
                 COUNT(*) as total,
@@ -605,11 +582,8 @@ app.get('/api/admin/dashboard-stats', requireLogin, async (req, res) => {
                 SUM(CASE WHEN DATE(created_at) = CURDATE() THEN 1 ELSE 0 END) as today
             FROM invoices
         `);
-
-        // إحصائيات حسب الدولة
         const saudiCompanies = companies.filter(c => c.country_code === 'SA').length;
         const egyptCompanies = companies.filter(c => c.country_code === 'EG').length;
-
         res.json({
             stats: {
                 totalCompanies: companies.length,
@@ -618,15 +592,14 @@ app.get('/api/admin/dashboard-stats', requireLogin, async (req, res) => {
                 saudiCount: saudiCompanies,
                 egyptCount: egyptCompanies
             },
-            recentCompanies: companies.slice(0, 5), // آخر 5 شركات
-            recentDevs: developers.slice(0, 5)     // آخر 5 مطورين
+            recentCompanies: companies.slice(0, 5),
+            recentDevs: developers.slice(0, 5)
         });
     } catch (e) {
         res.status(500).json({error: e.message});
     }
 });
 
-// API لحذف شركة (مثال للتحكم الكامل)
 app.post('/api/admin/delete-company', requireLogin, async (req, res) => {
     if (req.session.role !== 'admin') return res.status(403).json({error: 'Unauthorized'});
     const { id } = req.body;
@@ -634,18 +607,12 @@ app.post('/api/admin/delete-company', requireLogin, async (req, res) => {
     res.json({success: true});
 });
 
-// --- APIs لوحة التحكم المتقدمة ---
-
-// 1. جلب ملف الشركة الكامل (شامل المفاتيح والمطور والفواتير)
 app.get('/api/admin/company-file/:id', requireLogin, async (req, res) => {
     const compId = req.params.id;
     try {
-        // 1. جلب بيانات الشركة
         const [companies] = await db.execute('SELECT * FROM companies WHERE id = ?', [compId]);
         if (companies.length === 0) return res.status(404).json({error: 'الشركة غير موجودة'});
         const company = companies[0];
-
-        // 2. جلب بيانات المطور
         let devInfo = { name: 'غير مسند', email: '-' };
         if (company.developer_id) {
             try {
@@ -653,28 +620,20 @@ app.get('/api/admin/company-file/:id', requireLogin, async (req, res) => {
                 if (devs.length > 0) devInfo = devs[0];
             } catch (e) {}
         }
-
-        // 3. جلب الفواتير وعددها
         let invoices = [];
         let invoiceCount = 0;
         try {
             const [invResult] = await db.execute('SELECT * FROM invoices WHERE company_id = ? ORDER BY created_at DESC LIMIT 20', [compId]);
             invoices = invResult;
-            
             const [countResult] = await db.execute('SELECT COUNT(*) as count FROM invoices WHERE company_id = ?', [compId]);
             invoiceCount = countResult[0].count;
         } catch (e) {}
-
-        // 4. جلب سجلات الشحن (جديد)
         let shippingLogs = [];
         try {
             const [shipResult] = await db.execute('SELECT * FROM shipping_logs WHERE company_id = ? ORDER BY created_at DESC LIMIT 10', [compId]);
             shippingLogs = shipResult;
         } catch (e) {}
-
-        // 5. تحديد نوع الاشتراك (منطق بسيط)
         const subType = company.subscription_type === 'pro' ? 'مدفوع (Pro)' : 'مجاني (Free)';
-
         res.json({
             info: { 
                 ...company, 
@@ -687,22 +646,18 @@ app.get('/api/admin/company-file/:id', requireLogin, async (req, res) => {
             invoices: invoices,
             shipping: shippingLogs
         });
-
     } catch (e) {
         console.error(e);
         res.status(500).json({error: e.message});
     }
 });
 
-// 2. جلب ملف المطور الكامل
 app.get('/api/admin/developer-file/:id', requireLogin, async (req, res) => {
     if (req.session.role !== 'admin') return res.status(403).json({error: 'Unauthorized'});
-    
     try {
         const [devData] = await db.execute('SELECT * FROM developers WHERE id = ?', [req.params.id]);
         const [companies] = await db.execute('SELECT * FROM companies WHERE developer_id = ?', [req.params.id]);
         const [transactions] = await db.execute('SELECT * FROM transactions WHERE developer_id = ? ORDER BY created_at DESC LIMIT 20', [req.params.id]);
-
         res.json({
             profile: devData[0],
             companies: companies,
@@ -713,29 +668,19 @@ app.get('/api/admin/developer-file/:id', requireLogin, async (req, res) => {
     }
 });
 
-// أضف هذا الكود قبل السطر الأخير app.listen
 app.post('/api/admin/add-shipping', requireLogin, async (req, res) => {
     const { companyId, amount, trackingNumber, destination } = req.body;
-    
     try {
-        // 1. تسجيل الشحنة
         await db.execute(
             'INSERT INTO shipping_logs (company_id, tracking_number, status, destination, amount) VALUES (?, ?, ?, ?, ?)',
             [companyId, trackingNumber, 'shipped', destination, amount]
         );
-
-        // 2. المعادلة الحسابية: المبلغ * 100 (مثلاً)
-        // كل 1 دولار يعطي 100 فاتورة
         const extraInvoices = Math.floor(amount * 100); 
-
-        // 3. تحديث الرصيد والحد
         await db.execute(
             'UPDATE companies SET wallet_balance = wallet_balance + ?, invoice_limit = invoice_limit + ? WHERE id = ?',
             [amount, extraInvoices, companyId]
         );
-
         res.json({success: true, addedInvoices: extraInvoices});
-
     } catch (e) {
         res.status(500).json({error: e.message});
     }
@@ -745,51 +690,25 @@ app.post('/dev/allocate-balance', requireDev, async (req, res) => {
     const { company_id, amount } = req.body;
     const devId = req.session.user.id;
     const transferAmount = parseFloat(amount);
-
     try {
-        // 1. التأكد من رصيد المطور
         const [devs] = await db.execute('SELECT wallet_balance FROM developers WHERE id = ?', [devId]);
         if (devs[0].wallet_balance < transferAmount) {
             return res.send('<script>alert("عفواً، رصيد محفظتك لا يكفي!"); window.history.back();</script>');
         }
-
-        // 2. خصم من المطور
         await db.execute('UPDATE developers SET wallet_balance = wallet_balance - ? WHERE id = ?', [transferAmount, devId]);
-
-        // 3. إضافة لرصيد الشركة (Allocated Balance)
-        // وأيضاً نزيد حد الفواتير (invoice_limit) بناءً على المبلغ (مثلاً: 1 جنيه = 10 فواتير)
-        // يمكنك تغيير المعادلة هنا حسب رغبتك
         const invoicesToAdd = Math.floor(transferAmount * 10); 
-        
         await db.execute(
             'UPDATE companies SET allocated_balance = allocated_balance + ?, invoice_limit = invoice_limit + ? WHERE id = ?',
             [transferAmount, invoicesToAdd, company_id]
         );
-
-        // 4. تسجيل المعاملة
         await db.execute('INSERT INTO transactions (developer_id, amount, description) VALUES (?, ?, ?)', 
             [devId, -transferAmount, `Allocation to Company ID: ${company_id}`]);
-
         res.redirect('/dev-dashboard');
-
     } catch (e) {
         console.error(e);
         res.status(500).send("حدث خطأ أثناء التحويل");
     }
 });
 
-
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
-
-
-
-
-
-
-
-
-
-
-
-
