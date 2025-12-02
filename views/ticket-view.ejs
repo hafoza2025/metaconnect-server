@@ -1,232 +1,235 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
 <head>
-    <title>محادثة: <%= ticket.subject %>
-    </title>
+    <meta charset="UTF-8">
+    <title>محادثة: <%= ticket.subject %> | MetaConnect</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    
     <style>
-        .chat-box {
-            height: 450px;
-            overflow-y: auto;
-            background: #f0f2f5;
-            padding: 20px;
-            border-radius: 0 0 10px 10px;
-        }
+        body { font-family: 'Tajawal', sans-serif; background: #f3f4f6; overflow-x: hidden; }
+        
+        /* Sidebar */
+        .sidebar { width: 260px; height: 100vh; background: #111827; color: white; position: fixed; top: 0; right: 0; padding: 25px 15px; z-index: 1000; }
+        .sidebar h4 { font-weight: 800; margin-bottom: 50px; letter-spacing: 1px; color: #fff; text-align: center; }
+        .sidebar h4 span { color: #3b82f6; }
+        .nav-link { color: #9ca3af; padding: 12px 15px; border-radius: 10px; transition: 0.3s; margin-bottom: 8px; display: flex; align-items: center; font-weight: 500; }
+        .nav-link:hover, .nav-link.active { background: #1f2937; color: white; transform: translateX(-5px); }
+        .nav-link i { width: 30px; font-size: 1.1rem; margin-left: 10px; }
 
-        .message {
-            max-width: 75%;
-            margin-bottom: 15px;
-            padding: 12px 18px;
-            border-radius: 15px;
-            position: relative;
-            word-wrap: break-word;
-        }
+        /* Main Content */
+        .main-content { margin-right: 260px; padding: 40px; }
 
-        .message.admin {
-            background: #d1e7dd;
-            margin-right: auto;
-            border-bottom-left-radius: 2px;
-            color: #0f5132;
-        }
+        /* Chat Specific Styles */
+        .chat-container { background: white; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); overflow: hidden; height: calc(100vh - 100px); display: flex; flex-direction: column; }
+        
+        .chat-header { padding: 20px; border-bottom: 1px solid #e5e7eb; background: #fff; display: flex; justify-content: space-between; align-items: center; }
+        
+        .chat-messages { flex: 1; overflow-y: auto; padding: 20px; background: #f9fafb; }
+        
+        .message { max-width: 75%; margin-bottom: 20px; padding: 15px; border-radius: 15px; position: relative; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .message.admin { background: #eff6ff; color: #1e40af; margin-right: auto; border-bottom-left-radius: 2px; }
+        .message.developer { background: #fff; border: 1px solid #e5e7eb; margin-left: auto; border-bottom-right-radius: 2px; }
+        
+        .chat-input { padding: 20px; background: white; border-top: 1px solid #e5e7eb; }
+        
+        .status-badge { font-size: 0.8rem; padding: 5px 12px; border-radius: 20px; }
+        .msg-img { max-width: 200px; border-radius: 8px; margin-top: 10px; border: 1px solid rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.2s; }
+        .msg-img:hover { transform: scale(1.05); }
 
-        .message.developer {
-            background: #fff;
-            margin-left: auto;
-            border-bottom-right-radius: 2px;
-            border: 1px solid #edeeef;
-        }
-
-        .msg-img {
-            max-width: 100%;
-            max-height: 200px;
-            border-radius: 8px;
-            margin-top: 5px;
-            cursor: pointer;
-            border: 1px solid rgba(0, 0, 0, 0.1);
-        }
-
-        .status-badge {
-            font-size: 0.9em;
-            padding: 5px 10px;
-        }
-
-        .company-info-box {
-            background: #e7f1ff;
-            border: 1px solid #b6d4fe;
-            border-radius: 8px;
-            padding: 10px;
-            margin-bottom: 15px;
-            font-size: 0.9rem;
-        }
+        /* Info Sidebar */
+        .info-panel { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); height: fit-content; }
     </style>
 </head>
+<body>
 
-<body class="bg-light">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h4>Meta<span>Connect</span></h4>
+        <nav class="nav flex-column">
+            <a class="nav-link" href="/admin-dashboard"><i class="fas fa-chart-pie"></i> نظرة عامة</a>
+            <a class="nav-link" href="#"><i class="fas fa-building"></i> ملفات الشركات</a>
+            <a class="nav-link" href="#"><i class="fas fa-users-cog"></i> المطورين</a>
+            <a class="nav-link active" href="/admin/support"><i class="fas fa-headset"></i> الدعم الفني</a>
+            
+            <div style="margin-top: auto; padding-top: 30px;">
+                <a class="nav-link text-danger" href="/logout"><i class="fas fa-power-off"></i> تسجيل خروج</a>
+            </div>
+        </nav>
+    </div>
 
-    <div class="container mt-4 mb-5">
-        <div class="row justify-content-center">
-            <!-- منطقة الشات -->
-            <div class="col-lg-8">
-
-                <!-- صندوق معلومات التذكرة والشركة -->
-                <div class="card shadow-sm mb-3 border-0">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <h4 class="mb-2">
-                                    <%= ticket.subject %> <span class="text-muted fs-6">#<%= ticket.id %></span>
-                                </h4>
-                                <span
-                                    class="badge bg-<%= ticket.status == 'open' ? 'success' : (ticket.status == 'closed' ? 'secondary' : 'warning') %> status-badge mb-2">
-                                    <%= ticket.status=='open' ? 'مفتوحة' : (ticket.status=='closed' ? 'مغلقة' : 'معلقة'
-                                        ) %>
-                                </span>
-                            </div>
-                            <div>
-                                <% if(userType==='admin' ) { %>
-                                    <a href="/admin/support" class="btn btn-outline-secondary btn-sm">عودة</a>
-                                    <% } else { %>
-                                        <a href="/dev/support" class="btn btn-outline-secondary btn-sm">عودة</a>
-                                        <% } %>
-                            </div>
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="row h-100">
+            
+            <!-- Chat Area -->
+            <div class="col-lg-8 h-100">
+                <div class="chat-container">
+                    <!-- Header -->
+                    <div class="chat-header">
+                        <div>
+                            <h5 class="mb-1 fw-bold">
+                                <span class="text-muted">#<%= ticket.id %></span> <%= ticket.subject %>
+                            </h5>
+                            <% 
+                                let statusClass = 'secondary';
+                                let statusText = 'مغلقة';
+                                if(ticket.status == 'open') { statusClass = 'success'; statusText = 'مفتوحة'; }
+                                if(ticket.status == 'suspended') { statusClass = 'warning text-dark'; statusText = 'معلقة مؤقتاً'; }
+                            %>
+                            <span class="badge bg-<%= statusClass %> status-badge">
+                                <%= statusText %>
+                            </span>
                         </div>
-
-                        <!-- تفاصيل الشركة (مهم للإدمن) -->
-                        <% if(ticket.company_name) { %>
-                            <div class="company-info-box mt-2">
-                                <div class="row">
-                                    <div class="col-md-4"><strong>🏢 الشركة:</strong>
-                                        <%= ticket.company_name %>
-                                    </div>
-                                    <div class="col-md-4"><strong>🔢 ضريبي:</strong>
-                                        <%= ticket.tax_id %>
-                                    </div>
-                                    <div class="col-md-4"><strong>🌍 الدولة:</strong>
-                                        <%= ticket.country_code=='EG' ? 'مصر 🇪🇬' : 'السعودية 🇸🇦' %>
-                                    </div>
-                                </div>
-                            </div>
-                            <% } %>
-
-                                <!-- أزرار التحكم (للإدمن فقط) -->
-                                <% if(userType==='admin' ) { %>
-                                    <div class="border-top pt-2 mt-2">
-                                        <small class="text-muted fw-bold me-2">إجراءات الإدمن:</small>
-                                        <% if(ticket.status !=='closed' ) { %>
-                                            <form action="/admin/ticket/status" method="POST" class="d-inline">
-                                                <input type="hidden" name="ticket_id" value="<%= ticket.id %>">
-                                                <input type="hidden" name="status" value="suspended">
-                                                <button class="btn btn-sm btn-warning me-1">⏸ تعليق</button>
-                                            </form>
-                                            <form action="/admin/ticket/status" method="POST" class="d-inline">
-                                                <input type="hidden" name="ticket_id" value="<%= ticket.id %>">
-                                                <input type="hidden" name="status" value="closed">
-                                                <button class="btn btn-sm btn-dark">🔒 إغلاق نهائي</button>
-                                            </form>
-                                            <% } else { %>
-                                                <form action="/admin/ticket/status" method="POST" class="d-inline">
-                                                    <input type="hidden" name="ticket_id" value="<%= ticket.id %>">
-                                                    <input type="hidden" name="status" value="open">
-                                                    <button class="btn btn-sm btn-success">🔓 إعادة فتح</button>
-                                                </form>
-                                                <% } %>
-                                    </div>
-                                    <% } %>
+                        <div>
+                            <a href="<%= userType === 'admin' ? '/admin/support' : '/dev/support' %>" class="btn btn-outline-secondary btn-sm px-3 rounded-pill">
+                                <i class="fas fa-arrow-right me-1"></i> عودة
+                            </a>
+                        </div>
                     </div>
-                </div>
 
-                <!-- صندوق المحادثة -->
-                <div class="card shadow-sm border-0">
-                    <div class="card-body chat-box" id="chatBox">
+                    <!-- Messages -->
+                    <div class="chat-messages" id="chatBox">
                         <% messages.forEach(function(msg) { %>
-                            <div class="message <%= msg.sender_type %> shadow-sm">
-                                <div class="d-flex justify-content-between mb-1">
-                                    <strong>
-                                        <%= msg.sender_type=='admin' ? '👨‍💼 الدعم الفني' : '👤 العميل' %>
-                                    </strong>
-                                    <small class="text-muted" style="font-size: 0.7em">
-                                        <%= msg.created_at.toLocaleString() %>
-                                    </small>
+                            <div class="message <%= msg.sender_type %>">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="fw-bold small">
+                                        <% if(msg.sender_type == 'admin') { %>
+                                            <i class="fas fa-headset me-1"></i> الدعم الفني
+                                        <% } else { %>
+                                            <i class="fas fa-user me-1"></i> العميل
+                                        <% } %>
+                                    </span>
+                                    <span class="text-muted" style="font-size: 0.7rem">
+                                        <%= new Date(msg.created_at).toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'}) %>
+                                    </span>
                                 </div>
-
+                                
+                                <div style="white-space: pre-wrap; line-height: 1.6;"><%= msg.message %></div>
+                                
                                 <% if(msg.attachment) { %>
-                                    <div class="mb-2">
-                                        <a href="/uploads/<%= msg.attachment %>" target="_blank">
-                                            <img src="/uploads/<%= msg.attachment %>" class="msg-img"
-                                                title="اضغط للتكبير">
-                                        </a>
-                                    </div>
-                                    <% } %>
-
-                                        <div style="white-space: pre-wrap;">
-                                            <%= msg.message %>
-                                        </div>
+                                    <a href="/uploads/<%= msg.attachment %>" target="_blank">
+                                        <img src="/uploads/<%= msg.attachment %>" class="msg-img" alt="مرفق">
+                                    </a>
+                                <% } %>
                             </div>
-                            <% }); %>
+                        <% }); %>
                     </div>
 
-                    <!-- منطقة الكتابة (تختفي لو مغلق) -->
-                    <div class="card-footer bg-white p-3">
-                        <% if(ticket.status !=='closed' || userType==='admin' ) { %>
-                            <form action="/support/reply" method="POST" enctype="multipart/form-data"
-                                class="d-flex align-items-center">
+                    <!-- Input Area -->
+                    <div class="chat-input">
+                        <% if(ticket.status !== 'closed' && ticket.status !== 'suspended' || userType === 'admin') { %>
+                            <form action="/support/reply" method="POST" enctype="multipart/form-data" class="d-flex gap-2">
                                 <input type="hidden" name="ticket_id" value="<%= ticket.id %>">
-
-                                <!-- زر رفع الصورة -->
-                                <label class="btn btn-light border me-2" style="cursor: pointer;" title="إرفاق صورة">
-                                    📷 <input type="file" name="image" style="display: none;" accept="image/*">
+                                
+                                <label class="btn btn-light border" title="إرفاق صورة" style="padding: 10px 15px;">
+                                    <i class="fas fa-paperclip text-muted"></i>
+                                    <input type="file" name="image" style="display: none;" accept="image/*">
                                 </label>
-
-                                <input type="text" name="message" class="form-control me-2"
-                                    placeholder="اكتب ردك هنا..." autocomplete="off">
-                                <button type="submit" class="btn btn-primary px-4">إرسال 🚀</button>
+                                
+                                <input type="text" name="message" class="form-control border-0 bg-light" placeholder="اكتب ردك هنا..." style="padding: 10px 15px;" autocomplete="off">
+                                
+                                <button type="submit" class="btn btn-primary px-4 rounded-3">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
                             </form>
-                            <% } else { %>
-                                <div class="alert alert-secondary mb-0 text-center">
-                                    🔒 هذه التذكرة مغلقة. لا يمكن إرسال ردود جديدة.
-                                </div>
-                                <% } %>
+                        <% } else { %>
+                            <div class="alert alert-secondary mb-0 text-center py-2 small">
+                                <i class="fas fa-lock me-1"></i> هذه التذكرة مغلقة أو معلقة.
+                            </div>
+                        <% } %>
                     </div>
                 </div>
             </div>
 
-            <!-- (للإدمن فقط) لوحة الشحن الجانبية -->
-            <% if(userType==='admin' && developer) { %>
-                <div class="col-lg-4 mt-4 mt-lg-0">
-                    <div class="card border-success shadow-sm sticky-top" style="top: 20px;">
-                        <div class="card-header bg-success text-white fw-bold">💰 شحن رصيد سريع</div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <label class="text-muted small">اسم العميل</label>
-                                <div class="fw-bold">
-                                    <%= developer.name %>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label class="text-muted small">الرصيد الحالي</label>
-                                <div class="fw-bold text-success fs-4">
-                                    <%= developer.wallet_balance %> <small>ج.م</small>
-                                </div>
-                            </div>
-                            <hr>
-                            <form action="/admin/add-balance" method="POST">
-                                <input type="hidden" name="developer_id" value="<%= developer.id %>">
-                                <label class="form-label small fw-bold">مبلغ الشحن</label>
-                                <div class="input-group">
-                                    <input type="number" name="amount" class="form-control" placeholder="0.00" required>
-                                    <button class="btn btn-success" type="submit">تأكيد الشحن</button>
-                                </div>
-                            </form>
+            <!-- Side Panel (Info & Actions) -->
+            <div class="col-lg-4">
+                
+                <!-- Actions Panel -->
+                <% if(userType === 'admin') { %>
+                    <div class="info-panel mb-3">
+                        <h6 class="fw-bold text-muted mb-3 small"><i class="fas fa-cog me-1"></i> التحكم في التذكرة</h6>
+                        <div class="d-grid gap-2">
+                            
+                            <% if(ticket.status === 'closed') { %>
+                                <!-- زر إعادة الفتح -->
+                                <form action="/admin/ticket/status" method="POST">
+                                    <input type="hidden" name="ticket_id" value="<%= ticket.id %>">
+                                    <input type="hidden" name="status" value="open">
+                                    <button class="btn btn-success w-100"><i class="fas fa-unlock me-2"></i> إعادة فتح</button>
+                                </form>
+
+                            <% } else if(ticket.status === 'suspended') { %>
+                                <!-- زر فك التعليق + إغلاق -->
+                                <form action="/admin/ticket/status" method="POST">
+                                    <input type="hidden" name="ticket_id" value="<%= ticket.id %>">
+                                    <input type="hidden" name="status" value="open">
+                                    <button class="btn btn-outline-success w-100 fw-bold"><i class="fas fa-play me-2"></i> فك التعليق (تنشيط)</button>
+                                </form>
+                                <form action="/admin/ticket/status" method="POST">
+                                    <input type="hidden" name="ticket_id" value="<%= ticket.id %>">
+                                    <input type="hidden" name="status" value="closed">
+                                    <button class="btn btn-dark w-100"><i class="fas fa-check-circle me-2"></i> إغلاق نهائي</button>
+                                </form>
+
+                            <% } else { %>
+                                <!-- زر تعليق + إغلاق -->
+                                <form action="/admin/ticket/status" method="POST">
+                                    <input type="hidden" name="ticket_id" value="<%= ticket.id %>">
+                                    <input type="hidden" name="status" value="suspended">
+                                    <button class="btn btn-warning w-100"><i class="fas fa-pause me-2"></i> تعليق التذكرة</button>
+                                </form>
+                                <form action="/admin/ticket/status" method="POST">
+                                    <input type="hidden" name="ticket_id" value="<%= ticket.id %>">
+                                    <input type="hidden" name="status" value="closed">
+                                    <button class="btn btn-dark w-100"><i class="fas fa-check-circle me-2"></i> إغلاق التذكرة</button>
+                                </form>
+                            <% } %>
+
                         </div>
                     </div>
-                </div>
                 <% } %>
+
+                <!-- Ticket Info -->
+                <div class="info-panel mb-3">
+                    <h6 class="fw-bold text-muted mb-3 small">بيانات العميل</h6>
+                    <% if(ticket.company_name) { %>
+                        <div class="d-flex align-items-center mb-3 p-2 bg-light rounded">
+                            <div class="bg-white p-2 rounded shadow-sm text-primary fs-5 ms-2">
+                                <i class="fas fa-building"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold"><%= ticket.company_name %></div>
+                                <small class="text-muted font-monospace">Tax: <%= ticket.tax_id %></small>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+
+                <!-- Quick Balance (Admin Only) -->
+                <% if(userType === 'admin' && developer) { %>
+                    <div class="info-panel bg-success text-white" style="background: linear-gradient(45deg, #10b981, #059669);">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="mb-0"><i class="fas fa-wallet me-2"></i> شحن سريع</h6>
+                            <span class="badge bg-white text-success"><%= developer.wallet_balance %> ج.م</span>
+                        </div>
+                        <form action="/admin/add-balance" method="POST">
+                            <input type="hidden" name="developer_id" value="<%= developer.id %>">
+                            <div class="input-group">
+                                <input type="number" name="amount" class="form-control border-0" placeholder="المبلغ..." required style="opacity: 0.9;">
+                                <button class="btn btn-dark" type="submit">شحن</button>
+                            </div>
+                        </form>
+                    </div>
+                <% } %>
+            </div>
+
         </div>
     </div>
 
     <script>
-        var chatBox = document.getElementById("chatBox");
+        const chatBox = document.getElementById("chatBox");
         chatBox.scrollTop = chatBox.scrollHeight;
 
         function refreshChat() {
@@ -234,62 +237,33 @@
             fetch(`/api/support/messages/${ticketId}`)
                 .then(response => response.json())
                 .then(messages => {
-                    const chatBox = document.getElementById('chatBox');
-                    const currentScroll = chatBox.scrollTop;
                     const isAtBottom = chatBox.scrollHeight - chatBox.scrollTop <= chatBox.clientHeight + 150;
-
-                    chatBox.innerHTML = '';
-
-                    messages.forEach(msg => {
-                        let attachmentHtml = '';
-                        if (msg.attachment) {
-                            attachmentHtml = `<div class="mb-2"><a href="/uploads/${msg.attachment}" target="_blank"><img src="/uploads/${msg.attachment}" class="msg-img"></a></div>`;
-                        }
-
-                        const div = document.createElement('div');
-                        div.className = `message ${msg.sender_type} shadow-sm`;
-                        div.innerHTML = `
-                            <div class="d-flex justify-content-between mb-1">
-                                <strong>${msg.sender_type == 'admin' ? '👨‍💼 الدعم الفني' : '👤 العميل'}</strong>
-                                <small class="text-muted" style="font-size: 0.7em">${new Date(msg.created_at).toLocaleString()}</small>
-                            </div>
-                            ${attachmentHtml}
-                            <div style="white-space: pre-wrap;">${msg.message}</div>
-                        `;
-                        chatBox.appendChild(div);
-                    });
-
-                    if (isAtBottom) chatBox.scrollTop = chatBox.scrollHeight;
-                    else chatBox.scrollTop = currentScroll;
+                    
+                    // تحديث بسيط (يمكن تحسينه ليضيف الجديد فقط)
+                    if(chatBox.children.length !== messages.length) {
+                        chatBox.innerHTML = '';
+                        messages.forEach(msg => {
+                            let attachHtml = msg.attachment ? `<a href="/uploads/${msg.attachment}" target="_blank"><img src="/uploads/${msg.attachment}" class="msg-img"></a>` : '';
+                            const senderClass = msg.sender_type;
+                            const senderName = msg.sender_type == 'admin' ? '👨‍💼 الدعم الفني' : '👤 العميل';
+                            
+                            chatBox.innerHTML += `
+                                <div class="message ${senderClass}">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="fw-bold small">${senderName}</span>
+                                        <span class="text-muted" style="font-size: 0.7rem">${new Date(msg.created_at).toLocaleTimeString('ar-EG')}</span>
+                                    </div>
+                                    <div style="white-space: pre-wrap; line-height: 1.6;">${msg.message}</div>
+                                    ${attachHtml}
+                                </div>
+                            `;
+                        });
+                        if(isAtBottom) chatBox.scrollTop = chatBox.scrollHeight;
+                    }
                 });
         }
-
-        // التحديث كل 3 ثواني
         setInterval(refreshChat, 3000);
-    </script>
-    <script>
-        // رقم التذكرة وحالتها الحالية (عند تحميل الصفحة)
-        const currentTicketId = '<%= ticket.id %>';
-        let currentStatus = '<%= ticket.status %>';
-
-        function checkTicketStatus() {
-            // نطلب من السيرفر معرفة الحالة الحالية للتذكرة
-            fetch(`/api/ticket/status/${currentTicketId}`)
-                .then(response => response.json())
-                .then(data => {
-                    // إذا تغيرت الحالة عن ما هو معروض حالياً
-                    if (data.status !== currentStatus) {
-                        // نعرض تنبيه بسيط (اختياري) أو نحدث الصفحة فوراً
-                        location.reload();
-                    }
-                })
-                .catch(err => console.error(err));
-        }
-
-        // فحص الحالة كل 5 ثواني
-        setInterval(checkTicketStatus, 5000);
     </script>
 
 </body>
-
 </html>
