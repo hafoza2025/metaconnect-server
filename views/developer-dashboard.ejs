@@ -180,7 +180,8 @@
                                 <td class="text-end pe-4">
                                     <button class="action-btn connect-btn" onclick='openCredsModal(<%= JSON.stringify(comp) %>)' title="إعدادات الربط"><i class="bi bi-sliders"></i></button>
                                     <button class="action-btn" onclick="openAllocateModal('<%= comp.id %>', '<%= comp.name %>', '<%= currency %>')" title="شحن رصيد"><i class="bi bi-cash-stack"></i></button>
-                                    <button class="action-btn" onclick="openAuthModal('<%= comp.id %>', '<%= comp.name %>', 'store_<%= comp.id.substring(0,8) %>')" title="بيانات الدخول"><i class="bi bi-key"></i></button>
+                                    <!-- الإصلاح هنا: استخدام String() -->
+                                    <button class="action-btn" onclick="openAuthModal('<%= comp.id %>', '<%= comp.name %>', 'store_<%= String(comp.id).substring(0,8) %>')" title="بيانات الدخول"><i class="bi bi-key"></i></button>
                                 </td>
                             </tr>
                         <% }); %>
