@@ -835,10 +835,39 @@ app.post('/dev/update-store-auth', requireDev, express.json(), async (req, res) 
     }
 });
 
+// Route لصفحة التوثيق
+app.get('/dev/docs', async (req, res) => {
+    if (!req.session.developerId) return res.redirect('/dev/login');
+    
+    const companyId = req.query.company_id;
+    
+    // إذا لم يتم إرسال ID، نعرض خطأ أو نوجه للوحة التحكم
+    if (!companyId) {
+        return res.status(400).send("خطأ: يجب تحديد الشركة لعرض أكواد الربط الخاصة بها.");
+    }
+
+    try {
+        // البحث عن الشركة في قاعدة البيانات
+        // تأكد أن اسم الجدول هو 'companies' أو الاسم الذي تستخدمه
+        const [companies] = await pool.query('SELECT * FROM companies WHERE id = ?', [companyId]);
+        
+        if (companies.length === 0) {
+            return res.status(404).send("خطأ: الشركة غير موجودة أو تم حذفها.");
+        }
+
+        // عرض ملف docs.ejs مع تمرير بيانات الشركة
+        res.render('docs', { company: companies[0] });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("حدث خطأ في السيرفر");
+    }
+});
 
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
+
 
 
 
