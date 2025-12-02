@@ -69,14 +69,24 @@ function requireDev(req, res, next) {
 
 // دالة للتحقق من صحة الرقم الضريبي حسب الدولة
 function validateTaxId(taxId, countryCode) {
-    const cleanTaxId = taxId.replace(/[^0-9]/g, '');
+    // 1. حماية ضد البيانات الفارغة (لتجنب توقف السيرفر)
+    if (!taxId || !countryCode) return false;
+
+    // 2. تنظيف الرقم (تحويله لنص أولاً ثم حذف أي شيء غير الأرقام)
+    const cleanTaxId = String(taxId).replace(/[^0-9]/g, '');
+
     if (countryCode === 'EG') {
-        return cleanTaxId.length === 9;
-    } else if (countryCode === 'SA') {
-        return cleanTaxId.length === 15 && cleanTaxId.startsWith('3') && cleanTaxId.endsWith('3');
+        // مصر: يجب أن يكون 9 أرقام بالضبط
+        return /^\d{9}$/.test(cleanTaxId);
+    } 
+    else if (countryCode === 'SA') {
+        // السعودية: 15 رقم، يبدأ بـ 3 وينتهي بـ 3
+        return /^3\d{13}3$/.test(cleanTaxId);
     }
+
     return false;
 }
+
 
 
 // --- ROUTES الرئيسية ---
@@ -311,28 +321,62 @@ app.post('/api/v1/connect/:storeId', async (req, res) => {
 });
 
 app.post('/dev/add-company', requireDev, async (req, res) => {
-    const { name, tax_id, country_code } = req.body;
+    const { 
+        name, country_code,
+        tax_id_eg, address_eg,
+        tax_id_sa, cr_number, building_no, street_name, city
+    } = req.body;
+    
     const devId = req.session.user.id;
 
-    if (!validateTaxId(tax_id, country_code)) {
-        return res.send(`خطأ: الرقم الضريبي غير صحيح.`);
+    // 1. تحديد الرقم الضريبي بناءً على الدولة
+    let tax_id, address, commercial_register;
+    
+    if (country_code === 'SA') {
+        tax_id = tax_id_sa;
+        address = `${building_no || ''}, ${street_name || ''}, ${city || ''}`.trim();
+        commercial_register = cr_number;
+    } else {
+        tax_id = tax_id_eg;
+        address = address_eg;
+        commercial_register = null;
     }
 
+    // 2. التحقق من صحة الرقم الضريبي
+    if (!validateTaxId(tax_id, country_code)) {
+        return res.send(`<script>alert("خطأ: الرقم الضريبي غير صحيح."); window.history.back();</script>`);
+    }
+
+    // 3. إنشاء مفتاح API
     const api_secret = 'sec_' + Math.random().toString(36).substr(2, 9);
 
     try {
         const cleanTaxId = tax_id.replace(/[^0-9]/g, '');
+        
+        // 4. إدخال الشركة مع الحقول الجديدة
         const [result] = await db.execute(
-            'INSERT INTO companies (name, tax_id, country_code, api_secret, developer_id, free_invoices_left) VALUES (?, ?, ?, ?, ?, 20)',
-            [name, cleanTaxId, country_code, api_secret, devId]
+            `INSERT INTO companies 
+            (name, tax_id, country_code, api_secret, developer_id, free_invoices_left, 
+             address, commercial_register, building_no, street_name, city) 
+            VALUES (?, ?, ?, ?, ?, 20, ?, ?, ?, ?, ?)`,
+            [name, cleanTaxId, country_code, api_secret, devId, 
+             address, commercial_register, building_no, street_name, city]
         );
-        await db.execute('INSERT INTO end_users (company_id, username, password) VALUES (?, ?, ?)',
-            [result.insertId, `store_${result.insertId}`, '123456']);
+
+        // 5. إنشاء مستخدم افتراضي
+        await db.execute(
+            'INSERT INTO end_users (company_id, username, password) VALUES (?, ?, ?)',
+            [result.insertId, `store_${result.insertId}`, '123456']
+        );
+
         res.redirect('/dev-dashboard');
+        
     } catch (err) {
-        res.send(`خطأ: الرقم الضريبي مسجل مسبقاً`);
+        console.error("Add Company Error:", err);
+        res.send(`<script>alert("خطأ: ${err.code === 'ER_DUP_ENTRY' ? 'الرقم الضريبي مسجل مسبقاً' : 'حدث خطأ أثناء التسجيل'}"); window.history.back();</script>`);
     }
 });
+
 
 app.post('/dev/company/update-creds', requireDev, async (req, res) => {
     const { company_id, country_code, client_id, client_secret, otp } = req.body;
@@ -795,6 +839,7 @@ app.post('/dev/update-store-auth', requireDev, express.json(), async (req, res) 
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
+
 
 
 
