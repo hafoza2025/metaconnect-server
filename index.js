@@ -717,38 +717,49 @@ app.post('/dev/allocate-balance', requireDev, async (req, res) => {
 });
 
 // --- مسار جديد: تحديث بيانات دخول المتجر من قبل المطور ---
-app.post('/dev/update-store-auth', requireDev, async (req, res) => {
+app.post('/dev/update-store-auth', requireDev, express.json(), async (req, res) => {
+    // استقبال البيانات سواء كانت Form عادية أو JSON
     const { company_id, new_username, new_password } = req.body;
     const devId = req.session.user.id;
 
     try {
-        // 1. التأكد أن هذا المتجر يتبع المطور الحالي
-        const [companyCheck] = await db.execute('SELECT id FROM companies WHERE id = ? AND developer_id = ?', [company_id, devId]);
+        // 1. التحقق من أن المتجر يتبع المطور الحالي
+        const [companyCheck] = await db.execute(
+            'SELECT id FROM companies WHERE id = ? AND developer_id = ?', 
+            [company_id, devId]
+        );
         
         if (companyCheck.length === 0) {
-            return res.send('<script>alert("غير مصرح لك بتعديل هذا المتجر!"); window.history.back();</script>');
+            return res.status(403).json({ success: false, message: "غير مصرح لك بتعديل هذا المتجر!" });
         }
 
-        // 2. تحديث البيانات في جدول end_users
-        // ملاحظة: يجب التأكد أن اسم المستخدم غير مكرر لغير هذا المتجر
+        // 2. محاولة التحديث
         try {
             await db.execute(
                 'UPDATE end_users SET username = ?, password = ? WHERE company_id = ?',
                 [new_username, new_password, company_id]
             );
-            res.redirect('/dev-dashboard?msg=auth_updated');
+            
+            // نجاح العملية
+            return res.json({ success: true, message: "تم تحديث البيانات بنجاح" });
+
         } catch (e) {
-            // غالباً الخطأ بسبب تكرار اسم المستخدم
-            res.send('<script>alert("خطأ: اسم المستخدم مستخدم بالفعل، اختر اسماً آخر."); window.history.back();</script>');
+            // خطأ قاعدة البيانات (غالباً تكرار اسم المستخدم)
+            if (e.code === 'ER_DUP_ENTRY') {
+                return res.status(400).json({ success: false, message: "اسم المستخدم هذا موجود بالفعل، يرجى اختيار اسم آخر." });
+            }
+            throw e; // رمي الخطأ ليتم التقاطه في الـ catch الخارجي
         }
 
     } catch (e) {
-        console.error(e);
-        res.status(500).send("System Error");
+        console.error("Update Auth Error:", e);
+        return res.status(500).json({ success: false, message: "حدث خطأ في النظام، حاول مرة أخرى." });
     }
 });
 
 
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
+
 
