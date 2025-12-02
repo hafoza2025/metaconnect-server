@@ -1,138 +1,129 @@
 const axios = require('axios');
 const qs = require('qs');
 
-// إعدادات بيئة الاختبار (Pre-Production) لمصلحة الضرائب المصرية
-const ETA_AUTH_URL = 'https://id.preprod.eta.gov.eg/connect/token';
-const ETA_API_URL = 'https://api.preprod.invoicing.eta.gov.eg/api/v1/documentsubmissions';
+// روابط البيئة التجريبية (Preprod)
+const ETA_ID_URL = 'https://id.preprod.eta.gov.eg';
+const ETA_API_URL = 'https://api.preprod.invoicing.eta.gov.eg';
 
 module.exports = {
-    // دالة مساعدة: تسجيل الدخول وجلب التوكن
-    async loginToETA(clientId, clientSecret) {
+    // 1. تسجيل الدخول والحصول على التوكن
+    async login(clientId, clientSecret) {
         try {
-            const data = qs.stringify({
-                'grant_type': 'client_credentials',
-                'client_id': clientId,
-                'client_secret': clientSecret,
-                'scope': 'InvoicingAPI'
-            });
-
-            const response = await axios.post(ETA_AUTH_URL, data, {
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-            });
-
-            return response.data.access_token;
-        } catch (error) {
-            console.error("❌ ETA Login Failed:", error.response ? error.response.data : error.message);
-            throw new Error("فشل تسجيل الدخول لمصلحة الضرائب - تأكد من صحة البيانات");
+            const res = await axios.post(`${ETA_ID_URL}/connect/token`, qs.stringify({
+                grant_type: 'client_credentials',
+                client_id: clientId,
+                client_secret: clientSecret,
+                scope: 'InvoicingAPI'
+            }), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+            return res.data.access_token;
+        } catch (e) {
+            throw new Error(`Login Failed: ${e.response?.data?.error || e.message}`);
         }
     },
 
-    // الدالة الرئيسية للمعالجة
+    // 2. تجهيز الفاتورة وتوقيعها وإرسالها
     async process(invoiceData, companyInfo) {
-        console.log(`[EGYPT-REAL] Preparing invoice for ${companyInfo.name}...`);
+        console.log(`[EG] Starting Full Process for ${companyInfo.name}...`);
 
-        // 1. استخراج بيانات الاعتماد (الجديد هنا)
+        // استخراج المفاتيح
         let creds = {};
-        try {
-            if (companyInfo.api_credentials) {
-                creds = JSON.parse(companyInfo.api_credentials);
-            }
-        } catch (e) {
-            console.error("Error parsing credentials", e);
-        }
-
-        // 2. بناء هيكل الفاتورة الحقيقي (ETA JSON Structure v1.0)
-        const invoiceDocument = {
-            "issuer": {
-                "address": {
-                    "branchID": "0",
-                    "country": "EG",
-                    "governate": "Cairo",
-                    "regionCity": "Nasr City",
-                    "street": "Street Name",
-                    "buildingNumber": "1"
-                },
-                "type": "B",
-                "id": companyInfo.tax_id,
-                "name": companyInfo.name
-            },
-            "receiver": {
-                "address": {
-                    "country": "EG",
-                    "governate": "Cairo",
-                    "regionCity": "Maadi",
-                    "street": "Road 9",
-                    "buildingNumber": "5"
-                },
-                "type": "P",
-                "id": "",
-                "name": "General Consumer"
-            },
-            "documentType": "I",
-            "documentTypeVersion": "1.0",
-            "dateTimeIssued": new Date().toISOString(),
-            "taxpayerActivityCode": "4620",
-            "internalID": invoiceData.internal_id,
-            "invoiceLines": invoiceData.items.map(item => ({
-                "description": item.name || "Item",
-                "itemType": "GS1",
-                "itemCode": "1000",
-                "unitType": "EA",
-                "quantity": 1,
-                "internalCode": "ITM-001",
-                "salesTotal": item.price || 0,
-                "total": item.price || 0,
-                "valueDifference": 0,
-                "totalTaxableFees": 0,
-                "netTotal": item.price || 0,
-                "itemsDiscount": 0,
-                "unitValue": {
-                    "currencySold": "EGP",
-                    "amountEGP": item.price || 0
-                },
-                "discount": { "rate": 0, "amount": 0 },
-                "taxableItems": [
-                    { "taxType": "T1", "amount": (item.price * 0.14), "subType": "V009", "rate": 14 }
-                ]
-            })),
-            "totalDiscountAmount": 0,
-            "totalSalesAmount": invoiceData.total,
-            "netAmount": invoiceData.total,
-            "taxTotals": [
-                { "taxType": "T1", "amount": (invoiceData.total * 0.14) }
-            ],
-            "totalAmount": (invoiceData.total * 1.14),
-            "extraDiscountAmount": 0,
-            "totalItemsDiscountAmount": 0,
-            "signatures": []
-        };
+        try { creds = JSON.parse(companyInfo.api_credentials || '{}'); } catch (e) {}
+        if (!creds.id || !creds.secret) return { success: false, error: "Missing Credentials" };
 
         try {
-            // 3. محاولة الاتصال الحقيقي (إذا توفرت البيانات)
-            if (creds.type === 'ETA_OAUTH' && creds.id && creds.secret) {
-                console.log(`[EGYPT-REAL] Found Credentials. Attempting Login...`);
+            // الخطوة 1: تسجيل الدخول
+            const token = await this.login(creds.id, creds.secret);
+            console.log("✅ Logged in to ETA");
 
-                // محاولة تسجيل الدخول فعلياً (للتحقق من صحة البيانات)
-                // const token = await this.loginToETA(creds.id, creds.secret);
-                // console.log("✅ ETA Login Successful! Token received.");
+            // الخطوة 2: بناء الفاتورة JSON
+            const document = this.buildInvoiceJson(invoiceData, companyInfo);
 
-                // هنا يمكن إرسال الفاتورة فعلياً إذا أردنا
-            } else {
-                console.log("[EGYPT-SIM] No credentials found. Running in Simulation Mode.");
-            }
+            // الخطوة 3: التوقيع الإلكتروني (الجزء الحاسم)
+            // ⚠️ هنا يجب أن يتم التوقيع باستخدام Token أو HSM
+            // بما أننا لا نملك جهاز توقيع متصل الآن، هذه الدالة ستضيف توقيعاً وهمياً للتجربة
+            const signedDocument = await this.signDocument(document); 
 
-            return {
-                success: true,
-                gov_uuid: "READY_TO_SUBMIT_" + Math.floor(Math.random() * 100000),
-                full_response: {
-                    message: "الفاتورة تم بناؤها بنجاح وهي جاهزة للتوقيع",
-                    document: invoiceDocument
+            // الخطوة 4: الإرسال للضرائب
+            const submission = await axios.post(`${ETA_API_URL}/api/v1/documentsubmissions`, {
+                documents: [signedDocument]
+            }, {
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
                 }
-            };
+            });
+
+            // الخطوة 5: الرد بالنتيجة
+            if (submission.data.submissionId) {
+                return {
+                    success: true,
+                    gov_uuid: submission.data.submissionId, // رقم الإرسال
+                    full_response: submission.data
+                };
+            } else {
+                // في حالة الرفض (Rejected)
+                return {
+                    success: false,
+                    error: "Rejected by ETA",
+                    full_response: submission.data
+                };
+            }
 
         } catch (error) {
-            // حتى لو فشل الاتصال، سنعيد الفشل للمطور ليعرف أن بياناته خطأ
-            return { success: false, error: error.message };
+            console.error("❌ Process Failed:", error.response?.data || error.message);
+            return { success: false, error: error.response?.data?.error?.message || error.message };
         }
+    },
+
+    // دالة بناء الفاتورة
+    buildInvoiceJson(data, info) {
+        return {
+            "issuer": {
+                "address": { "branchID": "0", "country": "EG", "governate": "Cairo", "regionCity": "Cairo", "street": "Street", "buildingNumber": "1" },
+                "type": "B", "id": info.tax_id, "name": info.name
+            },
+            "receiver": {
+                "address": { "country": "EG", "governate": "Cairo", "regionCity": "Cairo", "street": "Street", "buildingNumber": "1" },
+                "type": "P", "id": "", "name": "Consumer"
+            },
+            "documentType": "I", "documentTypeVersion": "1.0",
+            "dateTimeIssued": new Date().toISOString(),
+            "taxpayerActivityCode": "4610",
+            "internalID": data.internal_id || `INV-${Date.now()}`,
+            "invoiceLines": data.items.map(item => ({
+                "description": item.name,
+                "itemType": "EGS", 
+                "itemCode": `EG-${info.tax_id}-${item.code || '1000'}`, 
+                "unitType": "EA", "quantity": 1, "internalCode": "ITM",
+                "salesTotal": item.price, "total": item.price * 1.14, "valueDifference": 0, "totalTaxableFees": 0, "netTotal": item.price, "itemsDiscount": 0,
+                "unitValue": { "currencySold": "EGP", "amountEGP": item.price },
+                "discount": { "rate": 0, "amount": 0 },
+                "taxableItems": [{ "taxType": "T1", "amount": item.price * 0.14, "subType": "V009", "rate": 14 }]
+            })),
+            "totalDiscountAmount": 0, "totalSalesAmount": data.total, "netAmount": data.total,
+            "taxTotals": [{ "taxType": "T1", "amount": data.total * 0.14 }],
+            "totalAmount": data.total * 1.14, "extraDiscountAmount": 0, "totalItemsDiscountAmount": 0,
+            "signatures": [] // سيتم ملؤه في دالة التوقيع
+        };
+    },
+
+    // دالة التوقيع (Placeholder)
+    async signDocument(doc) {
+        console.log("⚠️ Attempting to sign document...");
+        
+        // لكي يعمل هذا الكود حقيقة، يجب أن يكون لديك سيرفر توقيع (Signer Service)
+        // مثال: const signature = await axios.post('http://localhost:9000/sign', doc);
+        
+        // حالياً، سنترك التوقيع فارغاً، وهذا سيجعل الضرائب ترد بـ "Invalid Signature"
+        // وهذا هو "الرد الحقيقي" المتوقع في غياب التوقيع.
+        return {
+            ...doc,
+            signatures: [
+                {
+                    "signatureType": "I",
+                    "value": "MOCK_SIGNATURE_VALUE_FOR_TESTING_ONLY" // توقيع وهمي
+                }
+            ]
+        };
     }
 };
