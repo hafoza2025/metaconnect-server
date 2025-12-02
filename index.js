@@ -836,37 +836,46 @@ app.post('/dev/update-store-auth', requireDev, express.json(), async (req, res) 
 });
 
 // Route لصفحة التوثيق
+// Route لصفحة التوثيق (الإصدار الصحيح)
 app.get('/dev/docs', async (req, res) => {
-    if (!req.session.developerId) return res.redirect('/dev/login');
-    
-    const companyId = req.query.company_id;
-    
-    // إذا لم يتم إرسال ID، نعرض خطأ أو نوجه للوحة التحكم
-    if (!companyId) {
-        return res.status(400).send("خطأ: يجب تحديد الشركة لعرض أكواد الربط الخاصة بها.");
+    // التأكد من أن المطور مسجل دخوله
+    if (!req.session.developerId) {
+        return res.redirect('/dev/login');
+    }
+
+    const { company_id } = req.query;
+
+    if (!company_id) {
+        return res.status(400).send("Bad Request: Company ID is missing.");
     }
 
     try {
-        // البحث عن الشركة في قاعدة البيانات
-        // تأكد أن اسم الجدول هو 'companies' أو الاسم الذي تستخدمه
-        const [companies] = await pool.query('SELECT * FROM companies WHERE id = ?', [companyId]);
-        
+        // البحث عن الشركة باستخدام الـ ID القادم من الرابط
+        const [companies] = await pool.query('SELECT * FROM companies WHERE id = ?', [company_id]);
+
         if (companies.length === 0) {
-            return res.status(404).send("خطأ: الشركة غير موجودة أو تم حذفها.");
+            return res.status(404).send("Error: Company not found.");
         }
 
-        // عرض ملف docs.ejs مع تمرير بيانات الشركة
-        res.render('docs', { company: companies[0] });
+        const companyData = companies[0];
+
+        // 🔥 هنا التصحيح: إرسال البيانات تحت اسم 'exampleConfig' كما يتوقع ملفك
+        res.render('docs', {
+            userType: 'developer', // مطلوب في ملفك
+            exampleConfig: companyData // إرسال بيانات الشركة هنا
+        });
 
     } catch (err) {
-        console.error(err);
-        res.status(500).send("حدث خطأ في السيرفر");
+        console.error("Server Error in /dev/docs:", err);
+        res.status(500).send("An error occurred on the server.");
     }
 });
 
 
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
+
 
 
 
