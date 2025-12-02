@@ -5,6 +5,15 @@ const bodyParser = require('body-parser');
 const multer = require('multer');
 const path = require('path');
 const mysql = require('mysql2');
+const express = require('express');
+const app = express();
+
+// ==========================================
+// أضف هذا السطر هنا (مهم جداً)
+app.use(express.json()); 
+// ==========================================
+
+app.use(express.urlencoded({ extended: true })); // هذا غالباً موجود عندك بالفعل للفورم العادية
 
 // إنشاء الاتصال بقاعدة البيانات السحابية (TiDB)
 const pool = mysql.createPool({
@@ -761,5 +770,6 @@ app.post('/dev/update-store-auth', requireDev, express.json(), async (req, res) 
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
+
 
 
