@@ -142,7 +142,7 @@
                                 try {
                                     let creds = JSON.parse(comp.api_credentials || '{}');
                                     if(comp.country_code === 'EG') isConnected = !!(creds.client_id);
-                                    else isConnected = !!(creds.binarySecurityToken); // في السعودية، إذا عندنا Token يعني الربط تم
+                                    else isConnected = !!(creds.binarySecurityToken);
                                 } catch(e) {}
                             %>
                             <tr>
@@ -180,7 +180,6 @@
                                 <td class="text-end pe-4">
                                     <button class="action-btn connect-btn" onclick='openCredsModal(<%= JSON.stringify(comp) %>)' title="إعدادات الربط"><i class="bi bi-sliders"></i></button>
                                     <button class="action-btn" onclick="openAllocateModal('<%= comp.id %>', '<%= comp.name %>', '<%= currency %>')" title="شحن رصيد"><i class="bi bi-cash-stack"></i></button>
-                                    <!-- الإصلاح هنا: استخدام String() -->
                                     <button class="action-btn" onclick="openAuthModal('<%= comp.id %>', '<%= comp.name %>', 'store_<%= String(comp.id).substring(0,8) %>')" title="بيانات الدخول"><i class="bi bi-key"></i></button>
                                 </td>
                             </tr>
@@ -235,15 +234,19 @@
                                 <input type="text" name="name" class="form-control" placeholder="مثال: شركة الأفق للتجارة" required>
                             </div>
 
-                            <!-- EGYPT Fields -->
+                            <!-- EGYPT Fields (Updated) -->
                             <div id="fields_eg" class="col-12 row g-3 m-0 p-0">
-                                <div class="col-md-6 ps-0">
+                                <div class="col-md-4 ps-0">
                                     <label class="form-label small fw-bold">رقم التسجيل الضريبي (9 أرقام) <span class="req-star">*</span></label>
                                     <input type="text" name="tax_id_eg" id="tax_id_eg" class="form-control font-monospace" placeholder="xxxxxxxxx" maxlength="9">
                                 </div>
-                                <div class="col-md-6 pe-0">
-                                    <label class="form-label small fw-bold">العنوان (المحافظة - المدينة - الشارع) <span class="req-star">*</span></label>
-                                    <input type="text" name="address_eg" class="form-control" placeholder="القاهرة، مدينة نصر، شارع الطيران">
+                                <div class="col-md-4 px-1">
+                                    <label class="form-label small fw-bold">رقم السجل التجاري (اختياري)</label>
+                                    <input type="text" name="cr_number_eg" class="form-control font-monospace" placeholder="xxxxxx">
+                                </div>
+                                <div class="col-md-4 pe-0">
+                                    <label class="form-label small fw-bold">العنوان <span class="req-star">*</span></label>
+                                    <input type="text" name="address_eg" class="form-control" placeholder="المحافظة - المدينة">
                                 </div>
                             </div>
 
@@ -284,7 +287,7 @@
         </div>
     </div>
 
-    <!-- 2. Connection Modal (Credentials) -->
+    <!-- 2. Connection Modal -->
     <div class="modal fade" id="credsModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -302,7 +305,6 @@
                         <input type="hidden" name="company_id" id="creds_company_id">
                         <input type="hidden" name="country_code" id="creds_country_code">
 
-                        <!-- Egypt Inputs -->
                         <div id="egypt_fields" style="display:none;">
                             <div class="d-flex align-items-center gap-3 mb-3 p-3 bg-light border rounded">
                                 <i class="bi bi-bank fs-2 text-primary"></i>
@@ -321,7 +323,6 @@
                             </div>
                         </div>
 
-                        <!-- Saudi Inputs -->
                         <div id="saudi_fields" style="display:none;">
                             <div class="d-flex align-items-center gap-3 mb-3 p-3 bg-light border rounded">
                                 <i class="bi bi-qr-code-scan fs-2 text-success"></i>
@@ -400,13 +401,13 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // 1. Logic for Registration Form
+        // 1. Registration Logic
         function toggleCountryFields() {
             const isSA = document.getElementById('c_sa').checked;
             if (isSA) {
                 document.getElementById('fields_sa').style.display = 'flex';
                 document.getElementById('fields_eg').style.display = 'none';
-                // Requirements
+                
                 document.getElementById('tax_id_sa').required = true;
                 document.querySelector('input[name="building_no"]').required = true;
                 document.querySelector('input[name="street_name"]').required = true;
@@ -417,7 +418,7 @@
             } else {
                 document.getElementById('fields_sa').style.display = 'none';
                 document.getElementById('fields_eg').style.display = 'flex';
-                // Requirements
+                
                 document.getElementById('tax_id_sa').required = false;
                 document.querySelector('input[name="building_no"]').required = false;
                 document.querySelector('input[name="street_name"]').required = false;
@@ -446,7 +447,7 @@
             return true;
         }
 
-        // 2. Logic for Credentials Modal
+        // 2. Creds Modal Logic
         function openCredsModal(comp) {
             document.getElementById('creds_company_id').value = comp.id;
             document.getElementById('creds_country_code').value = comp.country_code;
@@ -455,7 +456,6 @@
             const header = document.getElementById('modal_flag_bg');
             const title = document.getElementById('modal_country_name');
             
-            // Try to parse existing creds safely
             let creds = {};
             try { creds = JSON.parse(comp.api_credentials || '{}'); } catch(e) {}
 
@@ -476,14 +476,14 @@
             new bootstrap.Modal(document.getElementById('credsModal')).show();
         }
 
-        // 3. Logic for Allocating Balance
+        // 3. Allocate Logic
         function openAllocateModal(id, name, curr) {
             document.getElementById('alloc_company_id').value = id;
             document.getElementById('alloc_currency').innerText = curr;
             new bootstrap.Modal(document.getElementById('allocateModal')).show();
         }
 
-        // 4. Logic for Auth Info
+        // 4. Auth Logic (Fixed)
         function openAuthModal(id, name, username) {
             document.getElementById('auth_company_id').value = id;
             document.getElementById('auth_user').value = username;
