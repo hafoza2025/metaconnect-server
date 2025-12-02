@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MetaConnect | بوابة الربط الحكومي الذكي</title>
+    <meta name="description" content="الحل المتكامل للربط مع منظومة الفواتير الإلكترونية (ETA) والزكاة (ZATCA). نضمن الامتثال الضريبي والشفافية المالية.">
+    
+    <!-- Google Fonts (Tajawal for Modern Arabic) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5 RTL -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <style>
+        :root {
+            --primary: #0f172a;       /* Dark Blue - Professionalism */
+            --accent: #3b82f6;        /* Tech Blue */
+            --accent-hover: #2563eb;
+            --bg-light: #f8fafc;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+        }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            color: var(--text-main);
+            overflow-x: hidden;
+            background-color: #fff;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            padding: 1rem 0;
+        }
+        .brand-text {
+            font-weight: 800;
+            font-size: 1.5rem;
+            color: var(--primary);
+            letter-spacing: -0.5px;
+        }
+        .nav-link {
+            font-weight: 500;
+            color: var(--text-main);
+            margin: 0 10px;
+            transition: 0.3s;
+        }
+        .nav-link:hover { color: var(--accent); }
+        .btn-primary-custom {
+            background-color: var(--primary);
+            color: white;
+            padding: 10px 24px;
+            border-radius: 50px;
+            font-weight: 700;
+            border: none;
+            transition: all 0.3s;
+        }
+        .btn-primary-custom:hover {
+            background-color: #1e293b;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+        }
+
+        /* Hero Section */
+        .hero-section {
+            padding: 120px 0 80px;
+            background: radial-gradient(circle at top right, #eff6ff 0%, #fff 40%);
+            position: relative;
+        }
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+        }
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 2.5rem;
+            max-width: 600px;
+        }
+        .hero-badge {
+            background: #dbeafe;
+            color: var(--accent);
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+        }
+
+        /* Features Cards */
+        .feature-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 24px;
+            padding: 2.5rem;
+            background: white;
+            transition: all 0.3s;
+            height: 100%;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px -15px rgba(0,0,0,0.1);
+            border-color: var(--accent);
+        }
+        .icon-box {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Gov Message Section */
+        .gov-section {
+            background-color: var(--primary);
+            color: white;
+            padding: 80px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .gov-section::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0; width: 100%; height: 100%;
+            background: url('data:image/svg+xml,<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">ircle cx="1" cy="1" r="1" fill="rgba(255,255,255,0.1)"/></svg>');
+            opacity: 0.3;
+        }
+
+        /* Footer */
+        footer {
+            background: #f1f5f9;
+            padding: 60px 0 30px;
+            margin-top: 80px;
+        }
+        .footer-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-bottom: 10px;
+            display: block;
+            transition: 0.2s;
+        }
+        .footer-link:hover { color: var(--primary); }
+
+        /* Animations */
+        .fade-up {
+            animation: fadeInUp 0.8s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar sticky-top navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+                <div style="width: 40px; height: 40px; background: var(--primary); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white;">
+                    <i class="bi bi-boxes"></i>
+                </div>
+                <span class="brand-text">MetaConnect</span>
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav align-items-center gap-3">
+                    <li class="nav-item"><a class="nav-link" href="#features">المميزات</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#compliance">الامتثال والرقابة</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#developers">المطورين</a></li>
+                    <li class="nav-item ms-2">
+                        <a href="/login" class="btn btn-outline-dark rounded-pill px-4 fw-bold">دخول</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/register" class="btn btn-primary-custom">حساب جديد</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 fade-up">
+                    <span class="hero-badge"><i class="bi bi-shield-check me-1"></i> معتمد ومتوافق 100%</span>
+                    <h1 class="hero-title">
+                        منظومة الربط <br>
+                        <span style="color: var(--accent);">الحكومي الذكي</span>
+                    </h1>
+                    <p class="hero-subtitle">
+                        الحل التقني المتكامل للربط مع مصلحة الضرائب المصرية (ETA) وهيئة الزكاة السعودية (ZATCA). 
+                        نمكن الشركات والمطورين من الامتثال المالي الكامل وحماية أعمالهم من المخاطر القانونية.
+                    </p>
+                    <div class="d-flex gap-3">
+                        <a href="/register" class="btn btn-primary-custom btn-lg shadow-lg">
+                            <i class="bi bi-rocket-takeoff me-2"></i>ابدأ الربط الآن
+                        </a>
+                        <a href="#features" class="btn btn-outline-dark btn-lg rounded-pill px-4 fw-bold">
+                            تعرف علينا
+                        </a>
+                    </div>
+                    <p class="mt-4 small text-muted">
+                        <i class="bi bi-check-circle-fill text-success me-1"></i> تنفيذ وتطوير <strong>Meta Software</strong>
+                    </p>
+                </div>
+                <div class="col-lg-6 mt-5 mt-lg-0 fade-up" style="animation-delay: 0.2s;">
+                    <img src="https://cdn.dribbble.com/users/1615584/screenshots/14683601/media/5c029050797238189db6691614c96657.jpg?resize=800x600&vertical=center" alt="System Dashboard" class="img-fluid rounded-4 shadow-lg border border-2">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Strategic Vision (Message to Government & Big Corps) -->
+    <section id="compliance" class="gov-section">
+        <div class="container">
+            <div class="row justify-content-center text-center mb-5">
+                <div class="col-lg-8">
+                    <span class="badge bg-white text-primary px-3 py-2 rounded-pill mb-3 fw-bold">الرؤية الاستراتيجية</span>
+                    <h2 class="fw-bold mb-3">نحو اقتصاد رقمي منظم وشفاف</h2>
+                    <p class="lead text-white-50">
+                        MetaConnect ليس مجرد أداة إرسال فواتير، بل هو نظام رقابي متطور يضمن انضباط الأسواق، ويوفر رؤية لحظية للنشاط الاقتصادي، مما يدعم توجهات الدولة في التحول الرقمي والعدالة الضريبية.
+                    </p>
+                </div>
+            </div>
+            <div class="row g-4 text-center">
+                <div class="col-md-4">
+                    <div class="p-4 border border-white border-opacity-10 rounded-4 h-100">
+                        <i class="bi bi-eye fs-1 mb-3 d-block text-info"></i>
+                        <h4 class="fw-bold">رقابة لحظية</h4>
+                        <p class="text-white-50 small">رصد وتوثيق كافة العمليات البيعية فور حدوثها، مما يغلق باب التلاعب ويضمن حقوق الدولة والتاجر.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-4 border border-white border-opacity-10 rounded-4 h-100">
+                        <i class="bi bi-file-earmark-lock fs-1 mb-3 d-block text-info"></i>
+                        <h4 class="fw-bold">التزام معياري</h4>
+                        <p class="text-white-50 small">تطبيق صارم لمعايير (UBL 2.1) وتشفير البيانات، مما يسهل عمليات الفحص الضريبي الآلي.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-4 border border-white border-opacity-10 rounded-4 h-100">
+                        <i class="bi bi-graph-up-arrow fs-1 mb-3 d-block text-info"></i>
+                        <h4 class="fw-bold">حماية الاقتصاد</h4>
+                        <p class="text-white-50 small">تقليل الاقتصاد الموازي ودمج كافة الأنشطة التجارية في منظومة رسمية موحدة وآمنة.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features for Devs & Companies -->
+    <section id="features" class="py-5">
+        <div class="container py-5">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold mb-2" style="color: var(--primary);">لماذا تختار MetaConnect؟</h2>
+                <p class="text-muted">حلول مصممة خصيصاً لشركات البرمجة، المتاجر، والمؤسسات</p>
+            </div>
+
+            <div class="row g-4">
+                <!-- Card 1: Developers -->
+                <div class="col-lg-4">
+                    <div class="feature-card">
+                        <div class="icon-box bg-primary bg-opacity-10 text-primary">
+                            <i class="bi bi-code-slash"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">للمطورين وشركات البرمجة</h4>
+                        <p class="text-muted mb-4">
+                            وفر مئات الساعات من البرمجة. نقدم لك API موحد يربطك بمصر والسعودية بكود واحد.
+                        </p>
+                        <ul class="list-unstyled text-muted small">
+                            <li class="mb-2"><i class="bi bi-check2-circle text-success me-2"></i> توثيق شامل (Documentation)</li>
+                            <li class="mb-2"><i class="bi bi-check2-circle text-success me-2"></i> بيئة تجريبية (Sandbox)</li>
+                            <li class="mb-2"><i class="bi bi-check2-circle text-success me-2"></i> دعم فني للمطورين</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Card 2: Business Owners -->
+                <div class="col-lg-4">
+                    <div class="feature-card">
+                        <div class="icon-box bg-success bg-opacity-10 text-success">
+                            <i class="bi bi-briefcase"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">لأصحاب الأعمال والمتاجر</h4>
+                        <p class="text-muted mb-4">
+                            تجنب الغرامات الضريبية ومخاطر الإغلاق. نظامنا يضمن إرسال فواتيرك بشكل قانوني وصحيح 100%.
+                        </p>
+                        <ul class="list-unstyled text-muted small">
+                            <li class="mb-2"><i class="bi bi-check2-circle text-success me-2"></i> لوحة تحكم سهلة بالعربية</li>
+                            <li class="mb-2"><i class="bi bi-check2-circle text-success me-2"></i> تقارير حالة الربط</li>
+                            <li class="mb-2"><i class="bi bi-check2-circle text-success me-2"></i> تنبيهات عند حدوث أخطاء</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Card 3: Security -->
+                <div class="col-lg-4">
+                    <div class="feature-card">
+                        <div class="icon-box bg-warning bg-opacity-10 text-warning">
+                            <i class="bi bi-shield-lock"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">أمان وتشفير عالٍ</h4>
+                        <p class="text-muted mb-4">
+                            بياناتك المالية هي مسؤوليتنا. نستخدم أحدث بروتوكولات التشفير لحماية التواقيع الإلكترونية.
+                        </p>
+                        <ul class="list-unstyled text-muted small">
+                            <li class="mb-2"><i class="bi bi-check2-circle text-success me-2"></i> تشفير End-to-End</li>
+                            <li class="mb-2"><i class="bi bi-check2-circle text-success me-2"></i> سيرفرات مؤمنة ومحمية</li>
+                            <li class="mb-2"><i class="bi bi-check2-circle text-success me-2"></i> نسخ احتياطي يومي</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-5 bg-light border-top">
+        <div class="container text-center py-5">
+            <h2 class="fw-bold mb-4 text-dark">ابدأ رحلة الامتثال الرقمي اليوم</h2>
+            <p class="text-muted mb-5 mx-auto" style="max-width: 600px;">
+                انضم لمئات الشركات التي تعتمد على MetaConnect لتبسيط عملياتها المالية والضريبية. التسجيل مفتوح الآن.
+            </p>
+            <a href="/register" class="btn btn-primary-custom btn-lg px-5 shadow">
+                إنشاء حساب جديد
+            </a>
+            <div class="mt-4 small text-muted">
+                لا توجد بطاقة ائتمان مطلوبة للتجربة المجانية
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row gy-4">
+                <div class="col-lg-5">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <div style="width: 32px; height: 32px; background: var(--primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white;">
+                            <i class="bi bi-boxes small"></i>
+                        </div>
+                        <span class="fw-bold fs-5 text-dark">MetaConnect</span>
+                    </div>
+                    <p class="text-muted small">
+                        نظام تقني متطور تم تطويره بواسطة <strong>Meta Software</strong> لتقديم حلول الربط الحكومي الموحد. نحن نؤمن بقوة التكنولوجيا في تنظيم الأعمال ودعم الاقتصاد الرقمي.
+                    </p>
+                </div>
+                <div class="col-lg-2 offset-lg-1">
+                    <h6 class="fw-bold mb-3">النظام</h6>
+                    <a href="#" class="footer-link small">الرئيسية</a>
+                    <a href="#" class="footer-link small">عن النظام</a>
+                    <a href="#" class="footer-link small">الأسعار</a>
+                </div>
+                <div class="col-lg-2">
+                    <h6 class="fw-bold mb-3">الدعم</h6>
+                    <a href="#" class="footer-link small">مركز المساعدة</a>
+                    <a href="#" class="footer-link small">التوثيق البرمجي</a>
+                    <a href="#" class="footer-link small">حالة النظام</a>
+                </div>
+                <div class="col-lg-2">
+                    <h6 class="fw-bold mb-3">تواصل معنا</h6>
+                    <div class="d-flex align-items-center gap-2 text-muted small mb-2">
+                        <i class="bi bi-envelope"></i>
+                        <a href="mailto:rm@metasoftware.eg" class="text-decoration-none text-muted fw-bold font-monospace">rm@metasoftware.eg</a>
+                    </div>
+                    <small class="text-muted d-block mt-2">للاستفسارات الرسمية والتعاقدات فقط.</small>
+                </div>
+            </div>
+            <div class="border-top mt-5 pt-4 text-center">
+                <p class="text-muted small mb-0">© 2025 Meta Software. جميع الحقوق محفوظة.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
