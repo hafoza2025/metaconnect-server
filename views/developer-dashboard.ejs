@@ -157,25 +157,26 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <% companies.forEach(function(comp) { 
-                            let currency = comp.country_code === 'SA' ? 'SAR' : 'EGP';
-                            let flag = comp.country_code === 'SA' ? 'https://flagcdn.com/w20/sa.png' : 'https://flagcdn.com/w20/eg.png';
-                            
-                            // Invoices Calculation
-                            let balance = parseFloat(comp.allocated_balance || 0);
-                            let paidInvoices = Math.floor(balance / 0.5); // Assuming 0.5 cost per invoice
-                            let usedInvoices = comp.invoices_used || 0;
-                            let freeInvoices = comp.free_invoices_left || 0;
-                            
-                            let isConnected = false;
-                            try {
-                                let c = JSON.parse(comp.api_credentials || '{}');
-                                isConnected = comp.country_code === 'EG' ? !!c.client_id : !!c.binarySecurityToken;
-                            } catch(e) {}
-                            
-                            // Auth User (إذا كان هناك اسم مستخدم مخصص نعرضه، وإلا نعرض الافتراضي)
-                            let authUser = comp.store_username ? comp.store_username : ('store_' + String(comp.id).substring(0,8));
-                        %>
+                       <% companies.forEach(function(comp) { 
+    let currency = comp.country_code === 'SA' ? 'SAR' : 'EGP';
+    let flag = comp.country_code === 'SA' ? 'https://flagcdn.com/w20/sa.png' : 'https://flagcdn.com/w20/eg.png';
+    
+    // Invoices Calculation
+    let balance = parseFloat(comp.allocated_balance || 0);
+    let paidInvoices = Math.floor(balance / 0.5); // Assuming 0.5 cost per invoice
+    let usedInvoices = comp.invoices_used || 0;
+    let freeInvoices = comp.free_invoices_left || 0;
+    
+    let isConnected = false;
+    try {
+        let c = JSON.parse(comp.api_credentials || '{}');
+        isConnected = comp.country_code === 'EG' ? !!c.client_id : !!c.binarySecurityToken;
+    } catch(e) {}
+    
+    // ✅ تم التعديل هنا: استخدام المتغير الصحيح القادم من السيرفر
+    let authUser = comp.username;
+%>
+
                         <tr>
                             <td class="ps-4">
                                 <div class="d-flex align-items-center gap-3">
@@ -539,3 +540,4 @@
     </script>
 </body>
 </html>
+
