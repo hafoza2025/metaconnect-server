@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دخول المطورين | MetaConnect</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* نفس الستايل الخاص بك تماماً */
+        body { background-color: #f0f2f5; background-image: radial-gradient(#cfd8dc 1px, transparent 1px); background-size: 20px 20px; height: 100vh; display: flex; align-items: center; justify-content: center; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .login-container { background: #fff; width: 100%; max-width: 450px; padding: 50px 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 1px solid #e1e4e8; }
+        .logo-area { text-align: center; margin-bottom: 30px; }
+        .logo-icon { font-size: 3rem; color: #0f172a; } /* لون أغمق للمطورين */
+        .app-name { font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-top: 10px; letter-spacing: -0.5px; }
+        .login-header { text-align: center; margin-bottom: 30px; color: #546e7a; font-size: 0.95rem; }
+        .form-control { background-color: #f9f9f9; border: 1px solid #dce0e4; padding: 14px; font-size: 0.95rem; border-radius: 8px; transition: all 0.2s; }
+        .form-control:focus { background-color: #fff; border-color: #0f172a; box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.1); }
+        .input-icon { position: relative; margin-bottom: 20px; }
+        .input-icon i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #90a4ae; font-size: 1.1rem; }
+        .input-icon input { padding-left: 45px; }
+        .btn-login { background-color: #0f172a; color: #fff; width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: background 0.3s; margin-top: 10px; }
+        .btn-login:hover { background-color: #1e293b; }
+        .divider { height: 1px; background: #e1e4e8; margin: 30px 0; position: relative; }
+        .divider span { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; padding: 0 10px; color: #90a4ae; font-size: 0.85rem; }
+        .register-link { text-align: center; display: block; color: #0f172a; text-decoration: none; font-weight: 600; font-size: 0.9rem; }
+        .register-link:hover { text-decoration: underline; }
+        /* Security Overlay */
+        .security-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.98); z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; color: #00ff88; font-family: 'Courier New', monospace; }
+        .scan-line { width: 100%; height: 2px; background: #00ff88; position: absolute; top: 0; animation: scan 3s infinite linear; opacity: 0.5; }
+        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
+        .lock-icon { font-size: 5rem; margin-bottom: 30px; color: #fff; }
+        .status-text { font-size: 1.2rem; margin-bottom: 15px; min-height: 30px; }
+        .loader-bar { width: 300px; height: 4px; background: #333; border-radius: 2px; overflow: hidden; }
+        .loader-fill { height: 100%; background: #00ff88; width: 0%; transition: width 0.2s; box-shadow: 0 0 15px #00ff88; }
+    </style>
+</head>
+<body>
+    <!-- Security Check Overlay -->
+    <div class="security-overlay" id="securityOverlay">
+        <div class="scan-line"></div>
+        <i class="fas fa-code lock-icon"></i>
+        <div class="status-text" id="statusText">جاري تهيئة بيئة المطور...</div>
+        <div class="loader-bar"><div class="loader-fill" id="loaderFill"></div></div>
+    </div>
+
+    <div class="login-container">
+        <div class="logo-area">
+            <i class="fas fa-cube logo-icon"></i>
+            <div class="app-name">MetaConnect <span class="badge bg-dark text-white" style="font-size: 0.7rem; vertical-align: middle;">DEV</span></div>
+        </div>
+        
+        <p class="login-header">تسجيل دخول المطورين للوحة التحكم</p>
+
+        <!-- Form مخصص للمطورين -->
+        <form id="loginForm" action="/dev/login" method="POST">
+            
+            <div class="input-icon">
+                <input type="email" name="email" class="form-control" placeholder="البريد الإلكتروني للمطور" required>
+                <i class="fas fa-envelope-open-text"></i>
+            </div>
+
+            <div class="input-icon">
+                <input type="password" name="password" id="password" class="form-control" placeholder="كلمة المرور" required>
+                <i class="fas fa-lock" style="cursor:pointer" onclick="togglePass(this)"></i>
+            </div>
+
+            <button type="submit" class="btn-login">دخول آمن</button>
+        </form>
+
+        <div class="divider"><span>أو</span></div>
+        <a href="/" class="register-link">عودة للصفحة الرئيسية</a>
+    </div>
+
+    <script>
+        function togglePass(icon) {
+            const input = document.getElementById('password');
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.replace("fa-lock", "fa-unlock");
+            } else {
+                input.type = "password";
+                icon.classList.replace("fa-unlock", "fa-lock");
+            }
+        }
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const overlay = document.getElementById('securityOverlay');
+            const statusText = document.getElementById('statusText');
+            const loader = document.getElementById('loaderFill');
+            const form = this;
+            overlay.style.display = 'flex';
+            const messages = ["التحقق من هوية المطور...", "تحميل إعدادات الـ API...", "تأمين الاتصال بقاعدة البيانات...", "تم التحقق بنجاح."];
+            let progress = 0; let msgIndex = 0;
+            const interval = setInterval(() => {
+                progress += 3; loader.style.width = progress + '%';
+                if (progress % 25 === 0 && msgIndex < messages.length) { statusText.textContent = messages[msgIndex]; msgIndex++; }
+                if (progress >= 100) { clearInterval(interval); setTimeout(() => { form.submit(); }, 400); }
+            }, 30);
+        });
+    </script>
+</body>
+</html>
