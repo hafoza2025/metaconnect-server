@@ -6,17 +6,23 @@
     <title>لوحة المطور: تقنية</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Tajawal', sans-serif; background: #f8f9fa; }
+    </style>
 </head>
 
 <body class="bg-light">
 
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4 shadow-sm">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="#">لوحة المطور: <%= developer.name %></a>
+            <a class="navbar-brand fw-bold" href="#">
+                <i class="bi bi-code-square me-2"></i> لوحة المطور: <%= developer.name %>
+            </a>
             <div class="d-flex">
-                <a href="/dev/support" class="btn btn-warning btn-sm me-2">💬 الدعم الفني</a>
-                <a href="/logout" class="btn btn-light btn-sm">خروج ⬅️</a>
+                <a href="/dev/support" class="btn btn-warning btn-sm me-2 fw-bold"><i class="bi bi-chat-dots"></i> الدعم الفني</a>
+                <a href="/logout" class="btn btn-light btn-sm text-primary fw-bold">خروج <i class="bi bi-box-arrow-left"></i></a>
             </div>
         </div>
     </nav>
@@ -24,27 +30,32 @@
     <div class="container">
         <!-- رصيد المحفظة -->
         <div class="row justify-content-center mb-4">
-            <div class="col-md-6">
-                <div class="card bg-dark text-white shadow">
-                    <div class="card-body d-flex justify-content-between align-items-center">
+            <div class="col-md-8">
+                <div class="card bg-dark text-white shadow border-0 overflow-hidden" style="background: linear-gradient(45deg, #212529, #495057);">
+                    <div class="card-body p-4 d-flex justify-content-between align-items-center">
                         <div>
-                            <h5 class="card-title opacity-75">رصيد المحفظة</h5>
-                            <h2 class="mb-0 text-warning">
-                                <%= parseFloat(developer.wallet_balance).toFixed(2) %> <small class="fs-6">ج.م</small>
+                            <h6 class="card-title text-white-50 mb-1">رصيد المحفظة الرئيسي</h6>
+                            <h2 class="mb-0 text-warning fw-bold">
+                                <%= parseFloat(developer.wallet_balance).toFixed(2) %> <small class="fs-6 text-white-50">ج.م</small>
                             </h2>
                         </div>
-                        <button class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#chargeModal">
-                            📺 طلب شحن رصيد
+                        <button class="btn btn-light fw-bold shadow-sm px-4 rounded-pill" data-bs-toggle="modal" data-bs-target="#chargeModal">
+                            <i class="bi bi-credit-card me-2"></i> شحن رصيد
                         </button>
+                    </div>
+                    <div class="card-footer bg-transparent border-white border-opacity-10 py-2 small text-white-50">
+                        * هذا الرصيد تستخدمه لتخصيص ميزانيات لشركاتك التابعة.
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- إضافة شركة جديدة -->
-        <div class="card shadow-sm mb-4">
+        <div class="card shadow-sm mb-4 border-0">
+            <div class="card-header bg-white py-3">
+                <h5 class="card-title mb-0 fw-bold text-primary"><i class="bi bi-plus-circle me-2"></i> إضافة عميل جديد</h5>
+            </div>
             <div class="card-body">
-                <h5 class="card-title mb-3">إضافة عميل جديد</h5>
                 <form action="/dev/add-company" method="POST" class="row g-2">
                     <div class="col-md-4">
                         <input type="text" name="name" class="form-control" placeholder="اسم الشركة" required>
@@ -54,73 +65,101 @@
                     </div>
                     <div class="col-md-2">
                         <select name="country_code" class="form-select">
-                            <option value="EG">مصر</option>
-                            <option value="SA">السعودية</option>
+                            <option value="EG">مصر 🇪🇬</option>
+                            <option value="SA">السعودية 🇸🇦</option>
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <button type="submit" class="btn btn-primary w-100">إضافة</button>
+                        <button type="submit" class="btn btn-primary w-100 fw-bold">إضافة الشركة</button>
                     </div>
                 </form>
             </div>
         </div>
 
         <!-- جدول الشركات -->
-        <div class="card shadow-sm">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold text-secondary"><i class="bi bi-building me-2"></i> الشركات المسجلة</h5>
+                <span class="badge bg-secondary"><%= companies.length %> شركة</span>
+            </div>
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
                         <tr>
                             <th>الشركة</th>
-                            <th>الرقم الضريبي</th>
-                            <th>API Secret</th>
-                            <th>الرصيد المجاني</th>
-                            <th>حساب المتجر (End User)</th>
-                            <th>إجراءات</th> <!-- عمود مجمع -->
+                            <th>الرصيد المخصص</th>
+                            <th>الفواتير</th>
+                            <th>حساب المتجر</th>
+                            <th class="text-center" style="width: 35%;">إجراءات التحكم</th>
                         </tr>
                     </thead>
                     <tbody>
                         <% if(companies.length==0) { %>
                             <tr>
-                                <td colspan="6" class="text-center py-4 text-muted">لا توجد شركات مسجلة بعد</td>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <i class="bi bi-inbox fs-1 d-block mb-2 opacity-50"></i>
+                                    لا توجد شركات مسجلة بعد
+                                </td>
                             </tr>
                             <% } %>
 
                                 <% companies.forEach(function(company) { %>
                                     <tr>
-                                        <td class="fw-bold">
-                                            <%= company.name %>
-                                        </td>
                                         <td>
-                                            <%= company.tax_id %>
+                                            <div class="fw-bold"><%= company.name %></div>
+                                            <div class="small text-muted"><%= company.tax_id %> | <%= company.country_code %></div>
                                         </td>
-                                        <td>de class="text-muted"><%= company.api_secret.substring(0, 10) %>...</code>
-                                        </td>
-                                        <td><span class="badge bg-success">
-                                                <%= company.free_invoices_left %>
-                                            </span></td>
+                                        
+                                        <!-- الرصيد المخصص (الجديد) -->
                                         <td>
+                                            <% if(company.allocated_balance > 0) { %>
+                                                <div class="text-success fw-bold">
+                                                    <%= parseFloat(company.allocated_balance).toFixed(2) %> ج.م
+                                                </div>
+                                                <small class="text-muted" style="font-size:0.75rem">مخصص من محفظتك</small>
+                                            <% } else { %>
+                                                <span class="text-muted small">--</span>
+                                            <% } %>
+                                        </td>
+
+                                        <!-- الفواتير (مجانية ومدفوعة) -->
+                                        <td>
+                                            <% if(company.free_invoices_left > 0) { %>
+                                                <span class="badge bg-success mb-1">تجريبة: <%= company.free_invoices_left %></span>
+                                            <% } %>
                                             <div class="small">
-                                                User: <b>store_<%= company.id %></b><br>
-                                                Pass: 123456
+                                                المتبقي: <b><%= (company.invoice_limit || 0) - (company.invoices_used || 0) %></b>
                                             </div>
                                         </td>
+
                                         <td>
-                                            <div class="d-flex gap-2">
-                                                <!-- زر الإعدادات -->
-                                                <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal"
-                                                    data-bs-target="#configModal<%= company.id %>">
-                                                    ⚙️ إعدادات
+                                            <div class="small bg-light p-1 rounded border d-inline-block">
+                                                <i class="bi bi-person-badge me-1"></i> <b>store_<%= company.id %></b>
+                                            </div>
+                                        </td>
+
+                                        <td>
+                                            <div class="d-flex gap-2 justify-content-end flex-wrap">
+                                                
+                                                <!-- زر تخصيص الرصيد (الميزة الجديدة) -->
+                                                <button class="btn btn-success btn-sm fw-bold" onclick="openAllocationModal(<%= company.id %>, '<%= company.name %>')">
+                                                    <i class="bi bi-cash-stack me-1"></i> تحويل رصيد
                                                 </button>
 
-                                                <!-- زر التوثيق (الجديد) -->
+                                                <!-- زر الإعدادات -->
+                                                <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal"
+                                                    data-bs-target="#configModal<%= company.id %>" title="الإعدادات">
+                                                    <i class="bi bi-gear-fill"></i>
+                                                </button>
+
+                                                <!-- زر التوثيق -->
                                                 <a href="/docs?company_id=<%= company.id %>"
-                                                    class="btn btn-primary btn-sm">
-                                                    📄 أكواد الربط
+                                                    class="btn btn-primary btn-sm" title="أكواد الربط">
+                                                    <i class="bi bi-code-slash"></i>
                                                 </a>
                                             </div>
 
-                                            <!-- Modal إعدادات الربط الذكي (مخفي) -->
+                                            <!-- Modal إعدادات الربط الذكي (لكل شركة) -->
                                             <div class="modal fade" id="configModal<%= company.id %>" tabindex="-1">
                                                 <div class="modal-dialog modal-lg">
                                                     <div class="modal-content">
@@ -133,93 +172,49 @@
 
                                                             <div
                                                                 class="modal-header <%= company.country_code == 'EG' ? 'bg-success text-white' : 'bg-dark text-warning' %>">
-                                                                <div class="d-flex align-items-center">
-                                                                    <% if(company.country_code=='EG' ) { %>
-                                                                        <h5 class="modal-title">🇪🇬 إعدادات الربط -
-                                                                            مصلحة الضرائب المصرية (ETA)</h5>
-                                                                        <% } else { %>
-                                                                            <h5 class="modal-title">🇸🇦 إعدادات الربط -
-                                                                                هيئة الزكاة والضريبة (ZATCA)</h5>
-                                                                            <% } %>
-                                                                </div>
+                                                                <h5 class="modal-title">
+                                                                    <%= company.country_code == 'EG' ? '🇪🇬 إعدادات مصر (ETA)' : '🇸🇦 إعدادات السعودية (ZATCA)' %>
+                                                                </h5>
                                                                 <button type="button"
                                                                     class="btn-close <%= company.country_code == 'EG' ? 'btn-close-white' : '' %>"
                                                                     data-bs-dismiss="modal"></button>
                                                             </div>
 
                                                             <div class="modal-body p-4">
-                                                                <div
-                                                                    class="alert alert-light border-start border-5 <%= company.country_code == 'EG' ? 'border-success' : 'border-warning' %> mb-4">
-                                                                    <strong>📝 ملاحظة هامة:</strong>
-                                                                    <% if(company.country_code=='EG' ) { %>
-                                                                        يجب استخراج هذه البيانات من موقع مصلحة الضرائب
-                                                                        المصرية (منظومة الفاتورة).
-                                                                        <% } else { %>
-                                                                            يتطلب الربط مع "فاتورة" رفع ملف CSR أو إدخال
-                                                                            رمز OTP من منصة "فاتورة".
-                                                                            <% } %>
-                                                                </div>
-
                                                                 <% if(company.country_code=='EG' ) { %>
                                                                     <!-- 🇪🇬 نموذج مصر -->
+                                                                    <div class="alert alert-success bg-opacity-10 border-success mb-3">
+                                                                        <i class="bi bi-info-circle-fill me-2"></i> أدخل بيانات الربط (Client ID & Secret) الخاصة ببيئة الضرائب المصرية.
+                                                                    </div>
                                                                     <div class="row g-3">
                                                                         <div class="col-12">
-                                                                            <label class="form-label fw-bold">Client ID
-                                                                                (معرف العميل)</label>
-                                                                            <div class="input-group">
-                                                                                <span
-                                                                                    class="input-group-text bg-light"><i
-                                                                                        class="bi bi-key"></i></span>
-                                                                                <input type="text" name="client_id"
-                                                                                    class="form-control font-monospace"
-                                                                                    placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-                                                                                    value="<%= company.api_credentials ? JSON.parse(company.api_credentials).id : '' %>"
-                                                                                    required>
-                                                                            </div>
-                                                                            <div class="form-text text-muted">يجب أن
-                                                                                يكون بتنسيق GUID (36 حرفاً).</div>
+                                                                            <label class="form-label fw-bold">Client ID</label>
+                                                                            <input type="text" name="client_id" class="form-control font-monospace"
+                                                                                placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                                                                                value="<%= company.api_credentials ? JSON.parse(company.api_credentials).id : '' %>" required>
                                                                         </div>
                                                                         <div class="col-12">
-                                                                            <label class="form-label fw-bold">Client
-                                                                                Secret (المفتاح السري)</label>
-                                                                            <div class="input-group">
-                                                                                <span
-                                                                                    class="input-group-text bg-light"><i
-                                                                                        class="bi bi-lock"></i></span>
-                                                                                <input type="password"
-                                                                                    name="client_secret"
-                                                                                    class="form-control font-monospace"
-                                                                                    placeholder="المفتاح السري الطويل..."
-                                                                                    value="<%= company.api_credentials ? JSON.parse(company.api_credentials).secret : '' %>"
-                                                                                    required>
-                                                                            </div>
+                                                                            <label class="form-label fw-bold">Client Secret</label>
+                                                                            <input type="password" name="client_secret" class="form-control font-monospace"
+                                                                                value="<%= company.api_credentials ? JSON.parse(company.api_credentials).secret : '' %>" required>
                                                                         </div>
                                                                     </div>
                                                                     <% } else { %>
                                                                         <!-- 🇸🇦 نموذج السعودية -->
-                                                                        <div class="row g-3">
-                                                                            <div class="col-12">
-                                                                                <label
-                                                                                    class="form-label fw-bold text-warning">OTP
-                                                                                    Code (رمز التحقق)</label>
-                                                                                <input type="text" name="otp"
-                                                                                    class="form-control font-monospace bg-dark text-white border-warning"
-                                                                                    placeholder="123456"
-                                                                                    value="<%= company.api_credentials ? JSON.parse(company.api_credentials).otp : '' %>">
-                                                                                <div class="form-text">لإصدار شهادة CSID
-                                                                                    لأول مرة.</div>
-                                                                            </div>
+                                                                        <div class="alert alert-warning bg-opacity-10 border-warning mb-3">
+                                                                            <i class="bi bi-exclamation-triangle-fill me-2"></i> أدخل رمز OTP لإصدار شهادة CSID جديدة.
                                                                         </div>
-                                                                        <% } %>
+                                                                        <div class="col-12">
+                                                                            <label class="form-label fw-bold">OTP Code</label>
+                                                                            <input type="text" name="otp" class="form-control font-monospace text-center fs-5"
+                                                                                placeholder="123456" maxlength="6">
+                                                                        </div>
+                                                                    <% } %>
                                                             </div>
 
                                                             <div class="modal-footer bg-light">
-                                                                <button type="button" class="btn btn-secondary"
-                                                                    data-bs-dismiss="modal">إلغاء</button>
-                                                                <button type="submit"
-                                                                    class="btn <%= company.country_code == 'EG' ? 'btn-success' : 'btn-warning' %> px-4">
-                                                                    💾 حفظ وتوثيق البيانات
-                                                                </button>
+                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                                                                <button type="submit" class="btn btn-primary">حفظ الإعدادات</button>
                                                             </div>
                                                         </form>
                                                     </div>
@@ -234,31 +229,67 @@
         </div>
     </div>
 
-    <!-- Modal شحن الرصيد -->
+    <!-- Modal تخصيص الرصيد (الجديد - واحد للجميع ويعمل بالـ JS) -->
+    <div class="modal fade" id="allocationModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="bi bi-cash-coin me-2"></i> تخصيص رصيد للشركة</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="/dev/allocate-balance" method="POST">
+                    <div class="modal-body p-4">
+                        <input type="hidden" name="company_id" id="alloc_company_id">
+                        
+                        <div class="text-center mb-4">
+                            <h6 class="text-muted mb-2">أنت تقوم بتحويل رصيد إلى:</h6>
+                            <h4 class="fw-bold text-success" id="alloc_company_name">--</h4>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">المبلغ المراد تحويله (ج.م)</label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text bg-light border-end-0">ج.م</span>
+                                <input type="number" name="amount" class="form-control border-start-0" placeholder="0.00" required min="1" step="0.01">
+                            </div>
+                            <div class="form-text text-muted mt-2">
+                                <i class="bi bi-info-circle me-1"></i> سيتم خصم هذا المبلغ من محفظتك الرئيسية وإضافته لرصيد الشركة المتاح.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                        <button type="submit" class="btn btn-success px-4 fw-bold">تأكيد التحويل 🚀</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal شحن الرصيد (للمطور) -->
     <div class="modal fade" id="chargeModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <form action="/dev/support/new" method="POST">
                     <div class="modal-header bg-dark text-white">
-                        <h5 class="modal-title">طلب شحن رصيد</h5>
+                        <h5 class="modal-title">طلب شحن المحفظة</h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
                         <input type="hidden" name="subject" value="طلب شحن رصيد">
-                        <div class="mb-3">
-                            <label class="form-label">اختر أي شركة تابعة لك (للتوثيق فقط)</label>
-                            <select name="company_id" class="form-select">
-                                <% companies.forEach(function(c) { %>
-                                    <option value="<%= c.id %>">
-                                        <%= c.name %>
-                                    </option>
-                                    <% }); %>
-                            </select>
-                        </div>
+                        
+                        <!-- اختيار شركة فقط لربط التذكرة (إجباري في النظام الحالي) -->
+                         <% if(companies.length > 0) { %>
+                            <input type="hidden" name="company_id" value="<%= companies[0].id %>">
+                         <% } %>
+
                         <div class="mb-3">
                             <label class="form-label">تفاصيل التحويل</label>
-                            <textarea name="message" class="form-control" rows="3"
-                                placeholder="مثال: تم تحويل 500 جنيه فودافون كاش من رقم ..."></textarea>
+                            <textarea name="message" class="form-control" rows="4"
+                                placeholder="يرجى كتابة تفاصيل التحويل البنكي أو المحفظة الإلكترونية هنا لتسهيل المراجعة..."></textarea>
+                        </div>
+                        <div class="alert alert-info small">
+                            <i class="bi bi-info-circle-fill me-1"></i> سيقوم الفريق بمراجعة الطلب وإضافة الرصيد لمحفظتك فور التأكد.
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -272,12 +303,19 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // دالة فتح نافذة تخصيص الرصيد وتمرير البيانات
+        function openAllocationModal(id, name) {
+            document.getElementById('alloc_company_id').value = id;
+            document.getElementById('alloc_company_name').innerText = name;
+            new bootstrap.Modal(document.getElementById('allocationModal')).show();
+        }
+
         function validateForm(country, form) {
             if (country === 'EG') {
                 const clientId = form.client_id.value.trim();
                 const guidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
                 if (!guidRegex.test(clientId)) {
-                    alert('خطأ في التنسيق! ❌\nالـ Client ID المصري يجب أن يكون بصيغة GUID صحيحة.\nمثال: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
+                    alert('خطأ في التنسيق! ❌\nالـ Client ID المصري يجب أن يكون بصيغة GUID صحيحة.');
                     return false;
                 }
             }
@@ -285,5 +323,4 @@
         }
     </script>
 </body>
-
 </html>
