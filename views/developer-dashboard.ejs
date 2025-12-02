@@ -3,276 +3,374 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم | MetaConnect Developer</title>
+    <title>MetaConnect | لوحة المطور</title>
     
-    <!-- CSS Libraries -->
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@300;400;500;700&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --primary: #0f172a;       /* أزرق داكن جداً ورسمي */
-            --secondary: #64748b;     /* رمادي مزرق */
-            --accent: #2563eb;        /* أزرق نشط */
-            --bg-body: #f8fafc;       /* خلفية فاتحة جداً */
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #64748b;
+            --bg-body: #f8fafc;
             --surface: #ffffff;
             --border: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
         }
 
         body {
-            font-family: 'Noto Kufi Arabic', sans-serif;
+            font-family: 'Tajawal', sans-serif;
             background-color: var(--bg-body);
-            color: var(--primary);
-            font-size: 0.9rem;
+            color: #0f172a;
+            line-height: 1.6;
         }
 
-        /* Navbar Styling */
+        /* Navbar */
         .navbar {
-            background-color: var(--surface);
+            background: var(--surface);
             border-bottom: 1px solid var(--border);
-            padding: 0.75rem 0;
+            padding: 0.8rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(8px);
+            background-color: rgba(255, 255, 255, 0.9);
         }
         .brand-logo {
-            font-weight: 700;
-            font-size: 1.1rem;
-            color: var(--primary);
+            font-weight: 800;
+            font-size: 1.25rem;
             letter-spacing: -0.5px;
+            color: var(--primary-dark);
         }
-        .nav-user-badge {
+        .user-pill {
             background: #f1f5f9;
-            padding: 0.35rem 0.75rem;
-            border-radius: 6px;
-            font-size: 0.8rem;
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 0.85rem;
             font-weight: 600;
             color: var(--secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+        .user-pill:hover {
+            border-color: var(--border);
+            background: #fff;
         }
 
-        /* Main Cards */
-        .stat-card {
+        /* Main Layout */
+        .main-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        /* Cards */
+        .dashboard-card {
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: 16px;
             padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
             height: 100%;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            position: relative;
+            overflow: hidden;
         }
-        .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        .dashboard-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
+            border-color: #cbd5e1;
         }
-        
-        .wallet-balance {
-            font-family: 'Inter', sans-serif;
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--primary);
+
+        /* Wallet Widget */
+        .wallet-widget {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: white;
+            border: none;
+        }
+        .wallet-amount {
+            font-size: 2.5rem;
+            font-weight: 800;
+            line-height: 1;
+            margin: 0.5rem 0;
             letter-spacing: -1px;
         }
-        .currency {
+        .wallet-currency {
             font-size: 1rem;
-            color: var(--secondary);
+            opacity: 0.7;
             font-weight: 500;
         }
-
-        /* Tables */
-        .custom-table {
-            background: var(--surface);
+        .wallet-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            width: 100%;
+            padding: 0.6rem;
             border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .wallet-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* Table Styling */
+        .table-container {
+            background: var(--surface);
+            border-radius: 16px;
             border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
             overflow: hidden;
+            margin-top: 2rem;
+        }
+        .table-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fff;
         }
         .table {
             margin-bottom: 0;
+            width: 100%;
         }
-        .table thead th {
+        .table th {
             background: #f8fafc;
             font-weight: 600;
             color: var(--secondary);
             font-size: 0.75rem;
             text-transform: uppercase;
-            padding: 1rem;
+            padding: 1rem 1.5rem;
             border-bottom: 1px solid var(--border);
+            letter-spacing: 0.5px;
         }
-        .table tbody td {
-            padding: 1rem;
+        .table td {
+            padding: 1rem 1.5rem;
             vertical-align: middle;
             border-bottom: 1px solid var(--border);
             color: #334155;
+            font-weight: 500;
         }
-        .table tbody tr:last-child td {
-            border-bottom: none;
+        .table tr:last-child td { border-bottom: none; }
+        .table tr:hover td { background: #f8fafc; }
+
+        /* Company Avatar */
+        .company-avatar {
+            width: 42px; height: 42px;
+            background: #e0f2fe;
+            color: #0369a1;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            border: 1px solid #bae6fd;
+        }
+        
+        /* Badges */
+        .badge-invoice {
+            background: #f1f5f9;
+            color: #475569;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid #e2e8f0;
         }
 
-        /* Modal Professional Styling */
+        /* Action Buttons */
+        .action-btn {
+            width: 34px; height: 34px;
+            display: inline-flex; align-items: center; justify-content: center;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #fff;
+            color: var(--secondary);
+            transition: all 0.2s;
+            margin-left: 4px;
+        }
+        .action-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: #eff6ff;
+        }
+        
+        /* Auth Input Group */
+        .auth-input-group {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            width: fit-content;
+        }
+        .auth-val {
+            background: transparent;
+            border: none;
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: var(--secondary);
+            padding: 0 8px;
+            width: 110px;
+            outline: none;
+        }
+        .auth-edit-btn {
+            border: none;
+            background: #fff;
+            border-radius: 6px;
+            width: 28px; height: 28px;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--primary);
+            cursor: pointer;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        /* Modals */
         .modal-content {
             border: none;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
         }
         .modal-header {
             border-bottom: 1px solid var(--border);
-            padding: 1.25rem;
-            background: #fff;
-            border-radius: 12px 12px 0 0;
-        }
-        .modal-title {
-            font-size: 1rem;
-            font-weight: 700;
-        }
-        .modal-body {
-            padding: 1.5rem;
+            padding: 1.25rem 1.5rem;
             background: #fff;
         }
-        .modal-footer {
-            border-top: 1px solid var(--border);
-            padding: 1rem;
-            background: #f8fafc;
-            border-radius: 0 0 12px 12px;
+        .modal-title { font-weight: 700; font-size: 1rem; }
+        .modal-body { padding: 1.5rem; }
+        
+        /* Flag Header */
+        .flag-header {
+            height: 100px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+        .flag-header::after {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+        }
+        .flag-header-content {
+            position: absolute; bottom: 15px; right: 20px; left: 20px;
+            z-index: 2; color: white;
+            display: flex; align-items: flex-end; justify-content: space-between;
         }
 
         /* Inputs */
+        .form-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--secondary);
+            margin-bottom: 0.4rem;
+        }
         .form-control, .form-select {
-            border-radius: 6px;
-            border: 1px solid var(--border);
-            padding: 0.6rem 0.8rem;
+            border-radius: 8px;
+            padding: 0.65rem 0.85rem;
             font-size: 0.9rem;
+            border-color: var(--border);
         }
         .form-control:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
-        }
-        .input-group-text {
-            background: #f8fafc;
-            border-color: var(--border);
-            color: var(--secondary);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
 
-        /* Buttons */
-        .btn {
-            font-weight: 500;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            font-size: 0.9rem;
-        }
-        .btn-primary {
-            background-color: var(--accent);
-            border-color: var(--accent);
-        }
-        .btn-primary:hover {
-            background-color: #1d4ed8;
-        }
-        .btn-outline-secondary {
-            color: var(--secondary);
-            border-color: var(--border);
-        }
-        .btn-outline-secondary:hover {
-            background-color: #f1f5f9;
-            color: var(--primary);
-        }
-
-        /* Badges & Icons */
-        .icon-box {
-            width: 36px; height: 36px;
-            display: flex; align-items: center; justify-content: center;
-            border-radius: 6px;
-            font-size: 1.1rem;
-        }
-        .bg-soft-blue { background: #eff6ff; color: var(--accent); }
-        .bg-soft-green { background: #f0fdf4; color: #16a34a; }
-        
-        /* Flag Header for Auth Modal */
-        .flag-bg {
-            height: 80px; /* Smaller header */
-            background-size: cover;
-            background-position: center;
-            border-radius: 12px 12px 0 0;
-            position: relative;
-        }
-        .flag-overlay {
-            position: absolute; inset: 0;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.6));
-            border-radius: 12px 12px 0 0;
-            display: flex; align-items: flex-end; padding: 1rem;
-        }
-        .flag-bg.eg { background-image: url('https://flagcdn.com/w640/eg.png'); }
-        .flag-bg.sa { background-image: url('https://flagcdn.com/w640/sa.png'); }
     </style>
 </head>
 <body>
 
-    <!-- Navbar -->
-    <nav class="navbar sticky-top">
-        <div class="container">
-            <a class="navbar-brand d-flex align-items-center gap-2 brand-logo" href="#">
-                <i class="bi bi-code-square text-primary"></i>
-                MetaConnect <span class="text-muted fw-normal ms-1" style="font-size: 0.8rem;">Developer Console</span>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container-fluid px-4 main-container my-0">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+                <div style="background: var(--primary); width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white;">
+                    <i class="bi bi-code-slash"></i>
+                </div>
+                <span>MetaConnect</span>
             </a>
             
             <div class="d-flex align-items-center gap-3">
-                <div class="nav-user-badge d-flex align-items-center gap-2">
-                    <i class="bi bi-person-circle"></i>
+                <div class="user-pill">
+                    <div style="width: 8px; height: 8px; background: #22c55e; border-radius: 50%;"></div>
                     <%= developer.name %>
                 </div>
-                <a href="/dev/support" class="btn btn-outline-secondary btn-sm">
-                    <i class="bi bi-headset"></i> الدعم
+                <a href="/dev/support" class="btn btn-outline-dark btn-sm rounded-pill px-3 fw-bold border-2" style="border-color: #e2e8f0;">
+                    <i class="bi bi-headset me-1"></i> الدعم
                 </a>
-                <a href="/logout" class="btn btn-light text-danger btn-sm border">
-                    <i class="bi bi-box-arrow-right"></i>
+                <a href="/logout" class="btn btn-light text-danger btn-sm rounded-circle border" style="width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-power"></i>
                 </a>
             </div>
         </div>
     </nav>
 
-    <div class="container py-5">
+    <div class="main-container">
         
-        <!-- Top Section -->
-        <div class="row g-4 mb-4">
+        <!-- Stats & Quick Add -->
+        <div class="row g-4">
             <!-- Wallet -->
             <div class="col-lg-4">
-                <div class="stat-card d-flex flex-column justify-content-between">
+                <div class="dashboard-card wallet-widget d-flex flex-column justify-content-between">
                     <div>
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <h6 class="text-uppercase text-muted small fw-bold ls-1">المحفظة الحالية</h6>
-                            <div class="icon-box bg-soft-blue"><i class="bi bi-wallet2"></i></div>
+                        <div class="d-flex justify-content-between align-items-start">
+                            <span class="text-white-50 text-uppercase small fw-bold ls-1"><i class="bi bi-wallet2 me-2"></i> الرصيد الحالي</span>
+                            <div style="background: rgba(255,255,255,0.1); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                <i class="bi bi-graph-up-arrow text-white small"></i>
+                            </div>
                         </div>
-                        <div class="d-flex align-items-baseline gap-2">
-                            <span class="wallet-balance"><%= parseFloat(developer.wallet_balance).toFixed(2) %></span>
-                            <span class="currency">EGP</span>
-                        </div>
+                        <div class="wallet-amount"><%= parseFloat(developer.wallet_balance).toFixed(2) %></div>
+                        <div class="wallet-currency">جنيه مصري (EGP)</div>
                     </div>
-                    <button class="btn btn-light w-100 border mt-3" onclick="alert('يرجى التواصل مع المبيعات للشحن')">
-                        <i class="bi bi-plus-lg me-1"></i> إضافة رصيد
+                    <button class="wallet-btn mt-4" onclick="alert('تواصل مع المبيعات للشحن')">
+                        <i class="bi bi-plus-lg me-1"></i> شحن الرصيد
                     </button>
                 </div>
             </div>
 
-            <!-- Add New Client -->
+            <!-- Add Company -->
             <div class="col-lg-8">
-                <div class="stat-card">
-                    <div class="d-flex align-items-center gap-2 mb-4 pb-3 border-bottom">
-                        <i class="bi bi-building-add text-primary"></i>
-                        <h6 class="fw-bold mb-0">تسجيل منشأة جديدة</h6>
+                <div class="dashboard-card">
+                    <div class="d-flex align-items-center gap-2 mb-4 border-bottom pb-3">
+                        <div style="width: 32px; height: 32px; background: #eff6ff; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--primary);">
+                            <i class="bi bi-building-add"></i>
+                        </div>
+                        <h5 class="fw-bold mb-0">تسجيل منشأة جديدة</h5>
                     </div>
+                    
                     <form action="/dev/add-company" method="POST" class="row g-3">
                         <div class="col-md-5">
-                            <label class="form-label small text-muted fw-bold">اسم النشاط التجاري</label>
-                            <input type="text" name="name" class="form-control" placeholder="مثال: مؤسسة النور" required>
+                            <label class="form-label">اسم النشاط التجاري</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white text-muted border-end-0"><i class="bi bi-shop"></i></span>
+                                <input type="text" name="name" class="form-control border-start-0" placeholder="مثال: متجر النور" required>
+                            </div>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label small text-muted fw-bold">الرقم الضريبي</label>
+                            <label class="form-label">الرقم الضريبي</label>
                             <input type="text" name="tax_id" class="form-control font-monospace" placeholder="3xxxxxxxxx" required>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label small text-muted fw-bold">الدولة</label>
+                            <label class="form-label">الدولة</label>
                             <select name="country_code" class="form-select">
-                                <option value="EG">مصر (E-Invoice)</option>
-                                <option value="SA">السعودية (ZATCA)</option>
+                                <option value="EG">🇪🇬 مصر</option>
+                                <option value="SA">🇸🇦 السعودية</option>
                             </select>
                         </div>
                         <div class="col-12 text-end mt-2">
-                            <button type="submit" class="btn btn-primary px-4">
-                                <i class="bi bi-check-lg me-1"></i> تسجيل المنشأة
+                            <button type="submit" class="btn btn-primary px-4 fw-bold rounded-3">
+                                <i class="bi bi-check2-circle me-1"></i> تسجيل
                             </button>
                         </div>
                     </form>
@@ -280,21 +378,21 @@
             </div>
         </div>
 
-        <!-- Clients Table -->
-        <div class="custom-table shadow-sm">
-            <div class="p-3 bg-white border-bottom d-flex justify-content-between align-items-center">
-                <h6 class="fw-bold mb-0 text-primary"><i class="bi bi-grid me-2"></i> العملاء المسجلين</h6>
-                <span class="badge bg-light text-dark border fw-normal">Total: <%= companies.length %></span>
+        <!-- Table Section -->
+        <div class="table-container">
+            <div class="table-header">
+                <h6 class="fw-bold mb-0"><i class="bi bi-grid-3x3-gap-fill text-primary me-2"></i> إدارة العملاء</h6>
+                <span class="badge bg-secondary bg-opacity-10 text-secondary border rounded-pill px-3">Total: <%= companies.length %></span>
             </div>
             <div class="table-responsive">
-                <table class="table table-hover">
+                <table class="table">
                     <thead>
                         <tr>
-                            <th class="ps-4">المنشأة / المعرف</th>
-                            <th>الرصيد المتاح</th>
-                            <th>الاستهلاك الفعلي</th>
-                            <th width="22%">بيانات الوصول (Portal)</th>
-                            <th class="text-end pe-4">الإجراءات</th>
+                            <th class="ps-4">المنشأة</th>
+                            <th>الرصيد</th>
+                            <th>الاستهلاك</th>
+                            <th width="250px">بيانات الوصول</th>
+                            <th class="text-end pe-4">تحكم سريع</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -302,12 +400,16 @@
                             <tr>
                                 <td class="ps-4">
                                     <div class="d-flex align-items-center gap-3">
-                                        <div class="icon-box bg-light border text-primary fw-bold">
+                                        <div class="company-avatar">
                                             <%= comp.name.charAt(0) %>
                                         </div>
                                         <div>
                                             <div class="fw-bold text-dark"><%= comp.name %></div>
-                                            <div class="small text-muted font-monospace"><%= comp.tax_id %></div>
+                                            <div class="small text-muted d-flex align-items-center gap-1">
+                                                <span class="font-monospace"><%= comp.tax_id %></span>
+                                                <i class="bi bi-dot"></i>
+                                                <%= comp.country_code %>
+                                            </div>
                                         </div>
                                     </div>
                                 </td>
@@ -315,44 +417,30 @@
                                     <% if(comp.allocated_balance > 0) { %>
                                         <span class="fw-bold text-success font-monospace"><%= parseFloat(comp.allocated_balance).toFixed(2) %></span> <small class="text-muted">EGP</small>
                                     <% } else { %>
-                                        <span class="text-muted small font-monospace">-</span>
+                                        <span class="text-muted small">-</span>
                                     <% } %>
                                 </td>
                                 <td>
-                                    <!-- حساب التكلفة: عدد الفواتير * 0.50 -->
-                                    <% 
-                                        let cost = (comp.invoices_used || 0) * 0.50; 
-                                    %>
-                                    <div class="d-flex flex-column">
-                                        <span class="fw-bold text-dark font-monospace"><%= cost.toFixed(2) %> <small class="text-muted fw-normal">EGP</small></span>
-                                        <span class="text-muted" style="font-size: 0.7rem;"><%= comp.invoices_used %> Invoices</span>
+                                    <div class="d-flex flex-column align-items-start gap-1">
+                                        <span class="badge-invoice"><i class="bi bi-receipt me-1"></i> <%= comp.invoices_used || 0 %> فاتورة</span>
+                                        <% if(comp.invoices_used > 0) { %>
+                                            <small class="text-muted" style="font-size: 0.7rem;">التكلفة: <%= (comp.invoices_used * 0.50).toFixed(2) %> EGP</small>
+                                        <% } %>
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <div class="input-group input-group-sm" style="width: 160px;">
-                                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-person"></i></span>
-                                            <input type="text" class="form-control border-start-0 bg-white text-muted" value="store_<%= comp.id %>" readonly disabled>
-                                        </div>
-                                        <button class="btn btn-sm btn-light border text-primary" 
-                                                onclick="openAuthModal('<%= comp.id %>', '<%= comp.name %>', 'store_<%= comp.id %>')"
-                                                title="تغيير كلمة المرور">
-                                            <i class="bi bi-key-fill"></i>
+                                    <div class="auth-input-group">
+                                        <i class="bi bi-person-lock ms-2 text-muted small"></i>
+                                        <input type="text" class="auth-val" value="store_<%= comp.id %>" readonly>
+                                        <button class="auth-edit-btn" onclick="openAuthModal('<%= comp.id %>', '<%= comp.name %>', 'store_<%= comp.id %>')" title="تغيير كلمة المرور">
+                                            <i class="bi bi-pencil-square" style="font-size: 0.9rem;"></i>
                                         </button>
                                     </div>
                                 </td>
                                 <td class="text-end pe-4">
-                                    <div class="btn-group">
-                                        <button class="btn btn-sm btn-outline-secondary" onclick="openAllocateModal('<%= comp.id %>', '<%= comp.name %>')">
-                                            <i class="bi bi-cash me-1"></i> شحن
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-secondary" onclick="openCredsModal('<%= comp.id %>', '<%= comp.name %>', '<%= comp.country_code %>')">
-                                            <i class="bi bi-sliders"></i> ربط
-                                        </button>
-                                        <a href="/docs" class="btn btn-sm btn-outline-secondary">
-                                            <i class="bi bi-code-slash"></i>
-                                        </a>
-                                    </div>
+                                    <button class="action-btn" onclick="openAllocateModal('<%= comp.id %>', '<%= comp.name %>')" title="شحن رصيد"><i class="bi bi-cash"></i></button>
+                                    <button class="action-btn" onclick="openCredsModal('<%= comp.id %>', '<%= comp.name %>', '<%= comp.country_code %>')" title="الربط"><i class="bi bi-link-45deg"></i></button>
+                                    <a href="/docs?company_id=<%= comp.id %>" class="action-btn text-decoration-none" title="التوثيق"><i class="bi bi-file-earmark-code"></i></a>
                                 </td>
                             </tr>
                         <% }); %>
@@ -362,72 +450,74 @@
         </div>
     </div>
 
-    <!-- =================== MODALS (Refined) =================== -->
+    <!-- ================= MODALS ================= -->
 
-    <!-- 1. Update Auth Modal -->
+    <!-- 1. Auth Update Modal -->
     <div class="modal fade" id="authUpdateModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-sm">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h6 class="modal-title fw-bold">تحديث بيانات الدخول</h6>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <div class="modal-header pb-0 border-0">
+                    <button type="button" class="btn-close ms-0 me-auto" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body pt-0 text-center">
+                    <div style="width: 50px; height: 50px; background: #e0e7ff; color: var(--primary); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
+                        <i class="bi bi-shield-lock-fill fs-4"></i>
+                    </div>
+                    <h5 class="fw-bold mb-1">تأمين الحساب</h5>
+                    <p class="text-muted small mb-4" id="auth_company_name"></p>
+                    
                     <form id="authForm" onsubmit="submitAuthForm(event)">
                         <input type="hidden" name="company_id" id="auth_company_id">
-                        <p class="text-muted small mb-3">المنشأة: <span id="auth_company_name" class="fw-bold text-dark"></span></p>
-                        
-                        <div class="mb-3">
-                            <label class="form-label small text-muted">اسم المستخدم الجديد</label>
-                            <input type="text" name="new_username" id="auth_new_username" class="form-control form-control-sm" required>
+                        <div class="text-start mb-3">
+                            <label class="form-label">اسم المستخدم</label>
+                            <input type="text" name="new_username" id="auth_new_username" class="form-control bg-light" required>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label small text-muted">كلمة المرور الجديدة</label>
-                            <input type="text" name="new_password" class="form-control form-control-sm" placeholder="اكتب كلمة مرور جديدة..." required minlength="6">
+                        <div class="text-start mb-4">
+                            <label class="form-label">كلمة المرور الجديدة</label>
+                            <input type="text" name="new_password" class="form-control bg-light" placeholder="New Password" required minlength="6">
                         </div>
-                        <button type="submit" class="btn btn-primary w-100 btn-sm">حفظ التغييرات</button>
+                        <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">حفظ التغييرات</button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 2. Allocate Balance Modal -->
+    <!-- 2. Allocate Modal -->
     <div class="modal fade" id="allocateModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-sm">
             <div class="modal-content">
-                <div class="modal-header bg-light">
-                    <h6 class="modal-title fw-bold">إضافة رصيد للمنشأة</h6>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="d-flex justify-content-between mb-3 small">
-                        <span class="text-muted">رصيدك المتاح:</span>
-                        <span class="fw-bold"><%= parseFloat(developer.wallet_balance).toFixed(2) %></span>
+                <div class="modal-body p-4">
+                    <h6 class="fw-bold mb-3">إضافة رصيد للمنشأة</h6>
+                    <div class="alert alert-light border d-flex justify-content-between align-items-center py-2 px-3 mb-3">
+                        <small class="text-muted">رصيدك:</small>
+                        <span class="fw-bold font-monospace"><%= parseFloat(developer.wallet_balance).toFixed(2) %></span>
                     </div>
                     <form action="/dev/allocate-balance" method="POST">
                         <input type="hidden" name="company_id" id="alloc_company_id">
-                        <label class="form-label small text-muted">المبلغ (EGP)</label>
-                        <input type="number" name="amount" class="form-control fw-bold text-center mb-3" placeholder="0.00" step="0.01" required>
-                        <button type="submit" class="btn btn-success w-100 btn-sm">تأكيد التحويل</button>
+                        <div class="input-group mb-3">
+                            <input type="number" name="amount" class="form-control fw-bold text-center" placeholder="0.00" step="0.01" required>
+                            <span class="input-group-text bg-light">EGP</span>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100 fw-bold">تأكيد التحويل</button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 3. Credentials Modal (Flag Header) -->
+    <!-- 3. Credentials Modal -->
     <div class="modal fade" id="credsModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content overflow-hidden">
-                <!-- Dynamic Header -->
-                <div id="modal_flag_header" class="flag-bg">
-                    <div class="flag-overlay">
+                <!-- Flag Header -->
+                <div id="modal_header_bg" class="flag-header">
+                    <div class="flag-header-content">
                         <div>
-                            <h5 class="text-white fw-bold mb-0" id="modal_country_title">Country Settings</h5>
-                            <small class="text-white-50" id="creds_company_name_display">Company Name</small>
+                            <h5 class="fw-bold mb-0 text-white" id="modal_country_title">Country Settings</h5>
+                            <small class="text-white-50 font-monospace" id="creds_company_name_display">Company Name</small>
                         </div>
-                        <button type="button" class="btn-close btn-close-white ms-auto mb-auto" data-bs-dismiss="modal"></button>
+                        <button type="button" class="btn-close btn-close-white mb-1" data-bs-dismiss="modal"></button>
                     </div>
                 </div>
 
@@ -438,36 +528,37 @@
 
                         <!-- Egypt Fields -->
                         <div id="egypt_fields" style="display:none;">
-                            <div class="alert alert-light border small mb-3">
-                                <i class="bi bi-info-circle me-1"></i> أدخل بيانات Production من بوابة الضرائب.
+                            <div class="alert alert-primary bg-opacity-10 border-0 d-flex gap-2 align-items-center small mb-3 text-primary">
+                                <i class="bi bi-info-circle-fill"></i> <span>أدخل بيانات Production (SDK) من بوابة الضرائب.</span>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label small text-muted fw-bold">Client ID</label>
-                                <input type="text" name="client_id" class="form-control font-monospace small">
+                                <label class="form-label">Client ID</label>
+                                <input type="text" name="client_id" class="form-control font-monospace text-muted" placeholder="xxxxxxxx-xxxx-xxxx...">
                             </div>
                             <div class="mb-3">
-                                <label class="form-label small text-muted fw-bold">Client Secret</label>
-                                <input type="password" name="client_secret" class="form-control font-monospace small">
+                                <label class="form-label">Client Secret</label>
+                                <input type="password" name="client_secret" class="form-control font-monospace text-muted" placeholder="••••••••••••">
                             </div>
                         </div>
 
                         <!-- Saudi Fields -->
                         <div id="saudi_fields" style="display:none;">
-                            <div class="d-flex align-items-center justify-content-between mb-3">
-                                <div class="d-flex align-items-center gap-2">
-                                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Zakat%2C_Tax_and_Customs_Authority_Logo.svg/1200px-Zakat%2C_Tax_and_Customs_Authority_Logo.svg.png" height="30">
-                                </div>
-                                <a href="#" class="small text-decoration-none" onclick="alert('سجل الدخول لمنصة فاتورة > إنشاء وحدة جديدة > نسخ الكود')">كيف أحصل على الكود؟</a>
+                            <div class="text-center mb-4">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Zakat%2C_Tax_and_Customs_Authority_Logo.svg/1200px-Zakat%2C_Tax_and_Customs_Authority_Logo.svg.png" height="40" class="mb-2">
+                                <p class="text-muted small">الربط مع هيئة الزكاة والضريبة والجمارك</p>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label small text-muted fw-bold">OTP Code (6 Digits)</label>
-                                <input type="text" name="otp" class="form-control font-monospace text-center letter-spacing-2" placeholder="123456" maxlength="6">
+                                <label class="form-label d-flex justify-content-between">
+                                    <span>كود التفعيل (OTP)</span>
+                                    <a href="#" class="text-decoration-none small" onclick="alert('من بوابة فاتورة > إعداد الحلول التقنية')">مساعدة؟</a>
+                                </label>
+                                <input type="text" name="otp" class="form-control font-monospace text-center fw-bold fs-5 letter-spacing-2" placeholder="123456" maxlength="6" style="letter-spacing: 3px;">
                             </div>
                         </div>
                     </div>
-                    <div class="modal-footer bg-white">
+                    <div class="modal-footer bg-light py-2">
                         <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">إلغاء</button>
-                        <button type="submit" class="btn btn-primary btn-sm px-4">حفظ الإعدادات</button>
+                        <button type="submit" class="btn btn-primary btn-sm px-4 fw-bold">حفظ البيانات</button>
                     </div>
                 </form>
             </div>
@@ -477,16 +568,15 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // 1. Auth Modal Logic
+        // 1. Auth Update Logic
         function openAuthModal(id, name, user) {
             document.getElementById('auth_company_id').value = id;
             document.getElementById('auth_company_name').innerText = name;
             document.getElementById('auth_new_username').value = user;
-            document.querySelector('input[name="new_password"]').value = ''; // Clear pass
+            document.querySelector('input[name="new_password"]').value = ''; 
             new bootstrap.Modal(document.getElementById('authUpdateModal')).show();
         }
 
-        // AJAX Update for Auth (No Refresh)
         async function submitAuthForm(e) {
             e.preventDefault();
             const form = e.target;
@@ -501,45 +591,46 @@
                 });
 
                 if (response.ok) {
-                    // Close Modal
                     bootstrap.Modal.getInstance(document.getElementById('authUpdateModal')).hide();
-                    // Show Success Toast
-                    alert('✅ تم تحديث بيانات الدخول بنجاح!');
+                    alert('✅ تم تحديث البيانات بنجاح!');
+                    // تحديث القيمة في الجدول فوراً (Visual Update)
+                    const inputField = document.querySelector(`input[value="store_${data.company_id}"]`);
+                    if(inputField) inputField.value = data.new_username;
                 } else {
-                    alert('❌ حدث خطأ أثناء التحديث');
+                    const result = await response.json();
+                    alert('❌ ' + (result.message || 'فشل التحديث'));
                 }
             } catch (error) {
-                console.error('Error:', error);
-                alert('❌ خطأ في الاتصال');
+                alert('❌ خطأ في الاتصال بالسيرفر');
             }
         }
 
-        // 2. Allocate Modal Logic
+        // 2. Allocate Modal
         function openAllocateModal(id, name) {
             document.getElementById('alloc_company_id').value = id;
-            // document.getElementById('alloc_company_name').innerText = name;
             new bootstrap.Modal(document.getElementById('allocateModal')).show();
         }
 
-        // 3. Credentials Modal Logic
+        // 3. Credentials Modal
         function openCredsModal(id, name, country) {
             document.getElementById('creds_company_id').value = id;
             document.getElementById('creds_company_name_display').innerText = name;
             document.getElementById('creds_country_code').value = country;
 
-            const header = document.getElementById('modal_flag_header');
+            const header = document.getElementById('modal_header_bg');
             const title = document.getElementById('modal_country_title');
 
-            header.classList.remove('eg', 'sa');
-            
+            // تنظيف الكلاسات القديمة (مهم جداً)
+            header.style.backgroundImage = ''; 
+
             if (country === 'EG') {
-                header.classList.add('eg');
-                title.innerText = 'الربط مع الضرائب المصرية';
+                header.style.backgroundImage = "url('https://flagcdn.com/w640/eg.png')";
+                title.innerText = 'الربط مع مصر (ETA)';
                 document.getElementById('egypt_fields').style.display = 'block';
                 document.getElementById('saudi_fields').style.display = 'none';
             } else {
-                header.classList.add('sa');
-                title.innerText = 'الربط مع هيئة الزكاة';
+                header.style.backgroundImage = "url('https://flagcdn.com/w640/sa.png')";
+                title.innerText = 'الربط مع السعودية (ZATCA)';
                 document.getElementById('egypt_fields').style.display = 'none';
                 document.getElementById('saudi_fields').style.display = 'block';
             }
