@@ -3,186 +3,206 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MetaConnect | Developer Console</title>
+    <title>MetaConnect | Console</title>
     
-    <!-- Fonts & Icons -->
+    <!-- Google Fonts (Cairo + Tajawal) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     
     <style>
         :root {
-            --primary: #2563eb; --primary-dark: #1e40af; --secondary: #64748b;
-            --bg-body: #f8fafc; --surface: #ffffff; --border: #cbd5e1;
-            --success: #10b981; --warning: #f59e0b;
+            --primary: #0f172a; --primary-light: #334155; --accent: #3b82f6;
+            --bg-body: #f1f5f9; --surface: #ffffff; --border: #e2e8f0;
+            --success-soft: #dcfce7; --success-text: #15803d;
+            --warning-soft: #fef3c7; --warning-text: #b45309;
+            --font-main: 'Tajawal', sans-serif;
         }
-        body { font-family: 'Tajawal', sans-serif; background-color: var(--bg-body); color: #0f172a; }
+        body { font-family: var(--font-main); background-color: var(--bg-body); color: #1e293b; -webkit-font-smoothing: antialiased; }
 
         /* Navbar */
-        .navbar { background: rgba(255, 255, 255, 0.95); border-bottom: 1px solid var(--border); padding: 0.8rem 0; backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000; }
-        .user-pill { background: #f1f5f9; padding: 6px 16px; border-radius: 50px; font-size: 0.85rem; font-weight: 600; color: var(--secondary); display: flex; align-items: center; gap: 8px; }
+        .navbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
+        .brand-logo { font-family: 'Cairo', sans-serif; font-weight: 800; letter-spacing: -0.5px; color: var(--primary); font-size: 1.4rem; }
+        .nav-pill-user { background: #f8fafc; border: 1px solid var(--border); padding: 6px 16px; border-radius: 12px; font-weight: 600; font-size: 0.9rem; color: #475569; display: flex; align-items: center; gap: 10px; transition: 0.2s; }
+        .nav-pill-user:hover { background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
-        /* Dashboard Cards */
-        .dashboard-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: transform 0.2s; }
-        .wallet-widget { background: linear-gradient(135deg, #0f172a 0%, #334155 100%); color: white; border: none; position: relative; overflow: hidden; }
-        .wallet-widget::after { content: ''; position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: rgba(255,255,255,0.1); border-radius: 50%; }
+        /* Main Cards */
+        .stats-card { background: var(--primary); color: white; border-radius: 20px; padding: 2rem; position: relative; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.2); }
+        .stats-card::before { content: ''; position: absolute; top: -50%; right: -20%; width: 200px; height: 200px; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%); }
+        .wallet-balance { font-size: 3rem; font-weight: 800; letter-spacing: -1px; line-height: 1; }
+        .add-btn-card { background: var(--surface); border: 1px dashed #94a3b8; border-radius: 20px; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: 0.2s; min-height: 180px; }
+        .add-btn-card:hover { border-color: var(--accent); background: #eff6ff; transform: translateY(-2px); }
 
-        /* Table Styling */
-        .table-container { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; margin-top: 2rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-        .table-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: #fff; }
-        .table th { background: #f8fafc; font-weight: 700; color: var(--secondary); font-size: 0.75rem; text-transform: uppercase; padding: 1rem 1.5rem; letter-spacing: 0.5px; }
-        .table td { padding: 1rem 1.5rem; vertical-align: middle; border-bottom: 1px solid var(--border); }
+        /* Modern Table */
+        .content-box { background: var(--surface); border-radius: 24px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); overflow: hidden; margin-top: 2.5rem; }
+        .box-header { padding: 1.5rem 2rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: #fff; }
+        .table thead th { background: #f8fafc; color: #64748b; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; padding: 1rem 2rem; border-bottom: 1px solid var(--border); }
+        .table tbody td { padding: 1.2rem 2rem; vertical-align: middle; border-bottom: 1px solid #f1f5f9; color: #334155; font-weight: 500; }
+        .table tbody tr:last-child td { border-bottom: none; }
         
-        .company-icon { width: 40px; height: 40px; background: #f0f9ff; color: var(--primary); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; border: 1px solid #bae6fd; }
+        .company-avatar { width: 48px; height: 48px; border-radius: 14px; background: #eff6ff; color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 800; border: 1px solid #dbeafe; }
+        
+        /* Status Badges */
+        .status-badge { padding: 6px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; }
+        .status-connected { background: var(--success-soft); color: var(--success-text); border: 1px solid #bbf7d0; }
+        .status-pending { background: var(--warning-soft); color: var(--warning-text); border: 1px solid #fde68a; }
         
         /* Action Buttons */
-        .action-btn { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid var(--border); background: #fff; color: var(--secondary); margin-left: 4px; transition: 0.2s; }
-        .action-btn:hover { border-color: var(--primary); color: var(--primary); background: #eff6ff; }
-        .action-btn.connect-btn { color: var(--primary); border-color: #bfdbfe; background: #eff6ff; }
-        .action-btn.connect-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
-
-        /* Badges */
-        .badge-free { background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; border: 1px solid #bbf7d0; }
-        .badge-country { font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; background: #f1f5f9; border: 1px solid #e2e8f0; color: #475569; font-weight: 600; display: flex; align-items: center; gap: 4px; width: fit-content; }
-
-        /* Form Elements */
-        .form-control, .form-select { border-radius: 8px; padding: 0.6rem 0.8rem; font-size: 0.9rem; border-color: #cbd5e1; }
-        .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
-        .req-star { color: #ef4444; margin-right: 2px; font-weight: bold; }
-        .form-section-title { font-size: 0.8rem; font-weight: 700; color: var(--primary); margin: 1rem 0 0.5rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; }
+        .action-btn { width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--border); background: #fff; color: #64748b; display: inline-flex; align-items: center; justify-content: center; transition: 0.2s; margin-left: 6px; }
+        .action-btn:hover { background: #f8fafc; color: var(--primary); border-color: #cbd5e1; transform: translateY(-1px); }
+        .action-btn.primary-action { background: #eff6ff; color: var(--accent); border-color: #bfdbfe; }
+        .action-btn.primary-action:hover { background: var(--accent); color: white; border-color: var(--accent); }
 
         /* Modals */
-        .modal-content { border: none; border-radius: 16px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
-        .flag-header { height: 100px; background-size: cover; background-position: center; position: relative; }
-        .flag-header::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); }
-        .flag-content { position: absolute; bottom: 15px; right: 20px; left: 20px; z-index: 2; color: white; }
+        .modal-content { border: none; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); overflow: hidden; }
+        .modal-header { padding: 1.5rem; border-bottom: 1px solid var(--border); background: #fff; }
+        .form-control { padding: 0.8rem 1rem; border-radius: 12px; border-color: #cbd5e1; background: #f8fafc; font-weight: 500; }
+        .form-control:focus { background: #fff; border-color: var(--accent); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
     </style>
 </head>
 <body>
 
-    <nav class="navbar">
-        <div class="container-fluid px-4" style="max-width: 1200px; margin: 0 auto;">
-            <a class="navbar-brand d-flex align-items-center gap-2" href="#">
-                <div style="background: var(--primary); width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white;">
-                    <i class="bi bi-code-slash"></i>
-                </div>
-                <span class="fw-bold text-primary-dark">MetaConnect</span>
-            </a>
+    <!-- Navbar -->
+    <nav class="navbar sticky-top">
+        <div class="container" style="max-width: 1200px;">
             <div class="d-flex align-items-center gap-3">
-                <div class="user-pill">
+                <div style="width: 40px; height: 40px; background: var(--primary); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white;">
+                    <i class="bi bi-boxes fs-5"></i>
+                </div>
+                <span class="brand-logo">MetaConnect</span>
+            </div>
+            
+            <div class="d-flex align-items-center gap-3">
+                <div class="nav-pill-user">
                     <div style="width: 8px; height: 8px; background: #22c55e; border-radius: 50%;"></div>
                     <%= developer.name %>
                 </div>
-                <a href="/logout" class="btn btn-light text-danger btn-sm rounded-circle border" style="width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;">
-                    <i class="bi bi-power"></i>
+                <a href="/logout" class="action-btn text-danger border-danger-subtle" style="background: #fef2f2;" title="تسجيل خروج">
+                    <i class="bi bi-box-arrow-left"></i>
                 </a>
             </div>
         </div>
     </nav>
 
-    <div class="container py-4" style="max-width: 1200px;">
+    <!-- Content -->
+    <div class="container py-5" style="max-width: 1200px;">
         
-        <!-- Top Section: Wallet & Actions -->
-        <div class="row g-4 mb-4">
-            <div class="col-md-4">
-                <div class="dashboard-card wallet-widget h-100 d-flex flex-column justify-content-center">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <span class="text-white-50 small fw-bold text-uppercase ls-1">المحفظة الحالية</span>
-                        <i class="bi bi-wallet2 text-white-50"></i>
+        <!-- Header Stats -->
+        <div class="row g-4">
+            <!-- Wallet Card -->
+            <div class="col-lg-5">
+                <div class="stats-card h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-white-50 fw-bold text-uppercase small ls-1">رصيد المحفظة</span>
+                            <span class="badge bg-white bg-opacity-10 border border-white border-opacity-25 rounded-pill px-3 py-2 fw-normal">Live Balance</span>
+                        </div>
+                        <div class="wallet-balance mt-2">
+                            <%= parseFloat(developer.wallet_balance).toFixed(2) %><span class="fs-4 ms-2 fw-light opacity-75">EGP</span>
+                        </div>
                     </div>
-                    <h2 class="fw-bold mb-0"><%= parseFloat(developer.wallet_balance).toFixed(2) %> <small class="fs-6 text-white-50">EGP</small></h2>
+                    <div class="mt-4 pt-3 border-top border-white border-opacity-10 d-flex gap-3">
+                        <button class="btn btn-light fw-bold px-4 rounded-pill" onclick="window.open('https://wa.me/201000000000', '_blank')">
+                            <i class="bi bi-plus-lg me-2"></i>شحن الرصيد
+                        </button>
+                        <button class="btn btn-outline-light fw-bold px-4 rounded-pill" onclick="location.href='/dev/support'">
+                            <i class="bi bi-headset me-2"></i>الدعم الفني
+                        </button>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-8">
-                <div class="dashboard-card h-100 d-flex align-items-center justify-content-between">
-                    <div>
-                        <h5 class="fw-bold mb-1">إدارة الشركات والربط</h5>
-                        <p class="text-muted small mb-0">قم بإضافة الشركات الجديدة وإعداد الربط الحكومي (ETA / ZATCA).</p>
+
+            <!-- Add Company Action -->
+            <div class="col-lg-7">
+                <div class="add-btn-card" onclick="new bootstrap.Modal(document.getElementById('addCompanyModal')).show()">
+                    <div class="mb-3 text-primary bg-primary bg-opacity-10 p-3 rounded-circle">
+                        <i class="bi bi-building-add fs-2"></i>
                     </div>
-                    <button class="btn btn-primary fw-bold px-4 py-2" onclick="new bootstrap.Modal(document.getElementById('addCompanyModal')).show()">
-                        <i class="bi bi-plus-lg me-2"></i> تسجيل منشأة
-                    </button>
+                    <h5 class="fw-bold text-primary mb-1">تسجيل منشأة جديدة</h5>
+                    <p class="text-muted small mb-0">اضغط هنا لإضافة عميل جديد والبدء في إجراءات الربط</p>
                 </div>
             </div>
         </div>
 
-        <!-- Companies Table -->
-        <div class="table-container">
-            <div class="table-header">
-                <h6 class="fw-bold mb-0"><i class="bi bi-list-ul me-2 text-primary"></i>المنشآت المسجلة</h6>
-                <span class="badge bg-secondary bg-opacity-10 text-secondary border"><%= companies.length %> منشأة</span>
+        <!-- Companies List -->
+        <div class="content-box">
+            <div class="box-header">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-grid-fill text-primary"></i>
+                    <h6 class="fw-bold mb-0 text-primary">العملاء والمنشآت</h6>
+                </div>
+                <span class="badge bg-secondary bg-opacity-10 text-secondary border px-3 py-2 rounded-pill">Total: <%= companies.length %></span>
             </div>
             <div class="table-responsive">
                 <table class="table mb-0">
                     <thead>
                         <tr>
                             <th class="ps-4">المنشأة</th>
-                            <th>الرصيد (المدفوع)</th>
-                            <th>الرصيد (المجاني)</th>
-                            <th>حالة الربط</th>
-                            <th class="text-end pe-4">الإجراءات</th>
+                            <th>تفاصيل الرصيد</th>
+                            <th>حالة الربط الحكومي</th>
+                            <th class="text-end pe-4">لوحة التحكم</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <% companies.forEach(function(comp) { %>
-                            <% 
-                                // تحديد العملة والعلم
-                                let currency = comp.country_code === 'SA' ? 'SAR' : 'EGP';
-                                let flagUrl = comp.country_code === 'SA' ? 'https://flagcdn.com/w20/sa.png' : 'https://flagcdn.com/w20/eg.png';
-                                
-                                // حساب الفواتير
-                                let paidInvoices = Math.floor((comp.allocated_balance || 0) / 0.5);
-                                let usedInvoices = comp.invoices_used || 0;
-                                let freeInvoices = comp.free_invoices_left || 0;
-
-                                // التحقق من وجود ربط
-                                let isConnected = false;
-                                try {
-                                    let creds = JSON.parse(comp.api_credentials || '{}');
-                                    if(comp.country_code === 'EG') isConnected = !!(creds.client_id);
-                                    else isConnected = !!(creds.binarySecurityToken);
-                                } catch(e) {}
-                            %>
-                            <tr>
-                                <td class="ps-4">
-                                    <div class="d-flex align-items-center gap-3">
-                                        <div class="company-icon"><%= comp.name.charAt(0) %></div>
-                                        <div>
-                                            <div class="fw-bold text-dark"><%= comp.name %></div>
-                                            <div class="badge-country mt-1">
-                                                <img src="<%= flagUrl %>" width="14">
-                                                <%= comp.country_code === 'SA' ? 'السعودية' : 'مصر' %>
-                                                <span class="text-muted fw-light ms-1">| <%= comp.tax_id %></span>
-                                            </div>
+                        <% companies.forEach(function(comp) { 
+                            let currency = comp.country_code === 'SA' ? 'SAR' : 'EGP';
+                            let flag = comp.country_code === 'SA' ? 'https://flagcdn.com/w20/sa.png' : 'https://flagcdn.com/w20/eg.png';
+                            let isConnected = false;
+                            try {
+                                let c = JSON.parse(comp.api_credentials || '{}');
+                                isConnected = comp.country_code === 'EG' ? !!c.client_id : !!c.binarySecurityToken;
+                            } catch(e) {}
+                        %>
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="company-avatar"><%= comp.name.charAt(0) %></div>
+                                    <div>
+                                        <div class="fw-bold text-dark mb-1"><%= comp.name %></div>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="badge bg-light border text-secondary fw-normal px-2 py-1 rounded-2 d-flex align-items-center gap-1">
+                                                <img src="<%= flag %>" width="14"> <%= comp.country_code %>
+                                            </span>
+                                            <span class="text-muted small font-monospace"><%= comp.tax_id %></span>
                                         </div>
                                     </div>
-                                </td>
-                                <td>
-                                    <div class="fw-bold text-dark"><%= parseFloat(comp.allocated_balance || 0).toFixed(2) %> <small class="text-muted" style="font-size:0.7em"><%= currency %></small></div>
-                                    <div class="small text-muted" style="font-size: 0.7rem;"><%= usedInvoices %> / <%= paidInvoices %> مستخدمة</div>
-                                </td>
-                                <td>
-                                    <% if(freeInvoices > 0) { %>
-                                        <span class="badge-free"><i class="bi bi-gift-fill me-1"></i> <%= freeInvoices %> متبقية</span>
-                                    <% } else { %>
-                                        <span class="text-muted small opacity-50">-</span>
-                                    <% } %>
-                                </td>
-                                <td>
-                                    <% if(isConnected) { %>
-                                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2"><i class="bi bi-check-circle-fill me-1"></i> متصل</span>
-                                    <% } else { %>
-                                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill px-2"><i class="bi bi-exclamation-circle-fill me-1"></i> غير مفعل</span>
-                                    <% } %>
-                                </td>
-                                <td class="text-end pe-4">
-                                    <button class="action-btn connect-btn" onclick='openCredsModal(<%= JSON.stringify(comp) %>)' title="إعدادات الربط"><i class="bi bi-sliders"></i></button>
-                                    <button class="action-btn" onclick="openAllocateModal('<%= comp.id %>', '<%= comp.name %>', '<%= currency %>')" title="شحن رصيد"><i class="bi bi-cash-stack"></i></button>
-                                    <button class="action-btn" onclick="openAuthModal('<%= comp.id %>', '<%= comp.name %>', 'store_<%= String(comp.id).substring(0,8) %>')" title="بيانات الدخول"><i class="bi bi-key"></i></button>
-                                </td>
-                            </tr>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-column gap-1">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <small class="text-muted fw-bold" style="width: 50px;">مدفوع:</small>
+                                        <span class="fw-bold text-dark font-monospace"><%= parseFloat(comp.allocated_balance || 0).toFixed(2) %> <%= currency %></span>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <small class="text-muted fw-bold" style="width: 50px;">مجاني:</small>
+                                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 rounded-pill font-monospace"><%= comp.free_invoices_left || 0 %></span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <% if(isConnected) { %>
+                                    <span class="status-badge status-connected"><i class="bi bi-check-circle-fill"></i> متصل بالنظام</span>
+                                <% } else { %>
+                                    <span class="status-badge status-pending"><i class="bi bi-exclamation-triangle-fill"></i> بانتظار التفعيل</span>
+                                <% } %>
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="d-flex justify-content-end gap-1">
+                                    <button class="action-btn primary-action" onclick='openCredsModal(<%= JSON.stringify(comp) %>)' data-bs-toggle="tooltip" title="إعدادات الربط">
+                                        <i class="bi bi-link-45deg fs-5"></i>
+                                    </button>
+                                    <button class="action-btn" onclick="openAllocateModal('<%= comp.id %>', '<%= comp.name %>', '<%= currency %>')" title="شحن رصيد">
+                                        <i class="bi bi-cash-stack"></i>
+                                    </button>
+                                    <button class="action-btn" onclick="openAuthModal('<%= comp.id %>', '<%= comp.name %>', 'store_<%= String(comp.id).substring(0,8) %>')" title="بيانات الدخول">
+                                        <i class="bi bi-key"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
                         <% }); %>
                     </tbody>
                 </table>
@@ -190,38 +210,35 @@
         </div>
     </div>
 
-    <!-- ================= MODALS ================= -->
+    <!-- ================= MODALS (Updated Designs) ================= -->
 
-    <!-- 1. Registration Modal (Smart Form) -->
+    <!-- 1. Registration Modal -->
     <div class="modal fade" id="addCompanyModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
-                <div class="modal-header bg-light border-bottom-0 pb-0">
-                    <h5 class="modal-title fw-bold">تسجيل منشأة جديدة</h5>
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-building-add me-2 text-primary"></i>تسجيل منشأة جديدة</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="px-3 pt-2 pb-0">
-                    <p class="text-muted small">يرجى اختيار الدولة وإدخال البيانات الرسمية بدقة للربط مع الجهات الحكومية.</p>
-                </div>
-                
                 <form action="/dev/add-company" method="POST" onsubmit="return validateRegistration(this)">
-                    <div class="modal-body pt-2">
-                        
-                        <!-- Country Selector -->
-                        <div class="row mb-3">
-                            <div class="col-12">
-                                <label class="form-label small fw-bold mb-2">دولة المقر الرئيسي</label>
-                                <div class="d-flex gap-2">
-                                    <div class="flex-fill">
+                    <div class="modal-body p-4">
+                        <!-- Country Selection -->
+                        <div class="row mb-4 justify-content-center">
+                            <div class="col-md-10">
+                                <label class="form-label text-center d-block text-muted small fw-bold mb-3">اختر الدولة لبدء التسجيل</label>
+                                <div class="row g-3">
+                                    <div class="col-6">
                                         <input type="radio" class="btn-check" name="country_code" id="c_eg" value="EG" checked onchange="toggleCountryFields()">
-                                        <label class="btn btn-outline-primary w-100 py-2 fw-bold" for="c_eg">
-                                            <img src="https://flagcdn.com/w40/eg.png" width="20" class="me-2"> مصر (ETA)
+                                        <label class="btn btn-outline-dark w-100 py-3 border-2 rounded-4 d-flex flex-column align-items-center gap-2 h-100" for="c_eg">
+                                            <img src="https://flagcdn.com/w80/eg.png" width="32" class="rounded-1 shadow-sm">
+                                            <span class="fw-bold">مصر (ETA)</span>
                                         </label>
                                     </div>
-                                    <div class="flex-fill">
+                                    <div class="col-6">
                                         <input type="radio" class="btn-check" name="country_code" id="c_sa" value="SA" onchange="toggleCountryFields()">
-                                        <label class="btn btn-outline-success w-100 py-2 fw-bold" for="c_sa">
-                                            <img src="https://flagcdn.com/w40/sa.png" width="20" class="me-2"> السعودية (ZATCA)
+                                        <label class="btn btn-outline-dark w-100 py-3 border-2 rounded-4 d-flex flex-column align-items-center gap-2 h-100" for="c_sa">
+                                            <img src="https://flagcdn.com/w80/sa.png" width="32" class="rounded-1 shadow-sm">
+                                            <span class="fw-bold">السعودية (ZATCA)</span>
                                         </label>
                                     </div>
                                 </div>
@@ -230,116 +247,108 @@
 
                         <div class="row g-3">
                             <div class="col-12">
-                                <label class="form-label small fw-bold">اسم المنشأة الرسمي <span class="req-star">*</span></label>
-                                <input type="text" name="name" class="form-control" placeholder="مثال: شركة الأفق للتجارة" required>
+                                <label class="form-label small fw-bold text-secondary">الاسم التجاري للمنشأة</label>
+                                <input type="text" name="name" class="form-control" placeholder="اسم الشركة كما في السجل" required>
                             </div>
 
-                            <!-- EGYPT Fields (Updated) -->
+                            <!-- Egypt Fields -->
                             <div id="fields_eg" class="col-12 row g-3 m-0 p-0">
-                                <div class="col-md-4 ps-0">
-                                    <label class="form-label small fw-bold">رقم التسجيل الضريبي (9 أرقام) <span class="req-star">*</span></label>
-                                    <input type="text" name="tax_id_eg" id="tax_id_eg" class="form-control font-monospace" placeholder="xxxxxxxxx" maxlength="9">
+                                <div class="col-md-6 ps-md-2 ps-0">
+                                    <label class="form-label small fw-bold text-secondary">رقم التسجيل الضريبي</label>
+                                    <input type="text" name="tax_id_eg" class="form-control font-monospace" placeholder="9 أرقام (xxxxxxxxx)" maxlength="9">
                                 </div>
-                                <div class="col-md-4 px-1">
-                                    <label class="form-label small fw-bold">رقم السجل التجاري (اختياري)</label>
-                                    <input type="text" name="cr_number_eg" class="form-control font-monospace" placeholder="xxxxxx">
+                                <div class="col-md-6 pe-md-2 pe-0">
+                                    <label class="form-label small fw-bold text-secondary">العنوان</label>
+                                    <input type="text" name="address_eg" class="form-control" placeholder="المحافظة - المدينة - الحي">
                                 </div>
-                                <div class="col-md-4 pe-0">
-                                    <label class="form-label small fw-bold">العنوان <span class="req-star">*</span></label>
-                                    <input type="text" name="address_eg" class="form-control" placeholder="المحافظة - المدينة">
+                                <div class="col-12">
+                                    <label class="form-label small fw-bold text-secondary">رقم السجل التجاري (اختياري)</label>
+                                    <input type="text" name="cr_number_eg" class="form-control font-monospace">
                                 </div>
                             </div>
 
-                            <!-- SAUDI Fields -->
+                            <!-- Saudi Fields -->
                             <div id="fields_sa" class="col-12 row g-3 m-0 p-0" style="display:none;">
-                                <div class="col-md-6 ps-0">
-                                    <label class="form-label small fw-bold">الرقم الضريبي (15 رقم) <span class="req-star">*</span></label>
-                                    <input type="text" name="tax_id_sa" id="tax_id_sa" class="form-control font-monospace" placeholder="3xxxxxxxxxxxxx3" maxlength="15">
-                                    <div class="form-text small text-danger d-none">يجب أن يبدأ بـ 3 وينتهي بـ 3</div>
+                                <div class="col-md-6 ps-md-2 ps-0">
+                                    <label class="form-label small fw-bold text-secondary">الرقم الضريبي (VAT Number)</label>
+                                    <input type="text" name="tax_id_sa" class="form-control font-monospace" placeholder="3xxxxxxxxxxxxx3" maxlength="15">
                                 </div>
-                                <div class="col-md-6 pe-0">
-                                    <label class="form-label small fw-bold">رقم السجل التجاري</label>
+                                <div class="col-md-6 pe-md-2 pe-0">
+                                    <label class="form-label small fw-bold text-secondary">رقم السجل التجاري</label>
                                     <input type="text" name="cr_number" class="form-control font-monospace">
                                 </div>
-                                
-                                <div class="col-12 mt-3"><div class="form-section-title">العنوان الوطني (مطلوب للزكاة)</div></div>
-                                <div class="col-md-4 ps-0">
-                                    <label class="form-label small text-muted">رقم المبنى (4 أرقام) <span class="req-star">*</span></label>
-                                    <input type="text" name="building_no" class="form-control" maxlength="4" placeholder="1234">
+                                <div class="col-12"><hr class="my-2"></div>
+                                <div class="col-md-4 ps-md-2 ps-0">
+                                    <label class="form-label small text-muted">رقم المبنى</label>
+                                    <input type="text" name="building_no" class="form-control" maxlength="4">
                                 </div>
-                                <div class="col-md-4">
-                                    <label class="form-label small text-muted">الشارع <span class="req-star">*</span></label>
+                                <div class="col-md-4 px-md-2 px-0">
+                                    <label class="form-label small text-muted">الشارع</label>
                                     <input type="text" name="street_name" class="form-control">
                                 </div>
-                                <div class="col-md-4 pe-0">
-                                    <label class="form-label small text-muted">المدينة <span class="req-star">*</span></label>
+                                <div class="col-md-4 pe-md-2 pe-0">
+                                    <label class="form-label small text-muted">المدينة</label>
                                     <input type="text" name="city" class="form-control">
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="modal-footer bg-light border-top-0">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">إلغاء</button>
-                        <button type="submit" class="btn btn-primary px-4 fw-bold">حفظ البيانات</button>
+                    <div class="modal-footer bg-light p-3">
+                        <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">إلغاء</button>
+                        <button type="submit" class="btn btn-primary fw-bold px-4 rounded-pill">حفظ وتسجيل</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- 2. Connection Modal -->
+    <!-- 2. Credentials Modal -->
     <div class="modal fade" id="credsModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <div id="modal_flag_bg" class="flag-header">
-                    <div class="flag-content">
-                        <span class="badge bg-white text-dark bg-opacity-75 border mb-2">إعدادات الربط</span>
-                        <h4 class="fw-bold mb-0" id="modal_country_name">Settings</h4>
-                        <small id="creds_company_name_display" class="font-monospace opacity-75"></small>
-                    </div>
-                    <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal"></button>
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold">إعدادات الربط الحكومي</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-
                 <form action="/dev/company/update-creds" method="POST">
-                    <div class="modal-body">
+                    <div class="modal-body p-4">
                         <input type="hidden" name="company_id" id="creds_company_id">
                         <input type="hidden" name="country_code" id="creds_country_code">
 
                         <div id="egypt_fields" style="display:none;">
-                            <div class="d-flex align-items-center gap-3 mb-3 p-3 bg-light border rounded">
-                                <i class="bi bi-bank fs-2 text-primary"></i>
-                                <div>
-                                    <h6 class="fw-bold mb-1">بوابة الضرائب المصرية</h6>
-                                    <small class="text-muted">أدخل مفاتيح (Production) الخاصة بـ ERP.</small>
+                            <div class="alert alert-light border border-primary border-opacity-25 d-flex gap-3 align-items-center mb-4">
+                                <i class="bi bi-info-circle-fill text-primary fs-4"></i>
+                                <div class="small text-muted">
+                                    يجب استخراج <b>Client ID & Secret</b> من بوابة الفواتير (ERP) وإدخالهم هنا.
+                                    <a href="https://invoicing.eta.gov.eg" target="_blank" class="fw-bold text-decoration-none d-block mt-1">فتح بوابة الضرائب ↗</a>
                                 </div>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label small fw-bold text-muted">Client ID</label>
-                                <input type="text" name="client_id" id="client_id" class="form-control font-monospace small">
+                                <label class="form-label small fw-bold">Client ID</label>
+                                <input type="text" name="client_id" id="client_id" class="form-control font-monospace">
                             </div>
                             <div class="mb-3">
-                                <label class="form-label small fw-bold text-muted">Client Secret</label>
-                                <input type="password" name="client_secret" id="client_secret" class="form-control font-monospace small">
+                                <label class="form-label small fw-bold">Client Secret</label>
+                                <input type="password" name="client_secret" id="client_secret" class="form-control font-monospace">
                             </div>
                         </div>
 
                         <div id="saudi_fields" style="display:none;">
-                            <div class="d-flex align-items-center gap-3 mb-3 p-3 bg-light border rounded">
-                                <i class="bi bi-qr-code-scan fs-2 text-success"></i>
-                                <div>
-                                    <h6 class="fw-bold mb-1">هيئة الزكاة (ZATCA)</h6>
-                                    <small class="text-muted">هذا الـ OTP يستخدم <b>لمرة واحدة فقط</b> لإنتاج الشهادة الدائمة.</small>
+                            <div class="alert alert-light border border-success border-opacity-25 d-flex gap-3 align-items-center mb-4">
+                                <i class="bi bi-check-circle-fill text-success fs-4"></i>
+                                <div class="small text-muted">
+                                    اطلب كود <b>OTP</b> (6 أرقام) من بوابة "فاتورة" (قسم الوحدات) وأدخله لتفعيل الربط فوراً.
+                                    <a href="https://fatoora.zatca.gov.sa" target="_blank" class="fw-bold text-success text-decoration-none d-block mt-1">فتح بوابة فاتورة ↗</a>
                                 </div>
                             </div>
-                            <div class="mb-3 text-center">
-                                <label class="form-label fw-bold">أدخل كود التفعيل (OTP)</label>
-                                <input type="text" name="otp" class="form-control text-center fs-3 fw-bold letter-spacing-3" maxlength="6" placeholder="123456">
-                                <small class="text-muted d-block mt-2">يمكن استخراجه من بوابة "فاتورة" -> إنشاء وحدة جديدة.</small>
+                            <div class="text-center">
+                                <label class="form-label fw-bold mb-3">رمز التفعيل (OTP)</label>
+                                <input type="text" name="otp" class="form-control form-control-lg text-center fw-bold letter-spacing-3 fs-2" maxlength="6" placeholder="------">
                             </div>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-success w-100 fw-bold">تأكيد وتفعيل الربط</button>
+                    <div class="modal-footer bg-light p-3">
+                        <button type="submit" class="btn btn-success w-100 fw-bold rounded-pill py-2">تأكيد الربط</button>
                     </div>
                 </form>
             </div>
@@ -350,21 +359,20 @@
     <div class="modal fade" id="allocateModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-sm">
             <div class="modal-content">
-                <div class="modal-header border-0 pb-0">
-                    <button type="button" class="btn-close ms-auto me-0" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body text-center pt-0">
-                    <div class="mb-3 text-success"><i class="bi bi-cash-coin fs-1"></i></div>
-                    <h5 class="fw-bold">إضافة رصيد</h5>
-                    <p class="text-muted small mb-4">سيتم خصم المبلغ من محفظتك وإضافته للعميل.</p>
+                <div class="modal-body p-4 text-center">
+                    <div class="mb-3 text-primary bg-primary bg-opacity-10 d-inline-flex p-3 rounded-circle">
+                        <i class="bi bi-wallet2 fs-1"></i>
+                    </div>
+                    <h5 class="fw-bold mb-1">إضافة رصيد</h5>
+                    <p class="text-muted small mb-4">خصم من محفظتك وإيداع للعميل</p>
                     
                     <form action="/dev/allocate-balance" method="POST">
                         <input type="hidden" name="company_id" id="alloc_company_id">
-                        <div class="input-group mb-3">
-                            <input type="number" name="amount" class="form-control text-center fw-bold fs-5" placeholder="0.00" step="0.01" required>
-                            <span class="input-group-text" id="alloc_currency">EGP</span>
+                        <div class="form-floating mb-3">
+                            <input type="number" name="amount" class="form-control text-center fw-bold fs-4" id="floatAmount" placeholder="0.00" step="0.01" required>
+                            <label for="floatAmount" class="w-100 text-center">المبلغ (<span id="alloc_currency"></span>)</label>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100 fw-bold">تأكيد العملية</button>
+                        <button type="submit" class="btn btn-primary w-100 fw-bold rounded-pill">تأكيد</button>
                     </form>
                 </div>
             </div>
@@ -373,32 +381,36 @@
 
     <!-- 4. Auth Info Modal -->
     <div class="modal fade" id="authModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header bg-light">
-                    <h6 class="modal-title fw-bold">بيانات الدخول</h6>
+                    <h6 class="modal-title fw-bold"><i class="bi bi-shield-lock me-2"></i>بيانات دخول المتجر</h6>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label small text-muted">اسم المستخدم</label>
+                <div class="modal-body p-4">
+                    <div class="mb-4">
+                        <label class="form-label small text-muted fw-bold">اسم المستخدم (تلقائي)</label>
                         <div class="input-group">
-                            <input type="text" id="auth_user" class="form-control bg-light" readonly>
+                            <input type="text" id="auth_user" class="form-control bg-light text-dark fw-bold font-monospace" readonly>
                             <button class="btn btn-outline-secondary" onclick="navigator.clipboard.writeText(document.getElementById('auth_user').value)"><i class="bi bi-clipboard"></i></button>
                         </div>
+                        <small class="text-muted fst-italic ms-1">يستخدمه العميل للدخول للنظام.</small>
                     </div>
-                    <hr>
-                    <p class="small text-muted mb-2">تحديث كلمة المرور:</p>
-                    <form action="/dev/update-store-auth" method="POST">
-                        <input type="hidden" name="company_id" id="auth_company_id">
-                        <input type="text" name="new_password" class="form-control mb-2" placeholder="كلمة سر جديدة" required>
-                        <button type="submit" class="btn btn-dark btn-sm w-100">تحديث</button>
-                    </form>
+                    
+                    <div class="border-top pt-3">
+                        <label class="form-label small text-muted fw-bold mb-2">تعيين كلمة مرور جديدة</label>
+                        <form action="/dev/update-store-auth" method="POST" class="d-flex gap-2">
+                            <input type="hidden" name="company_id" id="auth_company_id">
+                            <input type="text" name="new_password" class="form-control" placeholder="كلمة السر الجديدة" required minlength="6">
+                            <button type="submit" class="btn btn-dark px-4">حفظ</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- JS Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // 1. Registration Logic
@@ -408,23 +420,23 @@
                 document.getElementById('fields_sa').style.display = 'flex';
                 document.getElementById('fields_eg').style.display = 'none';
                 
-                document.getElementById('tax_id_sa').required = true;
+                document.querySelector('input[name="tax_id_sa"]').required = true;
                 document.querySelector('input[name="building_no"]').required = true;
                 document.querySelector('input[name="street_name"]').required = true;
                 document.querySelector('input[name="city"]').required = true;
                 
-                document.getElementById('tax_id_eg').required = false;
+                document.querySelector('input[name="tax_id_eg"]').required = false;
                 document.querySelector('input[name="address_eg"]').required = false;
             } else {
                 document.getElementById('fields_sa').style.display = 'none';
                 document.getElementById('fields_eg').style.display = 'flex';
                 
-                document.getElementById('tax_id_sa').required = false;
+                document.querySelector('input[name="tax_id_sa"]').required = false;
                 document.querySelector('input[name="building_no"]').required = false;
                 document.querySelector('input[name="street_name"]').required = false;
                 document.querySelector('input[name="city"]').required = false;
 
-                document.getElementById('tax_id_eg').required = true;
+                document.querySelector('input[name="tax_id_eg"]').required = true;
                 document.querySelector('input[name="address_eg"]').required = true;
             }
         }
@@ -434,56 +446,48 @@
             if (isSA) {
                 const val = form.tax_id_sa.value;
                 if (!/^3\d{13}3$/.test(val)) {
-                    alert('خطأ: الرقم الضريبي السعودي يجب أن يكون 15 رقم ويبدأ وينتهي بـ 3');
+                    alert('⚠️ الرقم الضريبي السعودي يجب أن يكون 15 رقم ويبدأ وينتهي بـ 3');
                     return false;
                 }
             } else {
                 const val = form.tax_id_eg.value;
                 if (!/^\d{9}$/.test(val)) {
-                    alert('خطأ: رقم التسجيل الضريبي المصري يجب أن يكون 9 أرقام');
+                    alert('⚠️ رقم التسجيل الضريبي المصري يجب أن يكون 9 أرقام');
                     return false;
                 }
             }
             return true;
         }
 
-        // 2. Creds Modal Logic
+        // 2. Credentials Modal
         function openCredsModal(comp) {
             document.getElementById('creds_company_id').value = comp.id;
             document.getElementById('creds_country_code').value = comp.country_code;
-            document.getElementById('creds_company_name_display').innerText = comp.name;
-
-            const header = document.getElementById('modal_flag_bg');
-            const title = document.getElementById('modal_country_name');
             
+            // Parse existing creds safely
             let creds = {};
             try { creds = JSON.parse(comp.api_credentials || '{}'); } catch(e) {}
 
             if(comp.country_code === 'EG') {
-                header.style.backgroundImage = "url('https://flagcdn.com/w640/eg.png')";
-                title.innerText = "مصر (ETA)";
                 document.getElementById('egypt_fields').style.display = 'block';
                 document.getElementById('saudi_fields').style.display = 'none';
-                
                 document.getElementById('client_id').value = creds.client_id || '';
                 document.getElementById('client_secret').value = creds.client_secret || '';
             } else {
-                header.style.backgroundImage = "url('https://flagcdn.com/w640/sa.png')";
-                title.innerText = "السعودية (ZATCA)";
                 document.getElementById('egypt_fields').style.display = 'none';
                 document.getElementById('saudi_fields').style.display = 'block';
             }
             new bootstrap.Modal(document.getElementById('credsModal')).show();
         }
 
-        // 3. Allocate Logic
+        // 3. Allocate
         function openAllocateModal(id, name, curr) {
             document.getElementById('alloc_company_id').value = id;
             document.getElementById('alloc_currency').innerText = curr;
             new bootstrap.Modal(document.getElementById('allocateModal')).show();
         }
 
-        // 4. Auth Logic (Fixed)
+        // 4. Auth
         function openAuthModal(id, name, username) {
             document.getElementById('auth_company_id').value = id;
             document.getElementById('auth_user').value = username;
