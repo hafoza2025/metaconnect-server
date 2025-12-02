@@ -12,6 +12,15 @@
         .stat-card { transition: transform 0.2s; border: none; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .stat-card:hover { transform: translateY(-3px); }
         .copy-btn { cursor: pointer; }
+        /* تنسيق خاص لأزرار الراديو في المودال */
+        .btn-check:checked + .btn-outline-primary, .btn-check:checked + .btn-outline-secondary {
+            background-color: #f8f9fa;
+            color: #000;
+            border-width: 2px;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
+        }
+        .btn-check:checked + .btn-outline-primary i { color: #0d6efd; }
+        .btn-check:checked + .btn-outline-secondary i { color: #6c757d; }
     </style>
 </head>
 
@@ -79,7 +88,7 @@
                 </div>
             </div>
 
-            <!-- 2. كارت المحفظة والرصيد (المطور) -->
+            <!-- 2. كارت المحفظة والرصيد -->
             <div class="col-lg-6">
                 <div class="card stat-card h-100 border-0" style="background: linear-gradient(135deg, #0d6efd, #0a58ca); color: white;">
                     <div class="card-body p-4">
@@ -113,10 +122,11 @@
 
                         <div class="d-flex justify-content-between align-items-center">
                             <small class="text-white-50">هل شارف رصيدك على الانتهاء؟</small>
-                            <!-- زر طلب الشحن المباشر -->
-                            <a href="/store/support" class="btn btn-light btn-sm text-primary fw-bold px-3 shadow-sm">
+                            
+                            <!-- زر يفتح المودال الجديد -->
+                            <button type="button" class="btn btn-light btn-sm text-primary fw-bold px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#rechargeRequestModal">
                                 <i class="bi bi-plus-circle-dotted me-1"></i> طلب شحن رصيد
-                            </a>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -214,6 +224,67 @@
                     <i class="bi bi-check-lg me-2"></i> تم نسخ المفتاح بنجاح!
                 </div>
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal طلب شحن الرصيد (المطور) -->
+    <div class="modal fade" id="rechargeRequestModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="/store/support/new" method="POST">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title"><i class="bi bi-cash-stack me-2"></i> طلب شحن رصيد جديد</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="subject" value="طلب شحن رصيد (فواتير)">
+                        
+                        <!-- اختيار الجهة الموجه لها الطلب -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-dark mb-3">لمن تريد توجيه طلب الشحن؟</label>
+                            
+                            <div class="d-grid gap-3">
+                                <!-- خيار 1: المطور -->
+                                <div>
+                                    <input type="radio" class="btn-check" name="target" id="targetDev" value="developer" checked>
+                                    <label class="btn btn-outline-secondary w-100 text-start p-3" for="targetDev">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong class="d-block mb-1">👨‍💻 المطور / الوكيل الخاص بي</strong>
+                                                <div class="small text-muted" style="font-size: 0.85rem">يتم إرسال الطلب للوكيل ويخصم من رصيدك المتفق عليه معه.</div>
+                                            </div>
+                                            <i class="bi bi-person-gear fs-2 ms-2 opacity-50"></i>
+                                        </div>
+                                    </label>
+                                </div>
+
+                                <!-- خيار 2: الإدارة (Meta Connect) -->
+                                <div>
+                                    <input type="radio" class="btn-check" name="target" id="targetAdmin" value="admin">
+                                    <label class="btn btn-outline-primary w-100 text-start p-3" for="targetAdmin">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong class="d-block mb-1">🏢 إدارة Meta Connect (مباشر)</strong>
+                                                <div class="small text-muted" style="font-size: 0.85rem">تواصل مباشر مع الشركة الأم لشراء باقة منفصلة عن الوكيل.</div>
+                                            </div>
+                                            <i class="bi bi-building-check fs-2 ms-2 opacity-50"></i>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">تفاصيل الطلب</label>
+                            <textarea name="message" class="form-control bg-light" rows="3" placeholder="مثال: أريد تجديد الباقة 1000 فاتورة، وسأقوم بالتحويل البنكي لكم..." required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                        <button type="submit" class="btn btn-primary px-4 fw-bold">إرسال الطلب 🚀</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
