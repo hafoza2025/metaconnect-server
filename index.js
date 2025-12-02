@@ -439,19 +439,35 @@ app.get('/store/support', requireLogin, async (req, res) => {
 
 app.post('/store/support/new', requireLogin, async (req, res) => {
     if (req.session.role !== 'store') return res.status(403).send('Unauthorized');
-    const { subject, message } = req.body;
+    
+    // نستقبل الحقل الجديد target
+    const { subject, message, target } = req.body;
     const storeId = req.session.user.id;
     const companyId = req.session.user.company_id;
-    const [companies] = await db.execute('SELECT * FROM companies WHERE id = ?', [companyId]);
-    const company = companies[0];
 
-    const [result] = await db.execute(
-        'INSERT INTO support_tickets (store_id, subject, company_name, tax_id, country_code, status) VALUES (?, ?, ?, ?, ?, "open")',
-        [storeId, subject, company.name, company.tax_id, company.country_code]
-    );
-    await db.execute('INSERT INTO ticket_messages (ticket_id, sender_type, message) VALUES (?, ?, ?)', [result.insertId, 'store', message]);
-    res.redirect('/store/support/view/' + result.insertId);
+    try {
+        const [companies] = await db.execute('SELECT * FROM companies WHERE id = ?', [companyId]);
+        const company = companies[0];
+
+        // إذا كان الهدف admin نضع العلامة 1، وإلا 0
+        // تنبيه: تأكد أنك أضفت العمود is_direct_to_admin في قاعدة البيانات كما شرحنا سابقاً
+        const isDirect = (target === 'admin') ? 1 : 0;
+
+        // نضيف developer_id أيضاً لنعرف من هو مطور هذه الشركة حتى لو كانت الرسالة للإدمن
+        const [result] = await db.execute(
+            'INSERT INTO support_tickets (store_id, subject, company_name, tax_id, country_code, status, is_direct_to_admin, developer_id) VALUES (?, ?, ?, ?, ?, "open", ?, ?)',
+            [storeId, subject, company.name, company.tax_id, company.country_code, isDirect, company.developer_id]
+        );
+
+        await db.execute('INSERT INTO ticket_messages (ticket_id, sender_type, message) VALUES (?, ?, ?)', [result.insertId, 'store', message]);
+        
+        res.redirect('/store/support/view/' + result.insertId);
+    } catch (e) {
+        console.error(e);
+        res.status(500).send("Error creating ticket");
+    }
 });
+
 
 app.get('/store/support/view/:id', requireLogin, async (req, res) => {
     if (req.session.role !== 'store') return res.redirect('/login');
@@ -471,13 +487,15 @@ app.post('/admin/ticket/status', requireLogin, async (req, res) => {
     res.redirect('/admin/support/view/' + ticket_id);
 });
 
-app.get('/dev/support/view/:id', requireDev, async (req, res) => {
-    const ticketId = req.params.id;
-    await db.execute('UPDATE ticket_messages SET is_read = 1 WHERE ticket_id = ? AND sender_type = "admin"', [ticketId]);
-    const [messages] = await db.execute('SELECT * FROM ticket_messages WHERE ticket_id = ? ORDER BY created_at ASC', [ticketId]);
-    const [ticket] = await db.execute('SELECT * FROM support_tickets WHERE id = ?', [ticketId]);
-    res.render('ticket-view', { ticket: ticket[0], messages, userType: 'developer' });
+// هذا المسار غالباً موجود عندك باسم /dev/support
+app.get('/dev/support', requireDev, async (req, res) => {
+    const devId = req.session.user.id;
+    // التعديل المهم هنا: AND (is_direct_to_admin = 0 OR is_direct_to_admin IS NULL)
+    const [tickets] = await db.execute('SELECT * FROM support_tickets WHERE developer_id = ? AND (is_direct_to_admin = 0 OR is_direct_to_admin IS NULL) ORDER BY created_at DESC', [devId]);
+    const [companies] = await db.execute('SELECT * FROM companies WHERE developer_id = ?', [devId]);
+    res.render('dev-support', { tickets, companies, userType: 'developer' });
 });
+
 
 // --- تعديل هام: تعطيل رفع الملفات في الردود ---
 app.post('/support/reply', requireLogin, async (req, res) => {
@@ -763,6 +781,7 @@ app.post('/dev/allocate-balance', requireDev, async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
+
 
 
 
