@@ -3,101 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة المطور | MetaConnect</title>
+    <title>MetaConnect | Developer Console</title>
     
     <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     
     <style>
         :root {
-            --primary: #0f172a; --accent: #3b82f6; --surface: #ffffff; --bg: #f1f5f9;
+            --primary: #2563eb; --primary-dark: #1e40af; --secondary: #64748b;
+            --bg-body: #f8fafc; --surface: #ffffff; --border: #e2e8f0;
         }
-        body { font-family: 'Tajawal', sans-serif; background-color: var(--bg); color: var(--primary); }
-        
+        body { font-family: 'Tajawal', sans-serif; background-color: var(--bg-body); color: #0f172a; }
+
         /* Navbar */
-        .navbar { background: var(--surface); border-bottom: 1px solid #e2e8f0; padding: 1rem 0; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-        .brand-logo { font-weight: 800; font-size: 1.2rem; color: var(--primary); }
-        
+        .navbar { background: rgba(255, 255, 255, 0.95); border-bottom: 1px solid var(--border); padding: 0.8rem 0; backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000; }
+        .brand-logo { font-weight: 800; font-size: 1.2rem; color: var(--primary-dark); letter-spacing: -0.5px; }
+        .user-pill { background: #f1f5f9; padding: 6px 16px; border-radius: 50px; font-size: 0.85rem; font-weight: 600; color: var(--secondary); display: flex; align-items: center; gap: 8px; }
+
         /* Cards */
-        .stat-card { background: var(--surface); border-radius: 12px; padding: 1.5rem; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); height: 100%; transition: transform 0.2s; }
-        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-        
+        .dashboard-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); height: 100%; transition: transform 0.2s; }
+        .dashboard-card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+
         /* Wallet */
-        .wallet-box { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: white; }
-        .wallet-amount { font-size: 2.5rem; font-weight: 800; line-height: 1.2; }
-        
+        .wallet-widget { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: white; border: none; }
+        .wallet-amount { font-size: 2.5rem; font-weight: 800; line-height: 1; margin: 0.5rem 0; }
+        .wallet-btn { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); color: white; width: 100%; padding: 0.6rem; border-radius: 8px; font-weight: 600; transition: 0.2s; }
+        .wallet-btn:hover { background: rgba(255,255,255,0.25); }
+
         /* Table */
-        .custom-table { background: var(--surface); border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; margin-top: 2rem; }
-        .table thead th { background: #f8fafc; color: #64748b; font-weight: 600; font-size: 0.8rem; padding: 1rem; border-bottom: 1px solid #e2e8f0; }
-        .table tbody td { padding: 1rem; vertical-align: middle; border-bottom: 1px solid #e2e8f0; }
-        
-        /* Auth Input */
-        .auth-pill { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 4px 8px; display: inline-flex; align-items: center; gap: 8px; }
-        .auth-val { border: none; background: transparent; font-family: monospace; font-size: 0.9rem; color: #334155; width: 120px; outline: none; }
+        .table-container { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; margin-top: 2rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .table-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: #fff; }
+        .table th { background: #f8fafc; font-weight: 700; color: var(--secondary); font-size: 0.75rem; text-transform: uppercase; padding: 1rem 1.5rem; }
+        .table td { padding: 1rem 1.5rem; vertical-align: middle; border-bottom: 1px solid var(--border); }
+        .company-avatar { width: 40px; height: 40px; background: #e0f2fe; color: #0369a1; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; border: 1px solid #bae6fd; }
+        .action-btn { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid var(--border); background: #fff; color: var(--secondary); margin-left: 4px; transition: 0.2s; }
+        .action-btn:hover { border-color: var(--primary); color: var(--primary); background: #eff6ff; }
+
+        /* Auth Pill */
+        .auth-input-group { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 4px; display: flex; width: fit-content; }
+        .auth-val { background: transparent; border: none; font-family: monospace; font-size: 0.85rem; color: var(--secondary); padding: 0 8px; width: 100px; outline: none; }
+        .auth-edit-btn { border: none; background: #fff; border-radius: 6px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; color: var(--primary); cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
 
         /* Modals */
-        .modal-content { border: none; border-radius: 16px; overflow: hidden; }
-        .modal-header { border-bottom: 1px solid #e2e8f0; background: #fff; padding: 1.25rem; }
+        .modal-content { border: none; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+        .modal-header { border-bottom: 1px solid var(--border); padding: 1.25rem 1.5rem; background: #fff; }
         .flag-header { height: 100px; background-size: cover; background-position: center; position: relative; }
-        .flag-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); display: flex; align-items: flex-end; padding: 1rem; color: white; }
+        .flag-header::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); }
+        .flag-header-content { position: absolute; bottom: 15px; right: 20px; left: 20px; z-index: 2; color: white; display: flex; align-items: flex-end; justify-content: space-between; }
+        
+        .form-control, .form-select { border-radius: 8px; padding: 0.6rem 0.8rem; font-size: 0.9rem; }
+        .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
     </style>
 </head>
 <body>
 
-    <nav class="navbar sticky-top">
-        <div class="container">
-            <div class="d-flex align-items-center gap-2">
-                <div class="bg-dark text-white rounded p-1"><i class="bi bi-code-slash"></i></div>
-                <span class="brand-logo">MetaConnect</span>
-            </div>
+    <nav class="navbar">
+        <div class="container-fluid px-4 my-0" style="max-width: 1200px; margin: 0 auto;">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+                <div style="background: var(--primary); width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white;">
+                    <i class="bi bi-code-slash"></i>
+                </div>
+                <span>MetaConnect</span>
+            </a>
             <div class="d-flex align-items-center gap-3">
-                <span class="fw-bold text-secondary small"><i class="bi bi-person-circle me-1"></i> <%= developer.name %></span>
-                <a href="/dev/support" class="btn btn-outline-dark btn-sm rounded-pill px-3">الدعم الفني</a>
-                <a href="/logout" class="text-danger ms-2"><i class="bi bi-box-arrow-right fs-5"></i></a>
+                <div class="user-pill">
+                    <div style="width: 8px; height: 8px; background: #22c55e; border-radius: 50%;"></div>
+                    <%= developer.name %>
+                </div>
+                <a href="/dev/support" class="btn btn-outline-dark btn-sm rounded-pill px-3 fw-bold border-2" style="border-color: #e2e8f0;">
+                    <i class="bi bi-headset me-1"></i> الدعم
+                </a>
+                <a href="/logout" class="btn btn-light text-danger btn-sm rounded-circle border" style="width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-power"></i>
+                </a>
             </div>
         </div>
     </nav>
 
-    <div class="container py-5">
+    <div class="container py-4" style="max-width: 1200px;">
         <div class="row g-4">
             <!-- Wallet -->
             <div class="col-lg-4">
-                <div class="stat-card wallet-box d-flex flex-column justify-content-between">
+                <div class="dashboard-card wallet-widget d-flex flex-column justify-content-between">
                     <div>
-                        <small class="text-white-50 fw-bold text-uppercase">المحفظة الحالية</small>
-                        <div class="wallet-amount mt-2"><%= parseFloat(developer.wallet_balance).toFixed(2) %></div>
+                        <div class="d-flex justify-content-between align-items-start">
+                            <span class="text-white-50 text-uppercase small fw-bold ls-1"><i class="bi bi-wallet2 me-2"></i> المحفظة الحالية</span>
+                            <div style="background: rgba(255,255,255,0.1); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                <i class="bi bi-arrow-up-right text-white small"></i>
+                            </div>
+                        </div>
+                        <div class="wallet-amount"><%= parseFloat(developer.wallet_balance).toFixed(2) %></div>
                         <small class="opacity-75">جنيه مصري (EGP)</small>
                     </div>
-                    <button class="btn btn-light w-100 mt-4 fw-bold" onclick="alert('تواصل مع الدعم للشحن')"><i class="bi bi-plus-lg"></i> شحن الرصيد</button>
+                    <button class="wallet-btn mt-4" onclick="alert('تواصل مع المبيعات للشحن')">
+                        <i class="bi bi-plus-lg me-1"></i> شحن الرصيد
+                    </button>
                 </div>
             </div>
 
-            <!-- Add Company -->
+            <!-- Registration -->
             <div class="col-lg-8">
-                <div class="stat-card">
-                    <h5 class="fw-bold mb-4"><i class="bi bi-building-add text-primary me-2"></i> تسجيل منشأة جديدة</h5>
+                <div class="dashboard-card">
+                    <div class="d-flex align-items-center gap-2 mb-4 border-bottom pb-3">
+                        <div style="width: 32px; height: 32px; background: #eff6ff; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--primary);">
+                            <i class="bi bi-building-add"></i>
+                        </div>
+                        <h5 class="fw-bold mb-0">تسجيل منشأة جديدة</h5>
+                    </div>
                     <form action="/dev/add-company" method="POST" class="row g-3">
                         <div class="col-md-5">
                             <label class="form-label small text-muted fw-bold">الاسم التجاري</label>
-                            <input type="text" name="name" class="form-control" placeholder="مثال: سوبر ماركت الأمل" required>
+                            <input type="text" name="name" class="form-control" placeholder="مثال: مؤسسة النور" required>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label small text-muted fw-bold">الرقم الضريبي</label>
-                            <input type="text" name="tax_id" class="form-control" placeholder="3xxxxxxxxx" required>
+                            <input type="text" name="tax_id" class="form-control font-monospace" placeholder="3xxxxxxxxx" required>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label small text-muted fw-bold">الدولة</label>
                             <select name="country_code" class="form-select">
-                                <option value="EG">مصر</option>
-                                <option value="SA">السعودية</option>
+                                <option value="EG">🇪🇬 مصر</option>
+                                <option value="SA">🇸🇦 السعودية</option>
                             </select>
                         </div>
                         <div class="col-12 text-end mt-2">
-                            <button type="submit" class="btn btn-primary px-4 fw-bold">تسجيل</button>
+                            <button type="submit" class="btn btn-primary px-4 fw-bold">تسجيل المنشأة</button>
                         </div>
                     </form>
                 </div>
@@ -105,10 +139,10 @@
         </div>
 
         <!-- Table -->
-        <div class="custom-table shadow-sm">
-            <div class="p-3 border-bottom bg-white d-flex justify-content-between align-items-center">
-                <h6 class="fw-bold mb-0">قائمة العملاء</h6>
-                <span class="badge bg-light text-dark border">عدد: <%= companies.length %></span>
+        <div class="table-container">
+            <div class="table-header">
+                <h6 class="fw-bold mb-0"><i class="bi bi-grid-3x3-gap-fill text-primary me-2"></i> إدارة العملاء</h6>
+                <span class="badge bg-secondary bg-opacity-10 text-secondary border rounded-pill px-3">Total: <%= companies.length %></span>
             </div>
             <div class="table-responsive">
                 <table class="table mb-0">
@@ -116,9 +150,9 @@
                         <tr>
                             <th class="ps-4">المنشأة</th>
                             <th>الرصيد المتاح</th>
-                            <th>استهلاك الفواتير</th>
-                            <th width="25%">بيانات الدخول (Username)</th>
-                            <th class="text-end pe-4">تحكم</th>
+                            <th>الاستهلاك</th>
+                            <th width="220px">بيانات الدخول</th>
+                            <th class="text-end pe-4">الإجراءات</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -126,47 +160,60 @@
                             <tr>
                                 <td class="ps-4">
                                     <div class="d-flex align-items-center gap-3">
-                                        <div class="bg-primary bg-opacity-10 text-primary rounded p-2 fw-bold border border-primary border-opacity-25">
+                                        <div class="company-avatar">
                                             <%= comp.name.charAt(0) %>
                                         </div>
                                         <div>
-                                            <div class="fw-bold"><%= comp.name %></div>
+                                            <div class="fw-bold text-dark"><%= comp.name %></div>
                                             <div class="small text-muted font-monospace"><%= comp.tax_id %></div>
                                         </div>
                                     </div>
                                 </td>
                                 <td>
                                     <% if(comp.allocated_balance > 0) { %>
-                                        <span class="fw-bold text-success"><%= parseFloat(comp.allocated_balance).toFixed(2) %></span> <small class="text-muted">EGP</small>
+                                        <span class="fw-bold text-success font-monospace"><%= parseFloat(comp.allocated_balance).toFixed(2) %></span> <small class="text-muted">EGP</small>
                                     <% } else { %>
-                                        <span class="text-muted">-</span>
+                                        <span class="text-muted small">-</span>
                                     <% } %>
                                 </td>
                                 <td>
-                                    <!-- هنا الحل لمشكلة عدد الفواتير: نقرأ المتغير invoices_used الذي جلبناه من الاستعلام الجديد -->
-                                    <div class="d-flex align-items-center gap-2">
-                                        <i class="bi bi-receipt text-muted"></i>
-                                        <span class="fw-bold"><%= comp.invoices_used || 0 %></span>
-                                        <small class="text-muted">فاتورة</small>
+                                    <% 
+                                        // 1 فاتورة = 0.50 عملة
+                                        // الفواتير المتاحة = الرصيد / 0.5
+                                        let availableInvoices = Math.floor((comp.allocated_balance || 0) / 0.5);
+                                        let usedInvoices = comp.invoices_used || 0;
+                                    %>
+                                    <div class="d-flex flex-column">
+                                        <span class="fw-bold text-dark font-monospace"><%= usedInvoices %> / <%= availableInvoices %></span>
+                                        <small class="text-muted" style="font-size: 0.7rem;">مستخدمة / متاحة</small>
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="auth-pill">
-                                        <i class="bi bi-person-lock text-muted small"></i>
-                                        <!-- نعرض اسم المستخدم القادم من قاعدة البيانات أو الافتراضي -->
+                                    <div class="auth-input-group">
+                                        <i class="bi bi-person-lock ms-2 text-muted small"></i>
                                         <input type="text" class="auth-val" value="<%= comp.username || 'store_' + comp.id %>" readonly id="user-field-<%= comp.id %>">
-                                        <button class="btn btn-sm btn-white border-0 p-0 text-primary" 
-                                                onclick="openAuthModal('<%= comp.id %>', '<%= comp.name %>', '<%= comp.username || `store_${comp.id}` %>')">
-                                            <i class="bi bi-pencil-square"></i>
+                                        <button class="auth-edit-btn" onclick="openAuthModal('<%= comp.id %>', '<%= comp.name %>', '<%= comp.username || `store_${comp.id}` %>')" title="تعديل">
+                                            <i class="bi bi-pencil-square" style="font-size: 0.9rem;"></i>
                                         </button>
                                     </div>
                                 </td>
                                 <td class="text-end pe-4">
-                                    <div class="btn-group">
-                                        <button class="btn btn-sm btn-outline-secondary" onclick="openAllocateModal('<%= comp.id %>', '<%= comp.name %>')" title="شحن"><i class="bi bi-cash"></i></button>
-                                        <button class="btn btn-sm btn-outline-secondary" onclick="openCredsModal('<%= comp.id %>', '<%= comp.name %>', '<%= comp.country_code %>')" title="ربط"><i class="bi bi-link-45deg"></i></button>
-                                        <a href="/docs" class="btn btn-sm btn-outline-secondary"><i class="bi bi-file-code"></i></a>
-                                    </div>
+                                    <!-- نمرر كائن البيانات بالكامل لتعبئة المودال -->
+                                    <% 
+                                        let creds = {};
+                                        try { creds = JSON.parse(comp.api_credentials || '{}'); } catch(e) {}
+                                    %>
+                                    <button class="action-btn" onclick='openCredsModal(<%= JSON.stringify({
+                                        id: comp.id, 
+                                        name: comp.name, 
+                                        country: comp.country_code,
+                                        clientId: creds.client_id || "",
+                                        clientSecret: creds.client_secret || "",
+                                        otp: creds.otp || ""
+                                    }) %>)' title="ربط API"><i class="bi bi-link-45deg"></i></button>
+
+                                    <button class="action-btn" onclick="openAllocateModal('<%= comp.id %>', '<%= comp.name %>')" title="شحن"><i class="bi bi-cash"></i></button>
+                                    <a href="/docs?company_id=<%= comp.id %>" class="action-btn text-decoration-none" title="مستندات"><i class="bi bi-file-earmark-code"></i></a>
                                 </td>
                             </tr>
                         <% }); %>
@@ -176,7 +223,62 @@
         </div>
     </div>
 
-    <!-- 1. Auth Modal -->
+    <!-- 1. Credentials Modal (With Validation) -->
+    <div class="modal fade" id="credsModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div id="modal_flag_bg" class="flag-header">
+                    <div class="flag-header-content">
+                        <div>
+                            <h5 class="fw-bold mb-0" id="modal_country_name">Settings</h5>
+                            <small id="creds_company_name_display" class="font-monospace opacity-75"></small>
+                        </div>
+                        <button type="button" class="btn-close btn-close-white mb-1" data-bs-dismiss="modal"></button>
+                    </div>
+                </div>
+
+                <form action="/dev/company/update-creds" method="POST" onsubmit="return validateCredsForm()">
+                    <div class="modal-body">
+                        <input type="hidden" name="company_id" id="creds_company_id">
+                        <input type="hidden" name="country_code" id="creds_country_code">
+
+                        <!-- Egypt -->
+                        <div id="egypt_fields" style="display:none;">
+                            <div class="alert alert-light border small text-muted mb-3">
+                                <i class="bi bi-info-circle-fill me-1 text-primary"></i> أدخل مفاتيح (Production) من بوابة الضرائب.
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">Client ID <span class="text-danger">*</span></label>
+                                <input type="text" name="client_id" id="client_id" class="form-control font-monospace text-muted small">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">Client Secret <span class="text-danger">*</span></label>
+                                <input type="password" name="client_secret" id="client_secret" class="form-control font-monospace text-muted small">
+                            </div>
+                        </div>
+
+                        <!-- Saudi -->
+                        <div id="saudi_fields" style="display:none;">
+                            <div class="text-center mb-4">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Zakat%2C_Tax_and_Customs_Authority_Logo.svg/1200px-Zakat%2C_Tax_and_Customs_Authority_Logo.svg.png" height="40">
+                                <p class="small text-muted mt-2">تفعيل الربط (ZATCA)</p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">OTP Code (6 Digits) <span class="text-danger">*</span></label>
+                                <input type="text" name="otp" id="otp_code" class="form-control text-center fw-bold fs-5" maxlength="6" placeholder="123456" style="letter-spacing: 4px;">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light py-2">
+                        <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">إلغاء</button>
+                        <button type="submit" class="btn btn-primary btn-sm px-4 fw-bold">حفظ التفعيل</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Auth Modal -->
     <div class="modal fade" id="authUpdateModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-sm">
             <div class="modal-content">
@@ -196,16 +298,16 @@
                         </div>
                         <div class="text-start mb-4">
                             <label class="form-label small fw-bold text-muted">كلمة المرور</label>
-                            <input type="text" name="new_password" class="form-control bg-light" placeholder="كلمة مرور جديدة" required minlength="6">
+                            <input type="text" name="new_password" class="form-control bg-light" required minlength="6">
                         </div>
-                        <button type="submit" class="btn btn-primary w-100 fw-bold">حفظ التغييرات</button>
+                        <button type="submit" class="btn btn-primary w-100 fw-bold">حفظ</button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 2. Allocate Modal -->
+    <!-- 3. Allocate Modal -->
     <div class="modal fade" id="allocateModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-sm">
             <div class="modal-content">
@@ -215,65 +317,13 @@
                 </div>
                 <div class="modal-body">
                     <div class="d-flex justify-content-between mb-3 small">
-                        <span>رصيدك:</span>
+                        <span>رصيدك المتاح:</span>
                         <span class="fw-bold"><%= parseFloat(developer.wallet_balance).toFixed(2) %></span>
                     </div>
                     <form action="/dev/allocate-balance" method="POST">
                         <input type="hidden" name="company_id" id="alloc_company_id">
-                        <input type="number" name="amount" class="form-control text-center fw-bold mb-3" placeholder="0.00" required>
+                        <input type="number" name="amount" class="form-control text-center fw-bold mb-3" placeholder="0.00" step="0.01" required>
                         <button type="submit" class="btn btn-success w-100 fw-bold">تأكيد</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 3. Credentials Modal -->
-    <div class="modal fade" id="credsModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div id="modal_flag_bg" class="flag-header">
-                    <div class="flag-overlay">
-                        <div>
-                            <h5 class="fw-bold mb-0" id="modal_country_name">Settings</h5>
-                            <small id="creds_company_name_display" class="opacity-75"></small>
-                        </div>
-                        <button type="button" class="btn-close btn-close-white mb-1" data-bs-dismiss="modal"></button>
-                    </div>
-                </div>
-                <div class="modal-body">
-                    <form action="/dev/company/update-creds" method="POST">
-                        <input type="hidden" name="company_id" id="creds_company_id">
-                        <input type="hidden" name="country_code" id="creds_country_code">
-
-                        <div id="egypt_fields" style="display:none;">
-                            <div class="alert alert-info small border-0 bg-info bg-opacity-10 text-info mb-3">
-                                <i class="bi bi-info-circle-fill me-1"></i> بيانات SDK من بوابة الضرائب
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label small fw-bold text-muted">Client ID</label>
-                                <input type="text" name="client_id" class="form-control font-monospace small text-muted">
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label small fw-bold text-muted">Client Secret</label>
-                                <input type="password" name="client_secret" class="form-control font-monospace small text-muted">
-                            </div>
-                        </div>
-
-                        <div id="saudi_fields" style="display:none;">
-                            <div class="text-center mb-4">
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Zakat%2C_Tax_and_Customs_Authority_Logo.svg/1200px-Zakat%2C_Tax_and_Customs_Authority_Logo.svg.png" height="40">
-                                <p class="small text-muted mt-2">ZATCA Integration</p>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label small fw-bold text-muted">OTP Code</label>
-                                <input type="text" name="otp" class="form-control text-center fw-bold fs-5 letter-spacing-2" maxlength="6" placeholder="123456" style="letter-spacing: 4px;">
-                            </div>
-                        </div>
-
-                        <div class="text-end">
-                            <button type="submit" class="btn btn-primary px-4 fw-bold">حفظ الإعدادات</button>
-                        </div>
                     </form>
                 </div>
             </div>
@@ -282,7 +332,55 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Auth Logic
+        // 1. Logic for Credentials Modal (With Data Pre-fill)
+        function openCredsModal(data) {
+            document.getElementById('creds_company_id').value = data.id;
+            document.getElementById('creds_company_name_display').innerText = data.name;
+            document.getElementById('creds_country_code').value = data.country;
+
+            const header = document.getElementById('modal_flag_bg');
+            const title = document.getElementById('modal_country_name');
+            
+            // Reset Inputs
+            document.getElementById('client_id').value = "";
+            document.getElementById('client_secret').value = "";
+            document.getElementById('otp_code').value = "";
+
+            if(data.country === 'EG') {
+                header.style.backgroundImage = "url('https://flagcdn.com/w640/eg.png')";
+                title.innerText = "مصر (ETA)";
+                document.getElementById('egypt_fields').style.display = 'block';
+                document.getElementById('saudi_fields').style.display = 'none';
+                
+                // Fill Egypt Data
+                document.getElementById('client_id').value = data.clientId;
+                document.getElementById('client_secret').value = data.clientSecret;
+            } else {
+                header.style.backgroundImage = "url('https://flagcdn.com/w640/sa.png')";
+                title.innerText = "السعودية (ZATCA)";
+                document.getElementById('egypt_fields').style.display = 'none';
+                document.getElementById('saudi_fields').style.display = 'block';
+                
+                // Fill Saudi Data
+                document.getElementById('otp_code').value = data.otp;
+            }
+            new bootstrap.Modal(document.getElementById('credsModal')).show();
+        }
+
+        function validateCredsForm() {
+            const country = document.getElementById('creds_country_code').value;
+            if (country === 'EG') {
+                const id = document.getElementById('client_id').value;
+                const secret = document.getElementById('client_secret').value;
+                if(!id || !secret) { alert('يجب إدخال Client ID و Secret!'); return false; }
+            } else {
+                const otp = document.getElementById('otp_code').value;
+                if(!otp || otp.length !== 6) { alert('كود OTP يجب أن يكون 6 أرقام!'); return false; }
+            }
+            return true;
+        }
+
+        // 2. Auth Logic
         function openAuthModal(id, name, user) {
             document.getElementById('auth_company_id').value = id;
             document.getElementById('auth_company_name').innerText = name;
@@ -307,45 +405,18 @@
                 if (res.ok) {
                     bootstrap.Modal.getInstance(document.getElementById('authUpdateModal')).hide();
                     alert('✅ تم التحديث بنجاح');
-                    // تحديث فوري للحقل في الجدول
                     const field = document.getElementById('user-field-' + data.company_id);
                     if(field) field.value = data.new_username;
                 } else {
                     alert('❌ فشل التحديث');
                 }
-            } catch (err) {
-                alert('❌ خطأ في الاتصال');
-            }
+            } catch (err) { alert('❌ خطأ في الاتصال'); }
         }
 
-        // Allocate Logic
+        // 3. Allocate Logic
         function openAllocateModal(id, name) {
             document.getElementById('alloc_company_id').value = id;
             new bootstrap.Modal(document.getElementById('allocateModal')).show();
-        }
-
-        // Credentials Logic
-        function openCredsModal(id, name, country) {
-            document.getElementById('creds_company_id').value = id;
-            document.getElementById('creds_company_name_display').innerText = name;
-            document.getElementById('creds_country_code').value = country;
-            
-            const header = document.getElementById('modal_flag_bg');
-            const title = document.getElementById('modal_country_name');
-
-            if(country === 'EG') {
-                header.style.backgroundImage = "url('https://flagcdn.com/w640/eg.png')";
-                title.innerText = "مصر (ETA)";
-                document.getElementById('egypt_fields').style.display = 'block';
-                document.getElementById('saudi_fields').style.display = 'none';
-            } else {
-                header.style.backgroundImage = "url('https://flagcdn.com/w640/sa.png')";
-                title.innerText = "السعودية (ZATCA)";
-                document.getElementById('egypt_fields').style.display = 'none';
-                document.getElementById('saudi_fields').style.display = 'block';
-            }
-
-            new bootstrap.Modal(document.getElementById('credsModal')).show();
         }
     </script>
 </body>
