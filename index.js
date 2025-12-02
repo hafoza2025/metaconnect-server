@@ -871,10 +871,45 @@ app.get('/dev/docs', async (req, res) => {
     }
 });
 
+// صفحة تسجيل دخول المطور (GET)
+app.get('/dev/login', (req, res) => {
+    if (req.session.developerId) {
+        return res.redirect('/dev-dashboard');
+    }
+    res.render('dev-login'); // تأكد من وجود ملف views/dev-login.ejs
+});
+
+// معالجة تسجيل الدخول (POST)
+app.post('/dev/login', async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+        const [devs] = await pool.query('SELECT * FROM developers WHERE email = ?', [email]);
+
+        if (devs.length === 0) {
+            return res.status(401).send("البريد الإلكتروني غير مسجل");
+        }
+
+        const developer = devs[0];
+        const isValid = await bcrypt.compare(password, developer.password);
+
+        if (!isValid) {
+            return res.status(401).send("كلمة المرور خاطئة");
+        }
+
+        req.session.developerId = developer.id;
+        res.redirect('/dev-dashboard');
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("خطأ في السيرفر");
+    }
+});
 
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
+
 
 
 
