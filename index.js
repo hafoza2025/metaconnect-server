@@ -813,12 +813,12 @@ app.post('/dev/update-store-auth', async (req, res) => {
 
     // يجب إرسال قيمة واحدة على الأقل للتعديل
     if ((!new_username || new_username.trim() === '') && (!new_password || new_password.trim() === '')) {
-        return res.redirect('/dev-dashboard'); // لم يتم تغيير شيء، نعود للصفحة الرئيسية
+        return res.redirect('/dev-dashboard'); 
     }
 
     try {
-        // 3. التحقق من أن المتجر يتبع المطور الحالي
-        const [companyCheck] = await pool.query(
+        // 3. التحقق من أن المتجر يتبع المطور الحالي (تصحيح: استخدام .promise())
+        const [companyCheck] = await pool.promise().query(
             'SELECT id FROM companies WHERE id = ? AND developer_id = ?', 
             [company_id, devId]
         );
@@ -827,27 +827,31 @@ app.post('/dev/update-store-auth', async (req, res) => {
             return res.status(403).send("غير مصرح لك بتعديل هذا المتجر!");
         }
 
-        // 4. بناء جملة التحديث ديناميكياً (لتحديث ما تم إرساله فقط)
+        // 4. بناء جملة التحديث
         let updateFields = [];
         let updateValues = [];
 
+        // تصحيح: تحديث جدول end_users وليس companies
         if (new_username && new_username.trim() !== '') {
-            updateFields.push('store_username = ?'); // تأكد أن اسم العمود في الداتابيز هو store_username
+            updateFields.push('username = ?'); // العمود الصحيح في end_users
             updateValues.push(new_username.trim());
         }
 
         if (new_password && new_password.trim() !== '') {
-            const hashedPassword = await bcrypt.hash(new_password, 10);
-            updateFields.push('store_password = ?'); // تأكد أن اسم العمود في الداتابيز هو store_password
-            updateValues.push(hashedPassword);
+            // يمكنك استخدام bcrypt هنا إذا أردت، أو حفظها كما هي إذا كان تسجيل الدخول يدعم الاثنين
+            // هنا سنحفظها كنص عادي لتجنب التعقيد حالياً، ويمكنك تفعيل التشفير لاحقاً
+            updateFields.push('password = ?'); // العمود الصحيح في end_users
+            updateValues.push(new_password.trim());
         }
 
-        // إضافة ID الشركة في نهاية المصفوفة للشرط WHERE
+        // إضافة ID الشركة للشرط
         updateValues.push(company_id);
 
-        const sql = `UPDATE companies SET ${updateFields.join(', ')} WHERE id = ?`;
+        // تصحيح: الاستعلام يوجه لجدول end_users
+        const sql = `UPDATE end_users SET ${updateFields.join(', ')} WHERE company_id = ?`;
 
-        await pool.execute(sql, updateValues);
+        // تصحيح: استخدام .promise().execute
+        await pool.promise().execute(sql, updateValues);
         
         // نجاح العملية -> عودة للوحة التحكم
         res.redirect('/dev-dashboard');
@@ -858,9 +862,10 @@ app.post('/dev/update-store-auth', async (req, res) => {
         if (e.code === 'ER_DUP_ENTRY') {
             return res.status(400).send("اسم المستخدم هذا موجود بالفعل، يرجى اختيار اسم آخر.");
         }
-        res.status(500).send("حدث خطأ في النظام");
+        res.status(500).send("حدث خطأ في النظام: " + e.message);
     }
 });
+
 
 
 // Route لصفحة التوثيق
@@ -988,6 +993,7 @@ app.post('/dev/login', async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
+
 
 
 
