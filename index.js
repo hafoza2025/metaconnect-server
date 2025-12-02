@@ -101,7 +101,7 @@ app.get('/', (req, res) => {
         if (req.session.role === 'developer') return res.redirect('/dev-dashboard');
         if (req.session.role === 'store') return res.redirect('/store-portal');
     }
-    res.redirect('/login');
+    res.redirect('/landing');
 });
 
 // --- AUTH ---
@@ -1068,6 +1068,7 @@ app.post('/dev/login', async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
+
 
 
 
