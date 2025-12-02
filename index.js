@@ -900,31 +900,40 @@ app.get('/dev/docs', async (req, res) => {
 
 // صفحة تسجيل دخول المطور (GET)
 // صفحة تسجيل دخول المطور (GET)
+// صفحة تسجيل دخول المطور (GET)
 app.get('/dev/login', (req, res) => {
     if (req.session.developerId) {
         return res.redirect('/dev-dashboard');
     }
-    
-    // التعديل هنا: نستدعي 'login' بدلاً من 'dev-login'
-    // ونمرر متغيرات تخبر الصفحة أنها في وضع المطور
-    res.render('login', { 
-        isDevLogin: true, 
-        pageTitle: 'دخول المطورين | MetaConnect' 
-    }); 
+    // استدعاء ملف dev-login.ejs المنفصل
+    res.render('dev-login'); 
 });
 
 // معالجة تسجيل الدخول (POST)
 app.post('/dev/login', async (req, res) => {
-    // لاحظ: في صفحة login.ejs الحقل اسمه 'username' أو 'email' حسب التعديل الذي سنقوم به لاحقاً
-    // لكن هنا سنستقبلها كـ email لأن المطور يسجل بالبريد
-    const email = req.body.username || req.body.email; 
-    const password = req.body.password;
+    const { email, password } = req.body;
+
+    // التحقق من وجود البيانات
+    if (!email || !password) {
+        return res.status(400).send(`
+            <script>
+                alert("الرجاء إدخال البريد الإلكتروني وكلمة المرور");
+                window.location.href = "/dev/login";
+            </script>
+        `);
+    }
 
     try {
+        // الحل الصحيح بناءً على كيفية تعريف pool في أعلى الملف:
+        // إذا كان pool معرّف بـ: const pool = mysql.createPool({...}).promise();
+        // استخدم هذا السطر:
         const [devs] = await pool.query('SELECT * FROM developers WHERE email = ?', [email]);
+        
+        // إذا كان pool معرّف بـ: const pool = mysql.createPool({...});
+        // استخدم هذا السطر بدلاً من السطر السابق:
+        // const [devs] = await pool.promise().query('SELECT * FROM developers WHERE email = ?', [email]);
 
         if (devs.length === 0) {
-            // نرسل رسالة خطأ بسيطة أو نعيد توجيه مع رسالة
             return res.status(401).send(`
                 <script>
                     alert("البريد الإلكتروني غير مسجل");
@@ -934,6 +943,8 @@ app.post('/dev/login', async (req, res) => {
         }
 
         const developer = devs[0];
+        
+        // التحقق من كلمة المرور باستخدام bcrypt
         const isValid = await bcrypt.compare(password, developer.password);
 
         if (!isValid) {
@@ -945,12 +956,18 @@ app.post('/dev/login', async (req, res) => {
             `);
         }
 
+        // تسجيل الجلسة بنجاح
         req.session.developerId = developer.id;
         res.redirect('/dev-dashboard');
 
     } catch (err) {
-        console.error(err);
-        res.status(500).send("خطأ في السيرفر");
+        console.error("❌ Dev Login Error:", err);
+        res.status(500).send(`
+            <script>
+                alert("حدث خطأ في السيرفر. حاول مرة أخرى.");
+                window.location.href = "/dev/login";
+            </script>
+        `);
     }
 });
 
@@ -958,6 +975,7 @@ app.post('/dev/login', async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
+
 
 
 
