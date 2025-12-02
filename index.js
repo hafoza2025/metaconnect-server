@@ -865,6 +865,7 @@ app.post('/dev/update-store-auth', async (req, res) => {
 
 // Route لصفحة التوثيق
 // Route لصفحة التوثيق (الإصدار الصحيح)
+// Route لصفحة التوثيق (الإصدار المصحح والنهائي)
 app.get('/dev/docs', async (req, res) => {
     // التأكد من أن المطور مسجل دخوله
     if (!req.session.developerId) {
@@ -878,8 +879,8 @@ app.get('/dev/docs', async (req, res) => {
     }
 
     try {
-        // البحث عن الشركة باستخدام الـ ID القادم من الرابط
-        const [companies] = await pool.query('SELECT * FROM companies WHERE id = ?', [company_id]);
+        // ✅ هنا التعديل المهم: إضافة .promise()
+        const [companies] = await pool.promise().query('SELECT * FROM companies WHERE id = ?', [company_id]);
 
         if (companies.length === 0) {
             return res.status(404).send("Error: Company not found.");
@@ -887,15 +888,15 @@ app.get('/dev/docs', async (req, res) => {
 
         const companyData = companies[0];
 
-        // 🔥 هنا التصحيح: إرسال البيانات تحت اسم 'exampleConfig' كما يتوقع ملفك
+        // إرسال البيانات للصفحة
         res.render('docs', {
-            userType: 'developer', // مطلوب في ملفك
-            exampleConfig: companyData // إرسال بيانات الشركة هنا
+            userType: 'developer',
+            exampleConfig: companyData
         });
 
     } catch (err) {
         console.error("Server Error in /dev/docs:", err);
-        res.status(500).send("An error occurred on the server.");
+        res.status(500).send("An error occurred on the server: " + err.message);
     }
 });
 
@@ -987,6 +988,7 @@ app.post('/dev/login', async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
+
 
 
 
