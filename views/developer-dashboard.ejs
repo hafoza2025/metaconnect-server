@@ -2,155 +2,223 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>لوحة المطور | MetaConnect</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Bootstrap 5 & Icons -->
+    <title>لوحة التحكم | MetaConnect Developer</title>
+    
+    <!-- CSS Libraries -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@300;400;500;700&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --primary-color: #0f172a;
-            --secondary-color: #64748b;
-            --accent-color: #3b82f6;
-            --success-color: #10b981;
-            --bg-color: #f1f5f9;
-            --card-bg: #ffffff;
+            --primary: #0f172a;       /* أزرق داكن جداً ورسمي */
+            --secondary: #64748b;     /* رمادي مزرق */
+            --accent: #2563eb;        /* أزرق نشط */
+            --bg-body: #f8fafc;       /* خلفية فاتحة جداً */
+            --surface: #ffffff;
+            --border: #e2e8f0;
         }
 
-        body { 
-            font-family: 'Tajawal', sans-serif; 
-            background-color: var(--bg-color); 
-            color: #334155;
+        body {
+            font-family: 'Noto Kufi Arabic', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--primary);
+            font-size: 0.9rem;
         }
 
-        /* Navbar */
+        /* Navbar Styling */
         .navbar {
-            background: #1e293b !important;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            padding: 0.8rem 0;
+            background-color: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0.75rem 0;
         }
-        .navbar-brand {
-            font-weight: 800;
-            font-size: 1.3rem;
-            letter-spacing: 0.5px;
+        .brand-logo {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--primary);
+            letter-spacing: -0.5px;
         }
-
-        /* Cards */
-        .card {
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            background: var(--card-bg);
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-            transition: all 0.2s ease;
-        }
-        .card:hover {
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        .nav-user-badge {
+            background: #f1f5f9;
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--secondary);
         }
 
-        /* Wallet Card */
-        .wallet-card {
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-            color: white;
-            border: none;
-            position: relative;
-            overflow: hidden;
+        /* Main Cards */
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            height: 100%;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
-        .wallet-card .bg-pattern {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-image: radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px);
-            background-size: 20px 20px;
-            opacity: 0.3;
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        
+        .wallet-balance {
+            font-family: 'Inter', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: -1px;
+        }
+        .currency {
+            font-size: 1rem;
+            color: var(--secondary);
+            font-weight: 500;
         }
 
         /* Tables */
+        .custom-table {
+            background: var(--surface);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+        .table {
+            margin-bottom: 0;
+        }
         .table thead th {
-            background-color: #f8fafc;
-            color: #475569;
+            background: #f8fafc;
             font-weight: 600;
-            font-size: 0.8rem;
+            color: var(--secondary);
+            font-size: 0.75rem;
             text-transform: uppercase;
             padding: 1rem;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid var(--border);
         }
         .table tbody td {
             padding: 1rem;
-            border-bottom: 1px solid #f1f5f9;
             vertical-align: middle;
-            font-size: 0.95rem;
-        }
-
-        /* Auth Box */
-        .auth-box {
-            font-family: 'Outfit', sans-serif;
-            font-weight: 500;
+            border-bottom: 1px solid var(--border);
             color: #334155;
         }
+        .table tbody tr:last-child td {
+            border-bottom: none;
+        }
 
-        /* Flag Backgrounds for Modals */
-        .modal-header-flag {
-            height: 160px;
+        /* Modal Professional Styling */
+        .modal-content {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .modal-header {
+            border-bottom: 1px solid var(--border);
+            padding: 1.25rem;
+            background: #fff;
+            border-radius: 12px 12px 0 0;
+        }
+        .modal-title {
+            font-size: 1rem;
+            font-weight: 700;
+        }
+        .modal-body {
+            padding: 1.5rem;
+            background: #fff;
+        }
+        .modal-footer {
+            border-top: 1px solid var(--border);
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 0 0 12px 12px;
+        }
+
+        /* Inputs */
+        .form-control, .form-select {
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            padding: 0.6rem 0.8rem;
+            font-size: 0.9rem;
+        }
+        .form-control:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+        }
+        .input-group-text {
+            background: #f8fafc;
+            border-color: var(--border);
+            color: var(--secondary);
+        }
+
+        /* Buttons */
+        .btn {
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        .btn-primary {
+            background-color: var(--accent);
+            border-color: var(--accent);
+        }
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+        }
+        .btn-outline-secondary {
+            color: var(--secondary);
+            border-color: var(--border);
+        }
+        .btn-outline-secondary:hover {
+            background-color: #f1f5f9;
+            color: var(--primary);
+        }
+
+        /* Badges & Icons */
+        .icon-box {
+            width: 36px; height: 36px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 6px;
+            font-size: 1.1rem;
+        }
+        .bg-soft-blue { background: #eff6ff; color: var(--accent); }
+        .bg-soft-green { background: #f0fdf4; color: #16a34a; }
+        
+        /* Flag Header for Auth Modal */
+        .flag-bg {
+            height: 80px; /* Smaller header */
             background-size: cover;
             background-position: center;
+            border-radius: 12px 12px 0 0;
             position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
-        .modal-header-flag::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.4); /* Overlay darkening */
+        .flag-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.6));
+            border-radius: 12px 12px 0 0;
+            display: flex; align-items: flex-end; padding: 1rem;
         }
-        .modal-header-flag.eg {
-            background-image: url('https://flagcdn.com/w640/eg.png'); /* رابط علم مصر */
-        }
-        .modal-header-flag.sa {
-            background-image: url('https://flagcdn.com/w640/sa.png'); /* رابط علم السعودية */
-        }
-        .modal-header-content {
-            position: relative;
-            z-index: 2;
-            text-align: center;
-        }
-
-        /* Tooltip Custom */
-        .help-btn {
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .help-btn:hover {
-            color: #2563eb !important;
-            transform: scale(1.1);
-        }
+        .flag-bg.eg { background-image: url('https://flagcdn.com/w640/eg.png'); }
+        .flag-bg.sa { background-image: url('https://flagcdn.com/w640/sa.png'); }
     </style>
 </head>
 <body>
 
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <nav class="navbar sticky-top">
         <div class="container">
-            <a class="navbar-brand d-flex align-items-center gap-2" href="#">
-                <i class="bi bi-layers-fill text-primary bg-white rounded p-1" style="font-size: 1rem;"></i>
-                <span>Meta<span class="fw-light text-white-50">Connect</span></span>
+            <a class="navbar-brand d-flex align-items-center gap-2 brand-logo" href="#">
+                <i class="bi bi-code-square text-primary"></i>
+                MetaConnect <span class="text-muted fw-normal ms-1" style="font-size: 0.8rem;">Developer Console</span>
             </a>
             
             <div class="d-flex align-items-center gap-3">
-                <div class="d-none d-md-block text-end lh-sm me-2">
-                    <div class="text-white-50 small" style="font-size: 0.7rem;">حساب المطور</div>
-                    <div class="text-white fw-bold"><%= developer.name %></div>
+                <div class="nav-user-badge d-flex align-items-center gap-2">
+                    <i class="bi bi-person-circle"></i>
+                    <%= developer.name %>
                 </div>
-                <a href="/dev/support" class="btn btn-warning btn-sm fw-bold rounded-pill px-3 shadow-sm">
-                    <i class="bi bi-headset me-1"></i> الدعم الفني
+                <a href="/dev/support" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-headset"></i> الدعم
                 </a>
-                <a href="/logout" class="btn btn-outline-light btn-sm rounded-circle" style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;">
-                    <i class="bi bi-power"></i>
+                <a href="/logout" class="btn btn-light text-danger btn-sm border">
+                    <i class="bi bi-box-arrow-right"></i>
                 </a>
             </div>
         </div>
@@ -158,83 +226,75 @@
 
     <div class="container py-5">
         
-        <!-- Top Stats Row -->
-        <div class="row g-4 mb-5 justify-content-center">
-            <!-- Wallet Card -->
+        <!-- Top Section -->
+        <div class="row g-4 mb-4">
+            <!-- Wallet -->
             <div class="col-lg-4">
-                <div class="card wallet-card h-100 p-4 d-flex flex-column justify-content-between">
-                    <div class="bg-pattern"></div>
-                    <div class="d-flex justify-content-between align-items-start mb-3 position-relative">
-                        <div>
-                            <h6 class="text-white-50 text-uppercase ls-1 mb-1 font-monospace" style="font-size: 0.8rem;">WALLET BALANCE</h6>
-                            <h2 class="display-5 fw-bold mb-0 font-monospace">
-                                <%= parseFloat(developer.wallet_balance).toFixed(2) %> <span class="fs-6 text-white-50">EGP</span>
-                            </h2>
+                <div class="stat-card d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h6 class="text-uppercase text-muted small fw-bold ls-1">المحفظة الحالية</h6>
+                            <div class="icon-box bg-soft-blue"><i class="bi bi-wallet2"></i></div>
                         </div>
-                        <div class="bg-white bg-opacity-20 p-2 rounded-3">
-                            <i class="bi bi-wallet2 fs-4 text-white"></i>
+                        <div class="d-flex align-items-baseline gap-2">
+                            <span class="wallet-balance"><%= parseFloat(developer.wallet_balance).toFixed(2) %></span>
+                            <span class="currency">EGP</span>
                         </div>
                     </div>
-                    <button class="btn btn-light text-primary w-100 fw-bold border-0 shadow-sm position-relative" onclick="alert('يرجى التواصل مع الإدارة للشحن')">
-                        <i class="bi bi-plus-circle-fill me-1"></i> إضافة رصيد
+                    <button class="btn btn-light w-100 border mt-3" onclick="alert('يرجى التواصل مع المبيعات للشحن')">
+                        <i class="bi bi-plus-lg me-1"></i> إضافة رصيد
                     </button>
                 </div>
             </div>
 
-            <!-- Quick Add -->
+            <!-- Add New Client -->
             <div class="col-lg-8">
-                <div class="card h-100 border-0 shadow-sm">
-                    <div class="card-header bg-white border-bottom py-3 px-4">
-                        <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-building-add me-2 text-primary"></i> تسجيل منشأة جديدة</h6>
+                <div class="stat-card">
+                    <div class="d-flex align-items-center gap-2 mb-4 pb-3 border-bottom">
+                        <i class="bi bi-building-add text-primary"></i>
+                        <h6 class="fw-bold mb-0">تسجيل منشأة جديدة</h6>
                     </div>
-                    <div class="card-body p-4">
-                        <form action="/dev/add-company" method="POST" class="row g-3 align-items-end">
-                            <div class="col-md-5">
-                                <label class="form-label small text-muted fw-bold">اسم النشاط التجاري</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-shop"></i></span>
-                                    <input type="text" name="name" class="form-control bg-light border-start-0" placeholder="مثال: مؤسسة النور للتجارة" required>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label small text-muted fw-bold">الرقم الضريبي</label>
-                                <input type="text" name="tax_id" class="form-control bg-light" placeholder="3xxxxxxxxx" required>
-                            </div>
-                            <div class="col-md-2">
-                                <label class="form-label small text-muted fw-bold">الدولة</label>
-                                <select name="country_code" class="form-select bg-light">
-                                    <option value="EG">مصر 🇪🇬</option>
-                                    <option value="SA">السعودية 🇸🇦</option>
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <button type="submit" class="btn btn-primary w-100 fw-bold">
-                                    إضافة <i class="bi bi-arrow-left"></i>
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+                    <form action="/dev/add-company" method="POST" class="row g-3">
+                        <div class="col-md-5">
+                            <label class="form-label small text-muted fw-bold">اسم النشاط التجاري</label>
+                            <input type="text" name="name" class="form-control" placeholder="مثال: مؤسسة النور" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small text-muted fw-bold">الرقم الضريبي</label>
+                            <input type="text" name="tax_id" class="form-control font-monospace" placeholder="3xxxxxxxxx" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small text-muted fw-bold">الدولة</label>
+                            <select name="country_code" class="form-select">
+                                <option value="EG">مصر (E-Invoice)</option>
+                                <option value="SA">السعودية (ZATCA)</option>
+                            </select>
+                        </div>
+                        <div class="col-12 text-end mt-2">
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="bi bi-check-lg me-1"></i> تسجيل المنشأة
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
 
-        <!-- Companies List -->
-        <div class="card shadow-sm border-0">
-            <div class="card-header bg-white py-3 px-4 d-flex justify-content-between align-items-center border-bottom">
-                <h6 class="mb-0 fw-bold text-dark"><i class="bi bi-list-ul me-2"></i> إدارة العملاء</h6>
-                <div class="d-flex align-items-center gap-2">
-                    <span class="badge bg-light text-dark border px-3 py-2 rounded-pill"><%= companies.length %> شركة مسجلة</span>
-                </div>
+        <!-- Clients Table -->
+        <div class="custom-table shadow-sm">
+            <div class="p-3 bg-white border-bottom d-flex justify-content-between align-items-center">
+                <h6 class="fw-bold mb-0 text-primary"><i class="bi bi-grid me-2"></i> العملاء المسجلين</h6>
+                <span class="badge bg-light text-dark border fw-normal">Total: <%= companies.length %></span>
             </div>
             <div class="table-responsive">
-                <table class="table mb-0">
+                <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th class="ps-4">المنشأة</th>
+                            <th class="ps-4">المنشأة / المعرف</th>
                             <th>الرصيد المتاح</th>
-                            <th>التكلفة المستهلكة</th>
-                            <th width="25%">بيانات الدخول (Portal)</th>
-                            <th class="text-center pe-4">إجراءات</th>
+                            <th>الاستهلاك الفعلي</th>
+                            <th width="22%">بيانات الوصول (Portal)</th>
+                            <th class="text-end pe-4">الإجراءات</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -242,67 +302,54 @@
                             <tr>
                                 <td class="ps-4">
                                     <div class="d-flex align-items-center gap-3">
-                                        <div class="bg-light rounded-3 d-flex align-items-center justify-content-center text-primary fw-bold border" style="width: 45px; height: 45px; font-size: 1.1rem;">
+                                        <div class="icon-box bg-light border text-primary fw-bold">
                                             <%= comp.name.charAt(0) %>
                                         </div>
                                         <div>
                                             <div class="fw-bold text-dark"><%= comp.name %></div>
-                                            <div class="small text-muted">
-                                                <span class="badge bg-light text-secondary border ms-1" style="font-weight: normal;"><%= comp.country_code %></span>
-                                                <span class="font-monospace"><%= comp.tax_id %></span>
-                                            </div>
+                                            <div class="small text-muted font-monospace"><%= comp.tax_id %></div>
                                         </div>
                                     </div>
                                 </td>
                                 <td>
                                     <% if(comp.allocated_balance > 0) { %>
-                                        <div class="fw-bold text-success font-monospace"><%= parseFloat(comp.allocated_balance).toFixed(2) %> <small>EGP</small></div>
+                                        <span class="fw-bold text-success font-monospace"><%= parseFloat(comp.allocated_balance).toFixed(2) %></span> <small class="text-muted">EGP</small>
                                     <% } else { %>
-                                        <span class="text-muted small font-monospace">0.00</span>
+                                        <span class="text-muted small font-monospace">-</span>
                                     <% } %>
                                 </td>
                                 <td>
-                                    <!-- حساب التكلفة: عدد الفواتير * 0.50 (أو القيمة الفعلية) -->
+                                    <!-- حساب التكلفة: عدد الفواتير * 0.50 -->
                                     <% 
-                                        let costPerInvoice = 0.50; 
-                                        let totalCost = (comp.invoices_used || 0) * costPerInvoice;
-                                        let percent = (comp.invoices_used / (comp.invoice_limit || 1)) * 100;
+                                        let cost = (comp.invoices_used || 0) * 0.50; 
                                     %>
-                                    <div class="d-flex flex-column" style="width: 140px;">
-                                        <div class="d-flex justify-content-between small mb-1">
-                                            <span class="fw-bold text-dark"><%= totalCost.toFixed(2) %> ج.م</span>
-                                            <span class="text-muted" style="font-size: 0.7rem;"><%= comp.invoices_used %> فاتورة</span>
-                                        </div>
-                                        <div class="progress" style="height: 4px;">
-                                            <div class="progress-bar bg-info" style="width: <%= percent %>%"></div>
-                                        </div>
+                                    <div class="d-flex flex-column">
+                                        <span class="fw-bold text-dark font-monospace"><%= cost.toFixed(2) %> <small class="text-muted fw-normal">EGP</small></span>
+                                        <span class="text-muted" style="font-size: 0.7rem;"><%= comp.invoices_used %> Invoices</span>
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="d-flex align-items-center gap-2 bg-light border rounded p-1 px-2" style="width: fit-content;">
-                                        <div class="d-flex flex-column" style="min-width: 100px;">
-                                            <span class="auth-box text-dark small" id="username-display-<%= comp.id %>">store_<%= comp.id %></span>
-                                            <span class="text-muted" style="font-size: 0.65rem; letter-spacing: 2px;">••••••</span>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="input-group input-group-sm" style="width: 160px;">
+                                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-person"></i></span>
+                                            <input type="text" class="form-control border-start-0 bg-white text-muted" value="store_<%= comp.id %>" readonly disabled>
                                         </div>
-                                        <button class="btn btn-sm btn-white border shadow-sm text-primary" 
+                                        <button class="btn btn-sm btn-light border text-primary" 
                                                 onclick="openAuthModal('<%= comp.id %>', '<%= comp.name %>', 'store_<%= comp.id %>')"
-                                                data-bs-toggle="tooltip" title="تغيير كلمة المرور">
-                                            <i class="bi bi-pencil-fill" style="font-size: 0.7rem;"></i>
+                                                title="تغيير كلمة المرور">
+                                            <i class="bi bi-key-fill"></i>
                                         </button>
                                     </div>
                                 </td>
-                                <td class="text-center pe-4">
-                                    <div class="d-flex justify-content-end gap-2">
-                                        <button class="btn btn-outline-success btn-sm fw-bold px-3" 
-                                                onclick="openAllocateModal('<%= comp.id %>', '<%= comp.name %>')">
+                                <td class="text-end pe-4">
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="openAllocateModal('<%= comp.id %>', '<%= comp.name %>')">
                                             <i class="bi bi-cash me-1"></i> شحن
                                         </button>
-                                        <button class="btn btn-outline-secondary btn-sm px-3" 
-                                                onclick="openCredsModal('<%= comp.id %>', '<%= comp.name %>', '<%= comp.country_code %>')"
-                                                title="إعدادات الربط">
-                                            <i class="bi bi-gear-wide-connected"></i>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="openCredsModal('<%= comp.id %>', '<%= comp.name %>', '<%= comp.country_code %>')">
+                                            <i class="bi bi-sliders"></i> ربط
                                         </button>
-                                        <a href="/docs?company_id=<%= comp.id %>" class="btn btn-light btn-sm text-primary border" title="API Docs">
+                                        <a href="/docs" class="btn btn-sm btn-outline-secondary">
                                             <i class="bi bi-code-slash"></i>
                                         </a>
                                     </div>
@@ -315,228 +362,189 @@
         </div>
     </div>
 
-    <!-- =================== MODALS (Developed) =================== -->
+    <!-- =================== MODALS (Refined) =================== -->
 
-    <!-- 1. Modal تعديل بيانات الدخول -->
+    <!-- 1. Update Auth Modal -->
     <div class="modal fade" id="authUpdateModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header border-0 pb-0">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title fw-bold">تحديث بيانات الدخول</h6>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body text-center pt-0 pb-4 px-4">
-                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex p-3 mb-3">
-                        <i class="bi bi-shield-lock-fill fs-3"></i>
-                    </div>
-                    <h6 class="fw-bold mb-1">تحديث بيانات الدخول</h6>
-                    <p class="text-muted small mb-3" id="auth_company_name"></p>
-                    
-                    <form action="/dev/update-store-auth" method="POST">
+                <div class="modal-body">
+                    <form id="authForm" onsubmit="submitAuthForm(event)">
                         <input type="hidden" name="company_id" id="auth_company_id">
+                        <p class="text-muted small mb-3">المنشأة: <span id="auth_company_name" class="fw-bold text-dark"></span></p>
                         
-                        <div class="form-floating mb-2">
-                            <input type="text" name="new_username" id="auth_new_username" class="form-control form-control-sm bg-light border-0" placeholder="User" required>
-                            <label class="small">اسم المستخدم</label>
+                        <div class="mb-3">
+                            <label class="form-label small text-muted">اسم المستخدم الجديد</label>
+                            <input type="text" name="new_username" id="auth_new_username" class="form-control form-control-sm" required>
                         </div>
-                        <div class="form-floating mb-3">
-                            <input type="text" name="new_password" class="form-control form-control-sm bg-light border-0" placeholder="Pass" required minlength="6">
-                            <label class="small">كلمة المرور الجديدة</label>
+                        <div class="mb-3">
+                            <label class="form-label small text-muted">كلمة المرور الجديدة</label>
+                            <input type="text" name="new_password" class="form-control form-control-sm" placeholder="اكتب كلمة مرور جديدة..." required minlength="6">
                         </div>
-                        <button type="submit" class="btn btn-primary w-100 btn-sm fw-bold">حفظ التغييرات</button>
+                        <button type="submit" class="btn btn-primary w-100 btn-sm">حفظ التغييرات</button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 2. Modal تحويل الرصيد -->
+    <!-- 2. Allocate Balance Modal -->
     <div class="modal fade" id="allocateModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow overflow-hidden">
-                <div class="modal-header bg-success text-white border-0">
-                    <h6 class="modal-title fw-bold"><i class="bi bi-wallet-fill me-2"></i> تخصيص رصيد للعميل</h6>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-header bg-light">
+                    <h6 class="modal-title fw-bold">إضافة رصيد للمنشأة</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-4 bg-light p-3 rounded">
-                        <span class="text-muted small">رصيدك الحالي:</span>
-                        <span class="fw-bold text-success font-monospace fs-5"><%= parseFloat(developer.wallet_balance).toFixed(2) %> EGP</span>
+                <div class="modal-body">
+                    <div class="d-flex justify-content-between mb-3 small">
+                        <span class="text-muted">رصيدك المتاح:</span>
+                        <span class="fw-bold"><%= parseFloat(developer.wallet_balance).toFixed(2) %></span>
                     </div>
-
                     <form action="/dev/allocate-balance" method="POST">
                         <input type="hidden" name="company_id" id="alloc_company_id">
-                        <p class="fw-bold text-center mb-2" id="alloc_company_name"></p>
-                        <label class="form-label small text-muted">المبلغ المراد إضافته</label>
-                        <div class="input-group input-group-lg mb-3">
-                            <input type="number" name="amount" class="form-control fw-bold text-center" placeholder="0.00" step="0.01" min="1" required>
-                            <span class="input-group-text bg-white text-muted border-start-0">EGP</span>
-                        </div>
-                        <button type="submit" class="btn btn-success w-100 py-2 fw-bold">تأكيد العملية</button>
+                        <label class="form-label small text-muted">المبلغ (EGP)</label>
+                        <input type="number" name="amount" class="form-control fw-bold text-center mb-3" placeholder="0.00" step="0.01" required>
+                        <button type="submit" class="btn btn-success w-100 btn-sm">تأكيد التحويل</button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 3. Modal إعدادات الربط (Flag Background) -->
+    <!-- 3. Credentials Modal (Flag Header) -->
     <div class="modal fade" id="credsModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow overflow-hidden">
-                <form action="/dev/company/update-creds" method="POST">
-                    <input type="hidden" name="company_id" id="creds_company_id">
-                    <input type="hidden" name="country_code" id="creds_country_code">
-
-                    <!-- رأس المودال مع الخلفية (العلم) -->
-                    <div id="modal_header_bg" class="modal-header-flag">
-                        <div class="modal-header-content">
-                            <h3 class="fw-bold mb-0" id="modal_country_title"></h3>
-                            <p class="mb-0 opacity-75 small" id="creds_company_name_display"></p>
+            <div class="modal-content overflow-hidden">
+                <!-- Dynamic Header -->
+                <div id="modal_flag_header" class="flag-bg">
+                    <div class="flag-overlay">
+                        <div>
+                            <h5 class="text-white fw-bold mb-0" id="modal_country_title">Country Settings</h5>
+                            <small class="text-white-50" id="creds_company_name_display">Company Name</small>
                         </div>
-                        <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal"></button>
+                        <button type="button" class="btn-close btn-close-white ms-auto mb-auto" data-bs-dismiss="modal"></button>
                     </div>
+                </div>
 
-                    <div class="modal-body p-4">
-                        <!-- زر المساعدة -->
-                        <div class="d-flex justify-content-end mb-2">
-                             <span class="help-btn text-primary small fw-bold" onclick="toggleHelp()">
-                                <i class="bi bi-info-circle-fill me-1"></i> كيف أحصل على البيانات؟
-                             </span>
-                        </div>
-                        
-                        <!-- قسم المساعدة (مخفي افتراضياً) -->
-                        <div id="help_section" class="alert alert-info small mb-3" style="display:none;">
-                            <h6 class="fw-bold mb-2"><i class="bi bi-lightbulb-fill text-warning"></i> دليل المساعدة</h6>
-                            <div id="help_text_eg" style="display:none;">
-                                <strong>لمصر (ETA):</strong>
-                                <ul class="ps-3 mb-0">
-                                    <li>سجل الدخول في <a href="https://invoicing.eta.gov.eg" target="_blank" class="fw-bold">بوابة الفواتير المصرية</a>.</li>
-                                    <li>اذهب إلى "إدارة التكامل" (Integration Management).</li>
-                                    <li>أنشئ ERP System جديد للحصول على de>Client ID</code> و de>Client Secret</code>.</li>
-                                    <li>تأكد من اختيار البيئة (Production) عند الإنشاء.</li>
-                                </ul>
-                            </div>
-                            <div id="help_text_sa" style="display:none;">
-                                <strong>للسعودية (ZATCA):</strong>
-                                <ul class="ps-3 mb-0">
-                                    <li>سجل الدخول في <a href="https://fatoora.zatca.gov.sa" target="_blank" class="fw-bold">منصة فاتورة</a>.</li>
-                                    <li>اذهب إلى قسم "تأهيل الوحدات" أو "Onboarding".</li>
-                                    <li>اختر "إنشاء وحدة جديدة" واحصل على كود de>OTP</code>.</li>
-                                    <li>الكود صالح لمدة ساعة واحدة فقط.</li>
-                                </ul>
-                            </div>
-                        </div>
+                <form action="/dev/company/update-creds" method="POST">
+                    <div class="modal-body">
+                        <input type="hidden" name="company_id" id="creds_company_id">
+                        <input type="hidden" name="country_code" id="creds_country_code">
 
-                        <!-- حقول مصر -->
+                        <!-- Egypt Fields -->
                         <div id="egypt_fields" style="display:none;">
-                            <div class="mb-3">
-                                <label class="form-label small fw-bold text-muted">Client ID</label>
-                                <input type="text" name="client_id" class="form-control bg-light" placeholder="xxxxxxxx-xxxx-xxxx...">
+                            <div class="alert alert-light border small mb-3">
+                                <i class="bi bi-info-circle me-1"></i> أدخل بيانات Production من بوابة الضرائب.
                             </div>
                             <div class="mb-3">
-                                <label class="form-label small fw-bold text-muted">Client Secret</label>
-                                <input type="password" name="client_secret" class="form-control bg-light" placeholder="••••••••••••">
+                                <label class="form-label small text-muted fw-bold">Client ID</label>
+                                <input type="text" name="client_id" class="form-control font-monospace small">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small text-muted fw-bold">Client Secret</label>
+                                <input type="password" name="client_secret" class="form-control font-monospace small">
                             </div>
                         </div>
 
-                        <!-- حقول السعودية -->
+                        <!-- Saudi Fields -->
                         <div id="saudi_fields" style="display:none;">
-                            <div class="mb-3">
-                                <label class="form-label small fw-bold text-muted">OTP Code</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-key"></i></span>
-                                    <input type="text" name="otp" class="form-control bg-light border-start-0" placeholder="123456" maxlength="6">
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <div class="d-flex align-items-center gap-2">
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Zakat%2C_Tax_and_Customs_Authority_Logo.svg/1200px-Zakat%2C_Tax_and_Customs_Authority_Logo.svg.png" height="30">
                                 </div>
-                                <small class="text-muted" style="font-size: 0.7rem;">* الكود يتكون من 6 أرقام</small>
+                                <a href="#" class="small text-decoration-none" onclick="alert('سجل الدخول لمنصة فاتورة > إنشاء وحدة جديدة > نسخ الكود')">كيف أحصل على الكود؟</a>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small text-muted fw-bold">OTP Code (6 Digits)</label>
+                                <input type="text" name="otp" class="form-control font-monospace text-center letter-spacing-2" placeholder="123456" maxlength="6">
                             </div>
                         </div>
-
-                        <button type="submit" class="btn btn-dark w-100 py-2 fw-bold mt-2">حفظ وربط</button>
+                    </div>
+                    <div class="modal-footer bg-white">
+                        <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">إلغاء</button>
+                        <button type="submit" class="btn btn-primary btn-sm px-4">حفظ الإعدادات</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Modals Logic
-        function openAuthModal(id, name, currentUsername) {
+        // 1. Auth Modal Logic
+        function openAuthModal(id, name, user) {
             document.getElementById('auth_company_id').value = id;
             document.getElementById('auth_company_name').innerText = name;
-            // نضع الاسم الحالي
-            const displayEl = document.getElementById('username-display-' + id);
-            if(displayEl) document.getElementById('auth_new_username').value = displayEl.innerText.trim();
-            
-            // تفريغ حقل الباسورد دائماً للأمان
-            document.querySelector('input[name="new_password"]').value = '';
-            
+            document.getElementById('auth_new_username').value = user;
+            document.querySelector('input[name="new_password"]').value = ''; // Clear pass
             new bootstrap.Modal(document.getElementById('authUpdateModal')).show();
         }
 
+        // AJAX Update for Auth (No Refresh)
+        async function submitAuthForm(e) {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch('/dev/update-store-auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    // Close Modal
+                    bootstrap.Modal.getInstance(document.getElementById('authUpdateModal')).hide();
+                    // Show Success Toast
+                    alert('✅ تم تحديث بيانات الدخول بنجاح!');
+                } else {
+                    alert('❌ حدث خطأ أثناء التحديث');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ خطأ في الاتصال');
+            }
+        }
+
+        // 2. Allocate Modal Logic
         function openAllocateModal(id, name) {
             document.getElementById('alloc_company_id').value = id;
-            document.getElementById('alloc_company_name').innerText = name;
+            // document.getElementById('alloc_company_name').innerText = name;
             new bootstrap.Modal(document.getElementById('allocateModal')).show();
         }
 
-        function openCredsModal(id, name, countryCode) {
+        // 3. Credentials Modal Logic
+        function openCredsModal(id, name, country) {
             document.getElementById('creds_company_id').value = id;
             document.getElementById('creds_company_name_display').innerText = name;
-            document.getElementById('creds_country_code').value = countryCode;
-            
-            const header = document.getElementById('modal_header_bg');
-            const title = document.getElementById('modal_country_title');
-            const helpDiv = document.getElementById('help_section');
-            helpDiv.style.display = 'none'; // إخفاء المساعدة عند الفتح
-            
-            // Reset classes
-            header.classList.remove('eg', 'sa');
+            document.getElementById('creds_country_code').value = country;
 
-            if(countryCode === 'EG') {
+            const header = document.getElementById('modal_flag_header');
+            const title = document.getElementById('modal_country_title');
+
+            header.classList.remove('eg', 'sa');
+            
+            if (country === 'EG') {
                 header.classList.add('eg');
                 title.innerText = 'الربط مع الضرائب المصرية';
                 document.getElementById('egypt_fields').style.display = 'block';
                 document.getElementById('saudi_fields').style.display = 'none';
-                // تجهيز نص المساعدة
-                document.getElementById('help_text_eg').style.display = 'block';
-                document.getElementById('help_text_sa').style.display = 'none';
             } else {
                 header.classList.add('sa');
                 title.innerText = 'الربط مع هيئة الزكاة';
                 document.getElementById('egypt_fields').style.display = 'none';
                 document.getElementById('saudi_fields').style.display = 'block';
-                // تجهيز نص المساعدة
-                document.getElementById('help_text_eg').style.display = 'none';
-                document.getElementById('help_text_sa').style.display = 'block';
             }
             
             new bootstrap.Modal(document.getElementById('credsModal')).show();
-        }
-
-        function toggleHelp() {
-            const helpDiv = document.getElementById('help_section');
-            helpDiv.style.display = helpDiv.style.display === 'none' ? 'block' : 'none';
-        }
-
-        // Success Message
-        const urlParams = new URLSearchParams(window.location.search);
-        if(urlParams.get('msg') === 'auth_updated') {
-            // إنشاء Toast بسيط
-            const toastHtml = `
-                <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-                    <div class="toast show align-items-center text-white bg-success border-0" role="alert">
-                        <div class="d-flex">
-                            <div class="toast-body">
-                                <i class="bi bi-check-circle-fill me-2"></i> تم تحديث بيانات الدخول بنجاح!
-                            </div>
-                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            document.body.insertAdjacentHTML('beforeend', toastHtml);
-            setTimeout(() => { document.querySelector('.toast').remove(); }, 4000);
-            window.history.replaceState({}, document.title, window.location.pathname);
         }
     </script>
 </body>
