@@ -901,12 +901,13 @@ app.get('/dev/docs', async (req, res) => {
 // صفحة تسجيل دخول المطور (GET)
 // صفحة تسجيل دخول المطور (GET)
 // صفحة تسجيل دخول المطور (GET)
+// صفحة تسجيل دخول المطور (GET)
 app.get('/dev/login', (req, res) => {
     if (req.session.developerId) {
         return res.redirect('/dev-dashboard');
     }
     // استدعاء ملف dev-login.ejs المنفصل
-    res.render('dev-login'); 
+    res.render('dev-login');
 });
 
 // معالجة تسجيل الدخول (POST)
@@ -924,14 +925,11 @@ app.post('/dev/login', async (req, res) => {
     }
 
     try {
-        // الحل الصحيح بناءً على كيفية تعريف pool في أعلى الملف:
-        // إذا كان pool معرّف بـ: const pool = mysql.createPool({...}).promise();
-        // استخدم هذا السطر:
-        const [devs] = await pool.query('SELECT * FROM developers WHERE email = ?', [email]);
-        
-        // إذا كان pool معرّف بـ: const pool = mysql.createPool({...});
-        // استخدم هذا السطر بدلاً من السطر السابق:
-        // const [devs] = await pool.promise().query('SELECT * FROM developers WHERE email = ?', [email]);
+        // ❗ هنا التعديل الحقيقي: استخدم promise() مع الاستعلام
+        const [devs] = await pool.promise().query(
+            'SELECT * FROM developers WHERE email = ?',
+            [email]
+        );
 
         if (devs.length === 0) {
             return res.status(401).send(`
@@ -943,7 +941,7 @@ app.post('/dev/login', async (req, res) => {
         }
 
         const developer = devs[0];
-        
+
         // التحقق من كلمة المرور باستخدام bcrypt
         const isValid = await bcrypt.compare(password, developer.password);
 
@@ -973,8 +971,10 @@ app.post('/dev/login', async (req, res) => {
 
 
 
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
+
 
 
 
