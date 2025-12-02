@@ -207,21 +207,29 @@ app.get('/dev-dashboard', requireDev, async (req, res) => {
     try {
         // 1. جلب بيانات المطور
         const [devs] = await db.execute('SELECT * FROM developers WHERE id = ?', [devId]);
+        
+        if (devs.length === 0) {
+            return res.status(404).send("حساب المطور غير موجود");
+        }
         const developer = devs[0];
 
         // 2. جلب الشركات + عدد الفواتير + اسم المستخدم
-        // نستخدم LEFT JOIN لربط جدول الشركات مع جدول الفواتير وجدول المستخدمين
-        const [companies] = await db.execute(`
+        const query = `
             SELECT 
                 c.*, 
                 (SELECT COUNT(*) FROM invoices WHERE company_id = c.id) AS invoices_used,
-                u.username
+                COALESCE(u.username, CONCAT('store_', c.id)) AS username
             FROM companies c 
             LEFT JOIN end_users u ON c.id = u.company_id 
             WHERE c.developer_id = ?
-        `, [devId]);
+        `;
 
-        // عرض الصفحة مع البيانات الكاملة
+        const [companies] = await db.execute(query, [devId]);
+
+        // (اختياري) طباعة للتأكد من البيانات في الـ Terminal
+        // console.log(`Dev ${devId} has ${companies.length} companies.`);
+
+        // 3. عرض الصفحة
         res.render('developer-dashboard', { 
             developer, 
             companies, 
@@ -230,9 +238,10 @@ app.get('/dev-dashboard', requireDev, async (req, res) => {
 
     } catch (e) {
         console.error("Dashboard Error:", e);
-        res.status(500).send("حدث خطأ أثناء تحميل اللوحة");
+        res.status(500).send(`حدث خطأ أثناء تحميل اللوحة: ${e.message}`);
     }
 });
+
 
 app.get('/store-portal', requireLogin, async (req, res) => {
     if (req.session.role !== 'store') return res.redirect('/login');
@@ -786,6 +795,7 @@ app.post('/dev/update-store-auth', requireDev, express.json(), async (req, res) 
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
+
 
 
 
