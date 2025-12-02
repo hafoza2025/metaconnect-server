@@ -101,8 +101,14 @@ app.get('/', (req, res) => {
         if (req.session.role === 'developer') return res.redirect('/dev-dashboard');
         if (req.session.role === 'store') return res.redirect('/store-portal');
     }
-     res.render('landing'); 
+    res.redirect('/landing');
+
 });
+// تعريف مسار صفحة الهبوط
+app.get('/landing', (req, res) => {
+    res.render('landing');
+});
+
 
 // --- AUTH ---
 app.get('/login', (req, res) => res.render('login'));
@@ -1068,6 +1074,7 @@ app.post('/dev/login', async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
+
 
 
 
