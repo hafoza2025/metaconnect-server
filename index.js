@@ -915,7 +915,7 @@ app.get('/dev/login', (req, res) => {
 app.post('/dev/login', async (req, res) => {
     const { email, password } = req.body;
 
-    // التحقق من وجود البيانات
+    // 1. التحقق من البيانات
     if (!email || !password) {
         return res.status(400).send(`
             <script>
@@ -926,7 +926,7 @@ app.post('/dev/login', async (req, res) => {
     }
 
     try {
-        // ❗ هنا التعديل الحقيقي: استخدم promise() مع الاستعلام
+        // 2. جلب بيانات المطور
         const [devs] = await pool.promise().query(
             'SELECT * FROM developers WHERE email = ?',
             [email]
@@ -942,9 +942,16 @@ app.post('/dev/login', async (req, res) => {
         }
 
         const developer = devs[0];
+        let isValid = false;
 
-        // التحقق من كلمة المرور باستخدام bcrypt
-        const isValid = await bcrypt.compare(password, developer.password);
+        // 3. التحقق الذكي: هل هي نص عادي؟ أم مشفرة؟
+        if (developer.password === password) {
+            // ✅ نجاح: كلمة المرور مطابقة كنص عادي
+            isValid = true;
+        } else {
+            // 🔄 محاولة المقارنة كـ Hash
+            isValid = await bcrypt.compare(password, developer.password).catch(() => false);
+        }
 
         if (!isValid) {
             return res.status(401).send(`
@@ -955,15 +962,19 @@ app.post('/dev/login', async (req, res) => {
             `);
         }
 
-        // تسجيل الجلسة بنجاح
+        // 4. تسجيل الجلسة بنجاح
         req.session.developerId = developer.id;
+        // إضافة user و role للجلسة لضمان التوافق مع باقي الموقع
+        req.session.user = developer;
+        req.session.role = 'developer';
+
         res.redirect('/dev-dashboard');
 
     } catch (err) {
         console.error("❌ Dev Login Error:", err);
         res.status(500).send(`
             <script>
-                alert("حدث خطأ في السيرفر. حاول مرة أخرى.");
+                alert("حدث خطأ في السيرفر: ${err.message}");
                 window.location.href = "/dev/login";
             </script>
         `);
@@ -973,8 +984,10 @@ app.post('/dev/login', async (req, res) => {
 
 
 
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
+
 
 
 
