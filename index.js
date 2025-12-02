@@ -4,6 +4,7 @@ const express = require('express');
 const session = require('express-session');
 const bodyParser = require('body-parser');
 const multer = require('multer');
+const axios = require('axios'); // تأكد من وجود هذا السطر
 const path = require('path');
 const mysql = require('mysql2');
 
@@ -378,26 +379,97 @@ app.post('/dev/add-company', requireDev, async (req, res) => {
     }
 });
 
-
 app.post('/dev/company/update-creds', requireDev, async (req, res) => {
     const { company_id, country_code, client_id, client_secret, otp } = req.body;
     const devId = req.session.user.id;
 
-    const [check] = await db.execute('SELECT id FROM companies WHERE id = ? AND developer_id = ?', [company_id, devId]);
+    // 1. التحقق من الملكية
+    const [check] = await db.execute('SELECT * FROM companies WHERE id = ? AND developer_id = ?', [company_id, devId]);
     if (check.length === 0) return res.status(403).send("Unauthorized");
 
     let credentials = {};
-    if (country_code === 'EG') {
-        credentials = { type: 'ETA_OAUTH', id: client_id.trim(), secret: client_secret.trim() };
-    } else {
-        credentials = { type: 'ZATCA_OTP', otp: otp ? otp.trim() : null };
-    }
 
     try {
+        // ==========================================
+        // 🇪🇬 التحقق الصارم من الربط المصري (ETA)
+        // ==========================================
+        if (country_code === 'EG') {
+            const cleanId = client_id ? client_id.trim() : '';
+            const cleanSecret = client_secret ? client_secret.trim() : '';
+
+            // 1. التحقق من الشكل (Validation)
+            // Client ID يجب أن يكون UUID (36 حرف) أو على الأقل طويلاً كفاية
+            if (cleanId.length < 30) {
+                throw new Error("Client ID قصير جداً وغير صحيح. يجب أن يكون معرف طويل (GUID).");
+            }
+            // Client Secret يجب أن يكون طويلاً ومعقداً
+            if (cleanSecret.length < 20) {
+                throw new Error("Client Secret قصير جداً وغير صحيح.");
+            }
+
+            // 2. محاولة الاتصال الفعلي (Verification)
+            const tokenUrl = "https://id.preprod.eta.gov.eg/connect/token"; 
+            const params = new URLSearchParams();
+            params.append('grant_type', 'client_credentials');
+            params.append('client_id', cleanId);
+            params.append('client_secret', cleanSecret);
+            params.append('scope', 'InvoicingAPI');
+
+            console.log(`🔄 ETA: Verifying credentials for Company ${company_id}...`);
+
+            const response = await axios.post(tokenUrl, params, {
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+            });
+
+            if (response.data && response.data.access_token) {
+                // ✅ البيانات صحيحة وتم الاتصال
+                credentials = { 
+                    type: 'ETA_OAUTH', 
+                    id: cleanId, 
+                    secret: cleanSecret,
+                    environment: 'preprod' 
+                };
+            } else {
+                throw new Error("لم تستجب مصلحة الضرائب ببيانات صحيحة.");
+            }
+        } 
+        // ==========================================
+        // 🇸🇦 التحقق الصارم من الربط السعودي (ZATCA)
+        // ==========================================
+        else {
+            const cleanOtp = otp ? otp.trim() : '';
+
+            // OTP يجب أن يكون 6 أرقام بالضبط (أرقام فقط)
+            if (!/^\d{6}$/.test(cleanOtp)) {
+                throw new Error("رمز OTP غير صحيح. يجب أن يتكون من 6 أرقام فقط (مثال: 123456).");
+            }
+
+            credentials = { type: 'ZATCA_OTP', otp: cleanOtp };
+        }
+
+        // 3. الحفظ في قاعدة البيانات
         await db.execute('UPDATE companies SET api_credentials = ? WHERE id = ?', [JSON.stringify(credentials), company_id]);
-        res.redirect('/dev-dashboard');
+        
+        res.redirect('/dev-dashboard?success=connected');
+
     } catch (err) {
-        res.send('Error updating credentials');
+        console.error("❌ Connection Error:", err.message);
+        
+        let errorMsg = err.message; // نستخدم رسالة الخطأ المخصصة التي كتبناها
+
+        // إذا كان الخطأ من axios (رد من الضرائب)
+        if (err.response && err.response.status === 400) {
+            errorMsg = "بيانات الربط مرفوضة من مصلحة الضرائب (Invalid Client). تأكد من نسخ Client ID و Secret بشكل صحيح.";
+        } else if (err.response) {
+            errorMsg = `خطأ في سيرفر الضرائب (${err.response.status}). حاول لاحقاً.`;
+        }
+
+        res.send(`
+            <script>
+                alert("⚠️ تنبيه هام: ${errorMsg}");
+                window.history.back();
+            </script>
+        `);
     }
 });
 
@@ -993,6 +1065,7 @@ app.post('/dev/login', async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
+
 
 
 
