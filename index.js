@@ -528,14 +528,20 @@ app.get('/admin/support/view/:id', requireLogin, async (req, res) => {
 });
 
 app.post('/admin/add-balance', requireLogin, async (req, res) => {
-    if (req.session.role !== 'admin') return res.status(403).send('Unauthorized');
+    // تأكد أن المستخدم أدمن
+    if (req.session.role !== 'admin') return res.status(403).send('Unauthorized Access');
+    
     const { developer_id, amount } = req.body;
     try {
         await db.execute('UPDATE developers SET wallet_balance = wallet_balance + ? WHERE id = ?', [amount, developer_id]);
         await db.execute('INSERT INTO transactions (developer_id, amount, description) VALUES (?, ?, ?)', [developer_id, amount, 'Admin Manual Deposit']);
-        res.redirect('/admin/support');
-    } catch (e) { res.send('Error adding balance'); }
+        // العودة لنفس الصفحة التي كنت فيها (غالباً صفحة الدعم أو قائمة المطورين)
+        res.redirect('back'); 
+    } catch (e) { 
+        res.send('Error adding balance'); 
+    }
 });
+
 
 app.get('/api/support/messages/:id', requireLogin, async (req, res) => {
     const ticketId = req.params.id;
@@ -710,5 +716,39 @@ app.post('/dev/allocate-balance', requireDev, async (req, res) => {
     }
 });
 
+// --- مسار جديد: تحديث بيانات دخول المتجر من قبل المطور ---
+app.post('/dev/update-store-auth', requireDev, async (req, res) => {
+    const { company_id, new_username, new_password } = req.body;
+    const devId = req.session.user.id;
+
+    try {
+        // 1. التأكد أن هذا المتجر يتبع المطور الحالي
+        const [companyCheck] = await db.execute('SELECT id FROM companies WHERE id = ? AND developer_id = ?', [company_id, devId]);
+        
+        if (companyCheck.length === 0) {
+            return res.send('<script>alert("غير مصرح لك بتعديل هذا المتجر!"); window.history.back();</script>');
+        }
+
+        // 2. تحديث البيانات في جدول end_users
+        // ملاحظة: يجب التأكد أن اسم المستخدم غير مكرر لغير هذا المتجر
+        try {
+            await db.execute(
+                'UPDATE end_users SET username = ?, password = ? WHERE company_id = ?',
+                [new_username, new_password, company_id]
+            );
+            res.redirect('/dev-dashboard?msg=auth_updated');
+        } catch (e) {
+            // غالباً الخطأ بسبب تكرار اسم المستخدم
+            res.send('<script>alert("خطأ: اسم المستخدم مستخدم بالفعل، اختر اسماً آخر."); window.history.back();</script>');
+        }
+
+    } catch (e) {
+        console.error(e);
+        res.status(500).send("System Error");
+    }
+});
+
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
+
