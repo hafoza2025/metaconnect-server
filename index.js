@@ -695,9 +695,75 @@ app.get('/api/admin/developer-file/:id', requireLogin, async (req, res) => {
     }
 });
 
+// أضف هذا الكود قبل السطر الأخير app.listen
+app.post('/api/admin/add-shipping', requireLogin, async (req, res) => {
+    const { companyId, amount, trackingNumber, destination } = req.body;
+    
+    try {
+        // 1. تسجيل الشحنة
+        await db.execute(
+            'INSERT INTO shipping_logs (company_id, tracking_number, status, destination, amount) VALUES (?, ?, ?, ?, ?)',
+            [companyId, trackingNumber, 'shipped', destination, amount]
+        );
+
+        // 2. المعادلة الحسابية: المبلغ * 100 (مثلاً)
+        // كل 1 دولار يعطي 100 فاتورة
+        const extraInvoices = Math.floor(amount * 100); 
+
+        // 3. تحديث الرصيد والحد
+        await db.execute(
+            'UPDATE companies SET wallet_balance = wallet_balance + ?, invoice_limit = invoice_limit + ? WHERE id = ?',
+            [amount, extraInvoices, companyId]
+        );
+
+        res.json({success: true, addedInvoices: extraInvoices});
+
+    } catch (e) {
+        res.status(500).json({error: e.message});
+    }
+});
+
+app.post('/dev/allocate-balance', requireDev, async (req, res) => {
+    const { company_id, amount } = req.body;
+    const devId = req.session.user.id;
+    const transferAmount = parseFloat(amount);
+
+    try {
+        // 1. التأكد من رصيد المطور
+        const [devs] = await db.execute('SELECT wallet_balance FROM developers WHERE id = ?', [devId]);
+        if (devs[0].wallet_balance < transferAmount) {
+            return res.send('<script>alert("عفواً، رصيد محفظتك لا يكفي!"); window.history.back();</script>');
+        }
+
+        // 2. خصم من المطور
+        await db.execute('UPDATE developers SET wallet_balance = wallet_balance - ? WHERE id = ?', [transferAmount, devId]);
+
+        // 3. إضافة لرصيد الشركة (Allocated Balance)
+        // وأيضاً نزيد حد الفواتير (invoice_limit) بناءً على المبلغ (مثلاً: 1 جنيه = 10 فواتير)
+        // يمكنك تغيير المعادلة هنا حسب رغبتك
+        const invoicesToAdd = Math.floor(transferAmount * 10); 
+        
+        await db.execute(
+            'UPDATE companies SET allocated_balance = allocated_balance + ?, invoice_limit = invoice_limit + ? WHERE id = ?',
+            [transferAmount, invoicesToAdd, company_id]
+        );
+
+        // 4. تسجيل المعاملة
+        await db.execute('INSERT INTO transactions (developer_id, amount, description) VALUES (?, ?, ?)', 
+            [devId, -transferAmount, `Allocation to Company ID: ${company_id}`]);
+
+        res.redirect('/dev-dashboard');
+
+    } catch (e) {
+        console.error(e);
+        res.status(500).send("حدث خطأ أثناء التحويل");
+    }
+});
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
+
 
 
 
